@@ -5,26 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>EXHEOH SYSTEM V37 (Supabase Function Chat)</title>
   <script>
-  window.__supabaseReadyPromise = new Promise((resolve, reject) => {
-    function loadScript(src, onFail) {
-      const s = document.createElement('script');
-      s.src = src;
-      s.async = true;
-      s.onload = () => {
-        if (window.supabase && window.supabase.createClient) resolve();
-        else reject(new Error('Supabase library loaded but createClient is unavailable'));
-      };
-      s.onerror = () => {
-        if (onFail) onFail();
-        else reject(new Error('Failed to load Supabase library'));
-      };
-      document.head.appendChild(s);
-    }
-    loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2', () => {
-      loadScript('https://unpkg.com/@supabase/supabase-js@2', null);
+    window.__supabaseReadyPromise = new Promise((resolve, reject) => {
+      function loadScript(src, onFail) {
+        const s = document.createElement('script');
+        s.src = src;
+        s.async = true;
+        s.onload = () => {
+          if (window.supabase && window.supabase.createClient) resolve();
+          else reject(new Error('Supabase library loaded but createClient is unavailable'));
+        };
+        s.onerror = () => {
+          if (onFail) onFail();
+          else reject(new Error('Failed to load Supabase library'));
+        };
+        document.head.appendChild(s);
+      }
+      loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2', () => {
+        loadScript('https://unpkg.com/@supabase/supabase-js@2', null);
+      });
     });
-  });
-</script>
+  </script>
   <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap');
 :root{
@@ -68,9 +68,18 @@ table{border-collapse:collapse;width:100%;white-space:nowrap}thead th{position:s
 .chat-btn{position:fixed;bottom:30px;right:30px;left:auto;width:60px;height:60px;background:linear-gradient(135deg,#111 0%,#3b342e 100%);color:#fff;border-radius:50%;display:flex;justify-content:center;align-items:center;font-size:30px;box-shadow:0 12px 24px rgba(17,17,17,.22);cursor:pointer;z-index:999;border:2px solid rgba(220,232,106,.65)}
 .chat-window{display:none;position:fixed;bottom:100px;right:30px;left:auto;width:390px;height:560px;background:#f6f1e8;border-radius:24px;box-shadow:0 22px 54px rgba(17,17,17,.16);border:1px solid var(--border);z-index:999;flex-direction:column;overflow:hidden}.chat-header{background:linear-gradient(90deg,#111 0%,#29231f 100%);color:#fff;padding:15px;font-weight:900;display:flex;justify-content:space-between;align-items:center}.chat-body{flex:1;padding:15px;overflow-y:auto;background:#f6f1e8;display:flex;flex-direction:column;gap:10px}.chat-input-area{padding:15px;border-top:1px solid var(--border);background:#f6f1e8;display:flex;gap:8px}.chat-input{flex:1;padding:10px;border:1px solid var(--border);border-radius:999px;outline:none;background:#fffefb}.chat-send{background:var(--primary-2);color:#111;border:none;padding:0 16px;border-radius:999px;cursor:pointer;font-weight:900}.msg{padding:12px 14px;border-radius:16px;font-size:13px;max-width:90%;line-height:1.6}.msg-bot{background:#fffefb;border:1px solid var(--border);align-self:flex-start}.msg-user{background:#111;color:#fff;align-self:flex-end}
 ::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-thumb{background:#d2c8b7;border-radius:999px}::-webkit-scrollbar-track{background:transparent}
-</style>
+
+.toast-wrap{position:fixed;top:18px;right:18px;z-index:2000;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{min-width:260px;max-width:420px;padding:12px 14px;border-radius:14px;border:1px solid var(--border);background:#fffefb;box-shadow:0 14px 28px rgba(17,17,17,.12);font-weight:800;line-height:1.5;color:#111;opacity:0;transform:translateY(-6px);transition:.2s ease}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.success{border-color:rgba(183,212,89,.8);background:#f7fbe8}
+.toast.error{border-color:rgba(223,95,72,.45);background:#fff4f1;color:#8b2b1c}
+.toast.info{border-color:rgba(149,174,223,.55);background:#f4f8ff;color:#173e8f}
+
+  </style>
 </head>
 <body>
+  <div id="toastWrap" class="toast-wrap"></div>
   <div id="authContainer">
     <div class="auth-wrap">
       <div class="card"><div class="auth-form">
@@ -215,6 +224,37 @@ table{border-collapse:collapse;width:100%;white-space:nowrap}thead th{position:s
     function projectNameOptions(selected){ const sel=String(selected||''); return cache.projects.map(p=>p?.name||'').filter(Boolean).map(name=>{ const esc=escapeHTML(name); return `<option value="${esc}" ${name===sel?'selected':''}>${esc}</option>`; }).join(''); }
     function dateDiffDays(due){ const t=new Date(); const today=new Date(t.getFullYear(),t.getMonth(),t.getDate()); const dd=new Date(due.getFullYear(),due.getMonth(),due.getDate()); return Math.round((dd-today)/(1000*60*60*24)); }
 
+    function notify(message, type='info'){
+      const wrap=document.getElementById('toastWrap');
+      if(!wrap || !message) return;
+      const el=document.createElement('div');
+      el.className=`toast ${type}`;
+      el.innerHTML=String(message);
+      wrap.appendChild(el);
+      requestAnimationFrame(()=>el.classList.add('show'));
+      setTimeout(()=>{ el.classList.remove('show'); setTimeout(()=>el.remove(), 220); }, type==='error' ? 5000 : 2600);
+    }
+    function formatDbError(prefix, error){
+      const msg = error?.message || error?.details || error?.hint || String(error || '알 수 없는 오류');
+      return `${prefix}: ${escapeHTML(msg)}`;
+    }
+    async function ensureReadySession(){
+      await ensureSupabaseClient();
+      const { data, error } = await sb.auth.getSession();
+      if(error) throw error;
+      if(!data?.session?.user) throw new Error('로그인 세션이 없습니다. 다시 로그인해 주세요.');
+      return data.session;
+    }
+    async function refreshEverything(opts={}){
+      await fetchAllData();
+      if(currentProfile.role==='admin') await fetchProfilesAdmin();
+      renderAll();
+      if(opts.stayOnPage){
+        const active = document.querySelector('.menu-item.active');
+        if(active?.dataset?.page) showPage(active.dataset.page, active);
+      }
+    }
+
     function showAuth(msg=''){ document.getElementById('appContainer').style.display='none'; document.getElementById('authContainer').style.display='flex'; const box=document.getElementById('authError'); if(msg){ box.style.display='block'; box.innerText=msg; } else { box.style.display='none'; box.innerText=''; } }
     function showApp(){ document.getElementById('authContainer').style.display='none'; document.getElementById('appContainer').style.display='block'; }
     function applyRoleUI(){ const isAdmin = currentProfile.role === 'admin'; document.querySelectorAll('.admin-only').forEach(el=>{ if(!isAdmin){ el.style.display='none'; } else if(el.classList.contains('menu-item')){ el.style.display='flex'; } else if(el.classList.contains('menu-category')){ el.style.display='block'; } else { el.style.display='block'; } }); const roleEl=document.getElementById('userRole'); roleEl.innerText=currentProfile.role||'member'; roleEl.className='rolebadge '+(isAdmin?'role-admin':'role-member'); }
@@ -222,157 +262,372 @@ table{border-collapse:collapse;width:100%;white-space:nowrap}thead th{position:s
     window.toggleChat=function(){ const w=document.getElementById('chatWindow'); w.style.display=(w.style.display==='flex')?'none':'flex'; };
     function appendChatMessage(type, html){ const body=document.getElementById('chatBody'); body.innerHTML += `<div class="msg ${type==='user'?'msg-user':'msg-bot'}">${html}</div>`; body.scrollTop = body.scrollHeight; }
     
-function normalizeText(value=''){
-  return String(value || '').toLowerCase().replace(/\s+/g, ' ').trim();
-}
-function tokenizeQuery(query=''){
-  const base = normalizeText(query);
-  const parts = base.split(/[\s,\/\\|:;()\[\]{}]+/).filter(Boolean);
-  const tokens = [...new Set([base, ...parts.filter(t => t.length > 1)])];
-  return tokens;
-}
-function includesAny(text, keywords){
-  const s = normalizeText(text);
-  return keywords.some(k => s.includes(normalizeText(k)));
-}
-function itemText(type, item){
-  if(type==='project') return [item.code,item.name,item.history,item.client,item.constructor,item.team,item.manager,item.note,item.type].join(' ');
-  if(type==='schedule') return [item.team,item.project_code,item.code,item.project_name,item.name,item.upper_task,item.lower_task,item.assignee,item.status,item.prev_progress,item.this_week_progress,item.client,item.constructor,item.dday,item.task_code,item.scale].join(' ');
-  if(type==='todo') return [item.group_tag,item.project,item.task_name,item.assignee,item.priority,item.status,item.due_date,item.category].join(' ');
-  if(type==='meeting') return [item.meeting_date,item.title,item.project,item.attendees,item.agenda,item.notes,item.actions,item.next_meeting_date].join(' ');
-  if(type==='log') return [item.date,item.assignee,item.project,item.task,item.spent_hours].join(' ');
-  return '';
-}
-function scoreItem(type, item, tokens, original){
-  const text = normalizeText(itemText(type, item));
-  if(!text) return 0;
-  let score = 0;
-  tokens.forEach(token => {
-    if(!token) return;
-    if(text.includes(token)) score += token.length > 3 ? 5 : 3;
-  });
-  if(original && text.includes(original)) score += 8;
-  if(type==='schedule' && includesAny(original, ['일정','진행','담당','이번주','금주'])) score += 2;
-  if(type==='todo' && includesAny(original, ['todo','할일','마감','업무'])) score += 2;
-  if(type==='meeting' && includesAny(original, ['회의','회의록','미팅','의사결정'])) score += 2;
-  if(type==='log' && includesAny(original, ['맨파워','업무기록','시간','투입'])) score += 2;
-  return score;
-}
-function searchDbOnly(query){
-  const original = normalizeText(query);
-  const tokens = tokenizeQuery(query);
-  const result = { projects:[], schedules:[], todo:[], meetings:[], logs:[] };
-
-  const pushScored = (arr, type, items) => {
-    items.forEach(item => {
-      const score = scoreItem(type, item, tokens, original);
-      if(score > 0) arr.push({ score, item });
-    });
-    arr.sort((a,b)=>b.score-a.score);
-    return arr.slice(0, 8).map(x => x.item);
-  };
-
-  result.projects = pushScored([], 'project', cache.projects || []);
-  result.schedules = pushScored([], 'schedule', cache.schedules || []);
-  result.todo = pushScored([], 'todo', cache.todo || []);
-  result.meetings = pushScored([], 'meeting', cache.meetings || []);
-  result.logs = pushScored([], 'log', cache.logs || []);
-  return result;
-}
-function formatSchedule(item){
-  const title = `${escapeHTML(item.project_code || item.code || '-')} / ${escapeHTML(item.project_name || item.name || '-')}`;
-  const task = `${item.upper_task || '-'} / ${item.lower_task || '-'}`;
-  const progress = item.this_week_progress || item.prev_progress || item.note || '-';
-  return `- ${title}<br>&nbsp;&nbsp;업무: ${escapeHTML(task)} / 담당: ${escapeHTML(item.assignee || '-')}<br>&nbsp;&nbsp;진행: ${escapeHTML(progress)}`;
-}
-function formatProject(item){
-  return `- ${escapeHTML(item.code || '-')} / ${escapeHTML(item.name || '-')}<br>&nbsp;&nbsp;발주처: ${escapeHTML(item.client || '-')} / 담당: ${escapeHTML(item.manager || '-')} / 단계: ${escapeHTML(item.type || '-')}`;
-}
-function formatTodo(item){
-  return `- ${escapeHTML(item.task_name || '-')}<br>&nbsp;&nbsp;프로젝트: ${escapeHTML(item.project || '-')} / 담당: ${escapeHTML(item.assignee || '-')} / 상태: ${escapeHTML(item.status || '-')}${item.due_date ? ` / 마감: ${escapeHTML(item.due_date)}` : ''}`;
-}
-function formatMeeting(item){
-  return `- ${escapeHTML(item.meeting_date || '-')} / ${escapeHTML(item.title || '-')}<br>&nbsp;&nbsp;프로젝트: ${escapeHTML(item.project || '-')} / 다음 일정: ${escapeHTML(item.next_meeting_date || '-')}`;
-}
-function formatLog(item){
-  return `- ${escapeHTML(item.date || '-')} / ${escapeHTML(item.assignee || '-')}<br>&nbsp;&nbsp;프로젝트: ${escapeHTML(item.project || '-')} / 업무: ${escapeHTML(item.task || '-')} / 시간: ${toNum(item.spent_hours,0).toFixed(2)}h`;
-}
-function buildDbOnlyReply(message){
-  const q = normalizeText(message);
-  if(includesAny(q, ['gpt','ai 모델','openai','api'])){
-    return '지금 챗봇은 외부 GPT API 없이 <b>Supabase 데이터베이스 검색 기반</b>으로 답하고 있습니다.';
-  }
-
-  const found = searchDbOnly(message);
-  const blocks = [];
-
-  if(found.schedules.length){
-    blocks.push(`<b>일정표 관련 ${found.schedules.length}건</b><br>${found.schedules.slice(0,4).map(formatSchedule).join('<br><br>')}`);
-  }
-  if(found.todo.length && includesAny(q, ['todo','할일','마감','업무','정리'])){
-    blocks.push(`<b>TO DO 관련 ${found.todo.length}건</b><br>${found.todo.slice(0,4).map(formatTodo).join('<br><br>')}`);
-  }
-  if(found.meetings.length && includesAny(q, ['회의','회의록','요약','미팅'])){
-    blocks.push(`<b>회의록 관련 ${found.meetings.length}건</b><br>${found.meetings.slice(0,3).map(formatMeeting).join('<br><br>')}`);
-  }
-  if(found.logs.length && includesAny(q, ['맨파워','업무기록','시간','투입','얼마나'])){
-    blocks.push(`<b>업무기록 관련 ${found.logs.length}건</b><br>${found.logs.slice(0,4).map(formatLog).join('<br><br>')}`);
-  }
-  if(found.projects.length && blocks.length < 2){
-    blocks.push(`<b>프로젝트 관련 ${found.projects.length}건</b><br>${found.projects.slice(0,3).map(formatProject).join('<br><br>')}`);
-  }
-
-  if(!blocks.length){
-    const allCounts = found.projects.length + found.schedules.length + found.todo.length + found.meetings.length + found.logs.length;
-    if(allCounts){
-      const fallback = [];
-      if(found.schedules.length) fallback.push(`<b>일정표</b><br>${found.schedules.slice(0,3).map(formatSchedule).join('<br><br>')}`);
-      if(found.projects.length && fallback.length < 2) fallback.push(`<b>프로젝트</b><br>${found.projects.slice(0,2).map(formatProject).join('<br><br>')}`);
-      if(found.todo.length && fallback.length < 2) fallback.push(`<b>TO DO</b><br>${found.todo.slice(0,2).map(formatTodo).join('<br><br>')}`);
-      if(found.meetings.length && fallback.length < 2) fallback.push(`<b>회의록</b><br>${found.meetings.slice(0,2).map(formatMeeting).join('<br><br>')}`);
-      return fallback.join('<br><br>');
+    function normalizeText(value=''){
+      return String(value || '').toLowerCase().replace(/\s+/g, ' ').trim();
     }
-    return '데이터상 일치하는 항목을 찾지 못했습니다.<br><span class="muted">예: D2514 이번 주 진행사항, 김주경 담당 일정, 이번 주 회의록, 마감 임박 TO DO</span>';
-  }
+    function tokenizeQuery(query=''){
+      const base = normalizeText(query);
+      const parts = base.split(/[\s,\/\\|:;()\[\]{}]+/).filter(Boolean);
+      const tokens = [...new Set([base, ...parts.filter(t => t.length > 1)])];
+      return tokens;
+    }
+    function includesAny(text, keywords){
+      const s = normalizeText(text);
+      return keywords.some(k => s.includes(normalizeText(k)));
+    }
+    function itemText(type, item){
+      if(type==='project') return [item.code,item.name,item.history,item.client,item.constructor,item.team,item.manager,item.note,item.type].join(' ');
+      if(type==='schedule') return [item.team,item.project_code,item.code,item.project_name,item.name,item.upper_task,item.lower_task,item.assignee,item.status,item.prev_progress,item.this_week_progress,item.client,item.constructor,item.dday,item.task_code,item.scale].join(' ');
+      if(type==='todo') return [item.group_tag,item.project,item.task_name,item.assignee,item.priority,item.status,item.due_date,item.category].join(' ');
+      if(type==='meeting') return [item.meeting_date,item.title,item.project,item.attendees,item.agenda,item.notes,item.actions,item.next_meeting_date].join(' ');
+      if(type==='log') return [item.date,item.assignee,item.project,item.task,item.spent_hours].join(' ');
+      return '';
+    }
+    function scoreItem(type, item, tokens, original){
+      const text = normalizeText(itemText(type, item));
+      if(!text) return 0;
+      let score = 0;
+      tokens.forEach(token => {
+        if(!token) return;
+        if(text.includes(token)) score += token.length > 3 ? 5 : 3;
+      });
+      if(original && text.includes(original)) score += 8;
+      if(type==='schedule' && includesAny(original, ['일정','진행','담당','이번주','금주'])) score += 2;
+      if(type==='todo' && includesAny(original, ['todo','할일','마감','업무'])) score += 2;
+      if(type==='meeting' && includesAny(original, ['회의','회의록','요약','미팅'])) score += 2;
+      if(type==='log' && includesAny(original, ['맨파워','업무기록','시간','투입'])) score += 2;
+      return score;
+    }
+    function searchDbOnly(query){
+      const original = normalizeText(query);
+      const tokens = tokenizeQuery(query);
+      const result = { projects:[], schedules:[], todo:[], meetings:[], logs:[] };
 
-  return blocks.join('<br><br>');
-}
-window.toggleChat=function(){ const w=document.getElementById('chatWindow'); w.style.display=(w.style.display==='flex')?'none':'flex'; };
-function appendChatMessage(type, html){ const body=document.getElementById('chatBody'); body.innerHTML += `<div class="msg ${type==='user'?'msg-user':'msg-bot'}">${html}</div>`; body.scrollTop = body.scrollHeight; }
-window.sendChat = async function(){ const inp=document.getElementById('chatInput'); const msg=inp.value.trim(); if(!msg) return; appendChatMessage('user', escapeHTML(msg)); inp.value=''; try{ const loadingId='chat-loading-'+Date.now(); appendChatMessage('bot', `<span id="${loadingId}">데이터베이스에서 찾는 중입니다...</span>`); await fetchAllData(); const reply = buildDbOnlyReply(msg); const loadingEl=document.getElementById(loadingId); if(loadingEl) loadingEl.parentElement.innerHTML = reply; } catch(err){ appendChatMessage('bot', `오류: ${escapeHTML(err.message||'검색 중 오류')}`); } };
-window.signIn = async function(){ try { await ensureSupabaseClient(); const email=document.getElementById('loginEmail').value.trim(); const password=document.getElementById('loginPassword').value; if(!email||!password) return showAuth('이메일과 비밀번호를 입력하세요.'); const { error } = await sb.auth.signInWithPassword({ email, password }); if(error) return showAuth('로그인 실패: '+error.message); await bootstrapAfterAuth(); } catch(err){ console.error(err); showAuth('로그인 실행 오류: ' + (err?.message || err)); } };
-    window.resetPassword = async function(){ const email=document.getElementById('loginEmail').value.trim(); if(!email) return showAuth('비밀번호 재설정할 이메일을 입력하세요.'); const { error } = await sb.auth.resetPasswordForEmail(email); if(error) return showAuth('재설정 메일 실패: '+error.message); showAuth('비밀번호 재설정 메일을 발송했습니다. 메일함을 확인하세요.'); };
-    window.signOut = async function(){ await sb.auth.signOut(); currentUser=null; currentProfile={role:'member',full_name:'',email:''}; cache={projects:[],logs:[],schedules:[],upper:[],lower:[],todo:[],meetings:[],profiles:[]}; showAuth(''); };
+      const pushScored = (arr, type, items) => {
+        items.forEach(item => {
+          const score = scoreItem(type, item, tokens, original);
+          if(score > 0) arr.push({ score, item });
+        });
+        arr.sort((a,b)=>b.score-a.score);
+        return arr.slice(0, 8).map(x => x.item);
+      };
 
-    async function loadMyProfile(){ const { data:userData } = await sb.auth.getUser(); currentUser=userData?.user||null; if(!currentUser) return; const { data, error } = await sb.from('profiles').select('id,email,full_name,role').eq('id', currentUser.id).maybeSingle(); if(error){ currentProfile={ role:'member', full_name:'', email: currentUser.email||'' }; } else { currentProfile={ role:data?.role||'member', full_name:data?.full_name||'', email:data?.email||(currentUser.email||'') }; } document.getElementById('userEmail').innerText=currentProfile.email||'-'; document.getElementById('userNameLine').innerText=currentProfile.full_name?('이름: '+currentProfile.full_name):''; applyRoleUI(); }
-    async function fetchAllData(){ const p=await sb.from('projects').select('*').order('id'); const l=await sb.from('manpower_logs').select('*').order('date',{ascending:false}); const s=await sb.from('schedules').select('*').order('id'); const u=await sb.from('settings_upper').select('*').order('id'); const lo=await sb.from('settings_lower').select('*').order('id'); const td=await sb.from('todo_items').select('*').order('id'); const mt=await sb.from('meeting_notes').select('*').order('meeting_date',{ascending:false}); cache.projects=p.data||[]; cache.logs=l.data||[]; cache.schedules=s.data||[]; cache.upper=u.data||[]; cache.lower=lo.data||[]; cache.todo=td.data||[]; cache.meetings=mt.data||[]; }
-    async function fetchProfilesAdmin(){ if(currentProfile.role!=='admin'){ cache.profiles=[]; return; } const { data, error } = await sb.from('profiles').select('id,email,full_name,role,created_at').order('created_at',{ascending:false}); cache.profiles=(!error && data)?data:[]; }
+      result.projects = pushScored([], 'project', cache.projects || []);
+      result.schedules = pushScored([], 'schedule', cache.schedules || []);
+      result.todo = pushScored([], 'todo', cache.todo || []);
+      result.meetings = pushScored([], 'meeting', cache.meetings || []);
+      result.logs = pushScored([], 'log', cache.logs || []);
+      return result;
+    }
+    function formatSchedule(item){
+      const title = `${escapeHTML(item.project_code || item.code || '-')} / ${escapeHTML(item.project_name || item.name || '-')}`;
+      const task = `${item.upper_task || '-'} / ${item.lower_task || '-'}`;
+      const progress = item.this_week_progress || item.prev_progress || item.note || '-';
+      return `- ${title}<br>&nbsp;&nbsp;업무: ${escapeHTML(task)} / 담당: ${escapeHTML(item.assignee || '-')}<br>&nbsp;&nbsp;진행: ${escapeHTML(progress)}`;
+    }
+    function formatProject(item){
+      return `- ${escapeHTML(item.code || '-')} / ${escapeHTML(item.name || '-')}<br>&nbsp;&nbsp;발주처: ${escapeHTML(item.client || '-')} / 담당: ${escapeHTML(item.manager || '-')} / 단계: ${escapeHTML(item.type || '-')}`;
+    }
+    function formatTodo(item){
+      return `- ${escapeHTML(item.task_name || '-')}<br>&nbsp;&nbsp;프로젝트: ${escapeHTML(item.project || '-')} / 담당: ${escapeHTML(item.assignee || '-')} / 상태: ${escapeHTML(item.status || '-')}${item.due_date ? ` / 마감: ${escapeHTML(item.due_date)}` : ''}`;
+    }
+    function formatMeeting(item){
+      return `- ${escapeHTML(item.meeting_date || '-')} / ${escapeHTML(item.title || '-')}<br>&nbsp;&nbsp;프로젝트: ${escapeHTML(item.project || '-')} / 다음 일정: ${escapeHTML(item.next_meeting_date || '-')}`;
+    }
+    function formatLog(item){
+      return `- ${escapeHTML(item.date || '-')} / ${escapeHTML(item.assignee || '-')}<br>&nbsp;&nbsp;프로젝트: ${escapeHTML(item.project || '-')} / 업무: ${escapeHTML(item.task || '-')} / 시간: ${toNum(item.spent_hours,0).toFixed(2)}h`;
+    }
+    function buildDbOnlyReply(message){
+      const q = normalizeText(message);
+      if(includesAny(q, ['gpt','ai 모델','openai','api'])){
+        return '지금 챗봇은 외부 GPT API 없이 <b>Supabase 데이터베이스 검색 기반</b>으로 답하고 있습니다.';
+      }
 
-    async function bootstrapAfterAuth(){ await loadMyProfile(); showApp(); await fetchAllData(); if(currentProfile.role==='admin') await fetchProfilesAdmin(); renderAll(); showPage('dashboard', document.querySelector('.menu-item[data-page="dashboard"]')); }
-    sb.auth.onAuthStateChange(async (event, session)=>{ if(session?.user){ await bootstrapAfterAuth(); } else { currentUser=null; currentProfile={role:'member',full_name:'',email:''}; showAuth(''); } });
-    (async function init(){ try { await ensureSupabaseClient(); const { data } = await sb.auth.getSession(); if(data?.session) await bootstrapAfterAuth(); else showAuth(''); } catch(err){ console.error(err); showAuth('초기화 오류: ' + (err?.message || err)); } })();
+      const found = searchDbOnly(message);
+      const blocks = [];
 
-    window.addNewProject = async function(){ const { error } = await sb.from('projects').insert([{}]); if(error) return alert('프로젝트 추가 실패: '+error.message); await fetchAllData(); renderProjects(); renderDashboard(); };
-    window.addDailyLog = async function(){ const today=new Date().toISOString().split('T')[0]; const { error } = await sb.from('manpower_logs').insert([{ date:today, spent_hours:0 }]); if(error) return alert('기록 추가 실패: '+error.message); await fetchAllData(); renderLogs(); renderDashboard(); };
-    window.addSchedule = async function(){ const { error } = await sb.from('schedules').insert([{ status:'new', date:new Date().toISOString().split('T')[0], team:'', project_code:'', code:'', project_name:'', name:'', upper_task:'', lower_task:'', prev_progress:'', note:'', this_week_progress:'', client:'', constructor:'', dday:'', assignee:'', task_code:'', remark:'', scale:'' }]); if(error) return alert('일정 추가 실패: '+error.message); await fetchAllData(); renderSchedules(); renderDashboard(); };
-    window.addTodo = async function(){ const { error } = await sb.from('todo_items').insert([{ group_tag:'GROUP 1', project:'', priority:'medium', task_name:'새 작업', assignee:'', status:'todo', due_date:null, category:'' }]); if(error) return alert('TO DO 추가 실패: '+error.message); await fetchAllData(); renderTodo(); renderDashboard(); };
-    window.addMeeting = async function(){ const { error } = await sb.from('meeting_notes').insert([{ meeting_date:new Date().toISOString().split('T')[0], title:'새 회의', project:'', attendees:'', agenda:'', notes:'', actions:'', next_meeting_date:null }]); if(error) return alert('회의록 추가 실패: '+error.message); await fetchAllData(); renderMeetings(); renderDashboard(); };
-    window.addSetting = async function(type){ if(currentProfile.role!=='admin') return alert('관리자만 가능합니다.'); const { error } = await sb.from('settings_'+type).insert([{ name:'새 항목' }]); if(error) return alert('설정 추가 실패: '+error.message); await fetchAllData(); renderSettings(type); renderSchedules(); };
-    window.updateDB = async function(table,id,field,value){ const payload={ [field]: value }; if(table==='manpower_logs' && field==='spent_hours') payload[field]=toNum(value,0); const { error } = await sb.from(table).update(payload).eq('id',id); if(error) return alert('저장 실패: '+error.message); await fetchAllData(); renderAll(); };
-    window.updateScheduleField = async function(id,field,value){ const payload={ [field]: value }; if(field==='project_code') payload.code=value; if(field==='project_name') payload.name=value; if(field==='prev_progress') payload.note=value; if(field==='task_code') payload.remark=value; const { error } = await sb.from('schedules').update(payload).eq('id',id); if(error) return alert('일정 저장 실패: '+error.message); await fetchAllData(); renderSchedules(); renderDashboard(); };
-    window.updateTodoField = async function(id,field,value){ const { error } = await sb.from('todo_items').update({ [field]: value || null }).eq('id',id); if(error) return alert('TO DO 저장 실패: '+error.message); await fetchAllData(); renderTodo(); renderDashboard(); };
-    window.updateMeetingField = async function(id,field,value){ const { error } = await sb.from('meeting_notes').update({ [field]: value || null }).eq('id',id); if(error) return alert('회의록 저장 실패: '+error.message); await fetchAllData(); renderMeetings(); renderDashboard(); };
-    window.deleteItem = async function(table,id){ if(!confirm('삭제하시겠습니까?')) return; const { error } = await sb.from(table).delete().eq('id',id); if(error) return alert('삭제 실패: '+error.message); await fetchAllData(); renderAll(); };
+      if(found.schedules.length){
+        blocks.push(`<b>일정표 관련 ${found.schedules.length}건</b><br>${found.schedules.slice(0,4).map(formatSchedule).join('<br><br>')}`);
+      }
+      if(found.todo.length && includesAny(q, ['todo','할일','마감','업무','정리'])){
+        blocks.push(`<b>TO DO 관련 ${found.todo.length}건</b><br>${found.todo.slice(0,4).map(formatTodo).join('<br><br>')}`);
+      }
+      if(found.meetings.length && includesAny(q, ['회의','회의록','요약','미팅'])){
+        blocks.push(`<b>회의록 관련 ${found.meetings.length}건</b><br>${found.meetings.slice(0,3).map(formatMeeting).join('<br><br>')}`);
+      }
+      if(found.logs.length && includesAny(q, ['맨파워','업무기록','시간','투입','얼마나'])){
+        blocks.push(`<b>업무기록 관련 ${found.logs.length}건</b><br>${found.logs.slice(0,4).map(formatLog).join('<br><br>')}`);
+      }
+      if(found.projects.length && blocks.length < 2){
+        blocks.push(`<b>프로젝트 관련 ${found.projects.length}건</b><br>${found.projects.slice(0,3).map(formatProject).join('<br><br>')}`);
+      }
 
-    window.handleFileUpload = async function(input, type){ const file=input.files?.[0]; if(!file) return; try{ const text=await readCsvText(file); const delimiter=detectDelimiter(text); const rows=parseRobustCSV(text, delimiter); if(rows.length<2) throw new Error('헤더 포함 2행 이상이어야 합니다.'); const headers=rows[0].map(h=>String(h).trim()); let insertData=[]; if(type==='project'){ const idx={ code:findHeaderIndex(headers,['코드','CODE','NO','번호']), name:findHeaderIndex(headers,['프로젝트명','프로젝트','NAME','PROJECT']), history:findHeaderIndex(headers,['이력','HISTORY']), client:findHeaderIndex(headers,['발주처','발주','CLIENT']), const:findHeaderIndex(headers,['건설사','건설','CONSTRUCTOR']), team:findHeaderIndex(headers,['소속팀','소속','TEAM']), manager:findHeaderIndex(headers,['담당자','담당','MANAGER']), note:findHeaderIndex(headers,['비고','NOTE','REMARK']), phase:findHeaderIndex(headers,['단계','PHASE','TYPE']) }; if(idx.code===-1) throw new Error('프로젝트 CSV에서 코드 열을 찾지 못했습니다.'); for(let i=1;i<rows.length;i++){ const row=rows[i]; const code=getCell(row, idx.code); if(!code) continue; const phaseRaw=getCell(row, idx.phase); const phase=((v)=>{ v=(v||'').toLowerCase(); if(v.includes('기획')||v==='plan') return 'plan'; if(v.includes('기본')||v==='basic') return 'basic'; if(v.includes('실시')||v==='exec') return 'exec'; if(v.includes('현장')||v==='site') return 'site'; return 'default'; })(phaseRaw); insertData.push({ code, name:getCell(row, idx.name), history:getCell(row, idx.history), client:getCell(row, idx.client), constructor:getCell(row, idx.const), team:getCell(row, idx.team), manager:getCell(row, idx.manager), note:getCell(row, idx.note), type:phase }); } }
+      if(!blocks.length){
+        const allCounts = found.projects.length + found.schedules.length + found.todo.length + found.meetings.length + found.logs.length;
+        if(allCounts){
+          const fallback = [];
+          if(found.schedules.length) fallback.push(`<b>일정표</b><br>${found.schedules.slice(0,3).map(formatSchedule).join('<br><br>')}`);
+          if(found.projects.length && fallback.length < 2) fallback.push(`<b>프로젝트</b><br>${found.projects.slice(0,2).map(formatProject).join('<br><br>')}`);
+          if(found.todo.length && fallback.length < 2) fallback.push(`<b>TO DO</b><br>${found.todo.slice(0,2).map(formatTodo).join('<br><br>')}`);
+          if(found.meetings.length && fallback.length < 2) fallback.push(`<b>회의록</b><br>${found.meetings.slice(0,2).map(formatMeeting).join('<br><br>')}`);
+          return fallback.join('<br><br>');
+        }
+        return '데이터상 일치하는 항목을 찾지 못했습니다.<br><span class="muted">예: D2514 이번 주 진행사항, 김주경 담당 일정, 이번 주 회의록, 마감 임박 TO DO</span>';
+      }
+
+      return blocks.join('<br><br>');
+    }
+
+    window.sendChat = async function(){
+      const inp=document.getElementById('chatInput');
+      const msg=inp.value.trim();
+      if(!msg) return;
+      appendChatMessage('user', escapeHTML(msg));
+      inp.value='';
+      try{
+        const loadingId='chat-loading-'+Date.now();
+        appendChatMessage('bot', `<span id="${loadingId}">데이터베이스에서 찾는 중입니다...</span>`);
+        await fetchAllData();
+        const reply = buildDbOnlyReply(msg);
+        const loadingEl=document.getElementById(loadingId);
+        if(loadingEl) loadingEl.parentElement.innerHTML = reply;
+      } catch(err){
+        appendChatMessage('bot', `오류: ${escapeHTML(err.message||'검색 중 오류')}`);
+      }
+    };
+
+    window.signIn = async function(){
+      try {
+        await ensureSupabaseClient();
+        const email=document.getElementById('loginEmail').value.trim();
+        const password=document.getElementById('loginPassword').value;
+        if(!email||!password) return showAuth('이메일과 비밀번호를 입력하세요.');
+        const { error } = await sb.auth.signInWithPassword({ email, password });
+        if(error) return showAuth('로그인 실패: '+error.message);
+        await bootstrapAfterAuth();
+      } catch(err){
+        console.error(err);
+        showAuth('로그인 실행 오류: ' + (err?.message || err));
+      }
+    };
+
+    window.resetPassword = async function(){
+      await ensureSupabaseClient();
+      const email=document.getElementById('loginEmail').value.trim();
+      if(!email) return showAuth('비밀번호 재설정할 이메일을 입력하세요.');
+      const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + window.location.pathname });
+      if(error) return showAuth('재설정 메일 실패: '+error.message);
+      showAuth('비밀번호 재설정 메일을 발송했습니다. 메일함을 확인하세요.');
+    };
+
+    window.signOut = async function(){
+      await ensureSupabaseClient();
+      await sb.auth.signOut();
+      currentUser=null;
+      currentProfile={role:'member',full_name:'',email:''};
+      cache={projects:[],logs:[],schedules:[],upper:[],lower:[],todo:[],meetings:[],profiles:[]};
+      showAuth('');
+    };
+    async function loadMyProfile(){
+      await ensureSupabaseClient();
+      const { data:userData, error:userErr } = await sb.auth.getUser();
+      if(userErr) throw userErr;
+      currentUser=userData?.user||null;
+      if(!currentUser) return;
+      const { data, error } = await sb.from('profiles').select('id,email,full_name,role').eq('id', currentUser.id).maybeSingle();
+      if(error){
+        currentProfile={ role:'member', full_name:'', email: currentUser.email||'' };
+        notify(formatDbError('프로필을 불러오지 못했습니다', error), 'error');
+      } else {
+        currentProfile={ role:data?.role||'member', full_name:data?.full_name||'', email:data?.email||(currentUser.email||'') };
+      }
+      document.getElementById('userEmail').innerText=currentProfile.email||'-';
+      document.getElementById('userNameLine').innerText=currentProfile.full_name?('이름: '+currentProfile.full_name):'';
+      applyRoleUI();
+    }
+
+    async function fetchTable(table, orderBy='id', options={}){
+      await ensureSupabaseClient();
+      let query = sb.from(table).select('*');
+      if(orderBy){
+        query = query.order(orderBy, options);
+      }
+      const { data, error } = await query;
+      if(error) throw new Error(`${table}: ${error.message}`);
+      return data || [];
+    }
+
+    async function fetchAllData(){
+      const results = await Promise.allSettled([
+        fetchTable('projects','id'),
+        fetchTable('manpower_logs','date',{ascending:false}),
+        fetchTable('schedules','id'),
+        fetchTable('settings_upper','id'),
+        fetchTable('settings_lower','id'),
+        fetchTable('todo_items','id'),
+        fetchTable('meeting_notes','meeting_date',{ascending:false}),
+      ]);
+      const keys=['projects','logs','schedules','upper','lower','todo','meetings'];
+      const nextCache={...cache};
+      const errors=[];
+      results.forEach((res, idx)=>{
+        const key=keys[idx];
+        if(res.status==='fulfilled') nextCache[key]=res.value;
+        else errors.push(res.reason?.message || String(res.reason));
+      });
+      cache = nextCache;
+      if(errors.length){
+        notify('일부 데이터를 불러오지 못했습니다.<br>'+errors.map(escapeHTML).join('<br>'),'error');
+      }
+    }
+
+    async function fetchProfilesAdmin(){
+      if(currentProfile.role!=='admin'){ cache.profiles=[]; return; }
+      await ensureSupabaseClient();
+      const { data, error } = await sb.from('profiles').select('id,email,full_name,role,created_at').order('created_at',{ascending:false});
+      if(error){
+        cache.profiles=[];
+        notify(formatDbError('권한 목록을 불러오지 못했습니다', error), 'error');
+        return;
+      }
+      cache.profiles=data||[];
+    }
+
+    let __bootstrapping = false;
+    async function bootstrapAfterAuth(){
+      if(__bootstrapping) return;
+      __bootstrapping = true;
+      try{
+        await loadMyProfile();
+        showApp();
+        await fetchAllData();
+        if(currentProfile.role==='admin') await fetchProfilesAdmin();
+        renderAll();
+        showPage('dashboard', document.querySelector('.menu-item[data-page="dashboard"]'));
+      } finally {
+        __bootstrapping = false;
+      }
+    }
+
+    (async function init(){
+      try {
+        await ensureSupabaseClient();
+
+        sb.auth.onAuthStateChange(async (event, session)=>{
+          try{
+            if(session?.user){
+              await bootstrapAfterAuth();
+            } else {
+              currentUser=null;
+              currentProfile={role:'member',full_name:'',email:''};
+              showAuth('');
+            }
+          }catch(err){
+            console.error(err);
+            showAuth('인증 상태 처리 오류: ' + (err?.message || err));
+          }
+        });
+
+        const { data } = await sb.auth.getSession();
+        if(data?.session) await bootstrapAfterAuth();
+        else showAuth('');
+      } catch(err){
+        console.error(err);
+        showAuth('초기화 오류: ' + (err?.message || err));
+      }
+    })();
+
+    async function mutate(queryBuilderPromise, successMessage='', opts={}){
+      await ensureReadySession();
+      const { error } = await queryBuilderPromise;
+      if(error){
+        const message = formatDbError('저장 실패', error);
+        notify(message, 'error');
+        throw error;
+      }
+      if(successMessage) notify(successMessage, 'success');
+      await refreshEverything({stayOnPage: opts.stayOnPage !== false});
+      return true;
+    }
+
+    window.addNewProject = async function(){
+      try{
+        await mutate(sb.from('projects').insert([{}]), '프로젝트를 추가했습니다.');
+      }catch(err){ console.error(err); }
+    };
+    window.addDailyLog = async function(){
+      try{
+        const today=new Date().toISOString().split('T')[0];
+        await mutate(sb.from('manpower_logs').insert([{ date:today, spent_hours:0 }]), '업무 기록을 추가했습니다.');
+      }catch(err){ console.error(err); }
+    };
+    window.addSchedule = async function(){
+      try{
+        await mutate(sb.from('schedules').insert([{ status:'new', date:new Date().toISOString().split('T')[0], team:'', project_code:'', code:'', project_name:'', name:'', upper_task:'', lower_task:'', prev_progress:'', note:'', this_week_progress:'', client:'', constructor:'', dday:'', assignee:'', task_code:'', remark:'', scale:'' }]), '일정을 추가했습니다.');
+      }catch(err){ console.error(err); }
+    };
+    window.addTodo = async function(){
+      try{
+        await mutate(sb.from('todo_items').insert([{ group_tag:'GROUP 1', project:'', priority:'medium', task_name:'새 작업', assignee:'', status:'todo', due_date:null, category:'' }]), 'TO DO를 추가했습니다.');
+      }catch(err){ console.error(err); }
+    };
+    window.addMeeting = async function(){
+      try{
+        await mutate(sb.from('meeting_notes').insert([{ meeting_date:new Date().toISOString().split('T')[0], title:'새 회의', project:'', attendees:'', agenda:'', notes:'', actions:'', next_meeting_date:null }]), '회의록을 추가했습니다.');
+      }catch(err){ console.error(err); }
+    };
+    window.addSetting = async function(type){
+      if(currentProfile.role!=='admin') return notify('관리자만 가능합니다.','error');
+      try{
+        await mutate(sb.from('settings_'+type).insert([{ name:'새 항목' }]), '설정 항목을 추가했습니다.');
+      }catch(err){ console.error(err); }
+    };
+    window.updateDB = async function(table,id,field,value){
+      try{
+        const payload={ [field]: value };
+        if(table==='manpower_logs' && field==='spent_hours') payload[field]=toNum(value,0);
+        await mutate(sb.from(table).update(payload).eq('id',id), '', {stayOnPage:true});
+      }catch(err){ console.error(err); }
+    };
+    window.updateScheduleField = async function(id,field,value){
+      try{
+        const payload={ [field]: value };
+        if(field==='project_code') payload.code=value;
+        if(field==='project_name') payload.name=value;
+        if(field==='prev_progress') payload.note=value;
+        if(field==='task_code') payload.remark=value;
+        await mutate(sb.from('schedules').update(payload).eq('id',id), '', {stayOnPage:true});
+      }catch(err){ console.error(err); }
+    };
+    window.updateTodoField = async function(id,field,value){
+      try{
+        const nextValue = (field==='due_date' || field==='category' || field==='project' || field==='group_tag' || field==='task_name' || field==='assignee')
+          ? (value === '' ? null : value)
+          : value;
+        await mutate(sb.from('todo_items').update({ [field]: nextValue }).eq('id',id), '', {stayOnPage:true});
+      }catch(err){ console.error(err); }
+    };
+    window.updateMeetingField = async function(id,field,value){
+      try{
+        await mutate(sb.from('meeting_notes').update({ [field]: value === '' ? null : value }).eq('id',id), '', {stayOnPage:true});
+      }catch(err){ console.error(err); }
+    };
+    window.deleteItem = async function(table,id){
+      if(!confirm('삭제하시겠습니까?')) return;
+      try{
+        await mutate(sb.from(table).delete().eq('id',id), '삭제했습니다.');
+      }catch(err){ console.error(err); }
+    };
+
+    window.handleFileUpload = async function(input, type){ const file=input.files?.[0]; if(!file) return; try{ await ensureReadySession(); const text=await readCsvText(file); const delimiter=detectDelimiter(text); const rows=parseRobustCSV(text, delimiter); if(rows.length<2) throw new Error('헤더 포함 2행 이상이어야 합니다.'); const headers=rows[0].map(h=>String(h).trim()); let insertData=[]; if(type==='project'){ const idx={ code:findHeaderIndex(headers,['코드','CODE','NO','번호']), name:findHeaderIndex(headers,['프로젝트명','프로젝트','NAME','PROJECT']), history:findHeaderIndex(headers,['이력','HISTORY']), client:findHeaderIndex(headers,['발주처','발주','CLIENT']), const:findHeaderIndex(headers,['건설사','건설','CONSTRUCTOR']), team:findHeaderIndex(headers,['소속팀','소속','TEAM']), manager:findHeaderIndex(headers,['담당자','담당','MANAGER']), note:findHeaderIndex(headers,['비고','NOTE','REMARK']), phase:findHeaderIndex(headers,['단계','PHASE','TYPE']) }; if(idx.code===-1) throw new Error('프로젝트 CSV에서 코드 열을 찾지 못했습니다.'); for(let i=1;i<rows.length;i++){ const row=rows[i]; const code=getCell(row, idx.code); if(!code) continue; const phaseRaw=getCell(row, idx.phase); const phase=((v)=>{ v=(v||'').toLowerCase(); if(v.includes('기획')||v==='plan') return 'plan'; if(v.includes('기본')||v==='basic') return 'basic'; if(v.includes('실시')||v==='exec') return 'exec'; if(v.includes('현장')||v==='site') return 'site'; return 'default'; })(phaseRaw); insertData.push({ code, name:getCell(row, idx.name), history:getCell(row, idx.history), client:getCell(row, idx.client), constructor:getCell(row, idx.const), team:getCell(row, idx.team), manager:getCell(row, idx.manager), note:getCell(row, idx.note), type:phase }); } }
       if(type==='schedule'){ const idx={ team:findHeaderIndex(headers,['소속','팀','TEAM']), project_code:findHeaderIndex(headers,['프로젝트코드','프로젝트 코드','업무코드','일정코드','코드','CODE','NO','번호']), status:findHeaderIndex(headers,['상태','구분','진행상태','STATUS']), project_name:findHeaderIndex(headers,['프로젝트명','프로젝트','현장명','업무명','NAME','PROJECT']), upper_task:findHeaderIndex(headers,['상위업무','상위','UPPER']), lower_task:findHeaderIndex(headers,['하위업무','하위','LOWER']), prev_progress:findHeaderIndex(headers,['전주진행사항','전주 진행사항','전주','지난주']), this_week_progress:findHeaderIndex(headers,['금주진행사항','금주 진행사항','금주','이번주']), client:findHeaderIndex(headers,['발주처','시행사','CLIENT']), constructor:findHeaderIndex(headers,['건설사','시공사','CONSTRUCTOR']), dday:findHeaderIndex(headers,['D-DAY','DDAY','D DAY']), assignee:findHeaderIndex(headers,['담당자','담당','ASSIGNEE','MANAGER']), task_code:findHeaderIndex(headers,['수행코드','수행 코드','TASK CODE','이력코드']), scale:findHeaderIndex(headers,['규모','SCALE']) }; if(idx.project_name===-1 && idx.project_code===-1) throw new Error('일정표 CSV 핵심 열(프로젝트명/코드)을 찾지 못했습니다.'); for(let i=1;i<rows.length;i++){ const row=rows[i]; const team=getCell(row, idx.team), project_code=getCell(row, idx.project_code), statusRaw=getCell(row, idx.status), project_name=getCell(row, idx.project_name), upper_task=getCell(row, idx.upper_task), lower_task=getCell(row, idx.lower_task), prev_progress=getCell(row, idx.prev_progress), this_week_progress=getCell(row, idx.this_week_progress), client=getCell(row, idx.client), constructor=getCell(row, idx.constructor), dday=getCell(row, idx.dday), assignee=getCell(row, idx.assignee), task_code=getCell(row, idx.task_code), scale=getCell(row, idx.scale); const hasAny=[team,project_code,project_name,upper_task,lower_task,prev_progress,this_week_progress,client,constructor,dday,assignee,task_code,scale].some(v=>v); if(!hasAny) continue; insertData.push({ team, project_code, code:project_code, status:normalizeScheduleStatus(statusRaw||project_code), project_name, name:project_name, upper_task, lower_task, prev_progress, note:prev_progress, this_week_progress, client, constructor, dday, assignee, task_code, remark:task_code, scale, date:new Date().toISOString().split('T')[0] }); } }
-      if(!insertData.length) throw new Error('업로드할 유효한 데이터가 없습니다.'); const tableName=type==='project'?'projects':'schedules'; const { error } = await sb.from(tableName).insert(insertData); if(error) throw error; alert(`${insertData.length}건 저장 완료`); await fetchAllData(); renderAll(); }catch(err){ console.error(err); alert('⚠️ 업로드 오류: '+(err.message||err)); } finally { input.value=''; } };
+      if(!insertData.length) throw new Error('업로드할 유효한 데이터가 없습니다.'); const tableName=type==='project'?'projects':'schedules'; const { error } = await sb.from(tableName).insert(insertData); if(error) throw error; notify(`${insertData.length}건 저장 완료`, 'success'); await refreshEverything({stayOnPage:true}); }catch(err){ console.error(err); notify('업로드 오류: '+escapeHTML(err.message||String(err)), 'error'); } finally { input.value=''; } };
 
-    window.refreshAdmin = async function(){ await fetchProfilesAdmin(); renderAdmin(); };
+    window.refreshAdmin = async function(){
+ await fetchProfilesAdmin(); renderAdmin(); };
     window.setUserRole = async function(userId, newRole){ if(currentProfile.role!=='admin') return alert('관리자만 가능합니다.'); const { error } = await sb.from('profiles').update({ role:newRole }).eq('id', userId); if(error) return alert('Role 변경 실패: '+error.message); await fetchProfilesAdmin(); renderAdmin(); };
     window.setStatsPreset = function(preset){ const now=new Date(); let start; if(preset==='week') start=startOfWeekMonday(now); else if(preset==='month') start=startOfMonth(now); else if(preset==='quarter') start=startOfQuarter(now); else start=startOfYear(now); statsState.start=isoDate(start); statsState.end=isoDate(now); document.getElementById('statsStart').value=statsState.start; document.getElementById('statsEnd').value=statsState.end; renderStats(); };
     window.applyStatsRange = function(){ statsState.start=document.getElementById('statsStart').value||null; statsState.end=document.getElementById('statsEnd').value||null; renderStats(); };
-    function filterLogsByRange(){ return cache.logs.filter(l=>{ const d=String(l.date||'').slice(0,10); if(!d) return false; if(statsState.start && d<statsState.start) return false; if(statsState.end && d>statsState.end) return false; return true; }); }
 
     function renderAll(){ renderProjects(); renderLogs(); renderSchedules(); renderTodo(); renderMeetings(); if(currentProfile.role==='admin'){ renderSettings('upper'); renderSettings('lower'); renderAdmin(); } renderDashboard(); }
     function renderProjects(){ const t=document.getElementById('tableBody'); t.innerHTML=''; cache.projects.forEach(p=>{ t.insertAdjacentHTML('beforeend', `<tr><td><button class="delete-btn" onclick="deleteItem('projects',${p.id})">×</button></td><td contenteditable="true" onblur="updateDB('projects',${p.id},'code',this.innerText)">${escapeHTML(p.code||'')}</td><td contenteditable="true" onblur="updateDB('projects',${p.id},'name',this.innerText)">${escapeHTML(p.name||'')}</td><td contenteditable="true" onblur="updateDB('projects',${p.id},'history',this.innerText)">${escapeHTML(p.history||'')}</td><td contenteditable="true" onblur="updateDB('projects',${p.id},'client',this.innerText)">${escapeHTML(p.client||'')}</td><td contenteditable="true" onblur="updateDB('projects',${p.id},'constructor',this.innerText)">${escapeHTML(p.constructor||'')}</td><td contenteditable="true" onblur="updateDB('projects',${p.id},'team',this.innerText)">${escapeHTML(p.team||'')}</td><td contenteditable="true" onblur="updateDB('projects',${p.id},'manager',this.innerText)">${escapeHTML(p.manager||'')}</td><td><select onchange="updateDB('projects',${p.id},'type',this.value)"><option value="default" ${p.type==='default'?'selected':''}>선택</option><option value="plan" ${p.type==='plan'?'selected':''}>기획</option><option value="basic" ${p.type==='basic'?'selected':''}>기본</option><option value="exec" ${p.type==='exec'?'selected':''}>실시</option><option value="site" ${p.type==='site'?'selected':''}>현장지원</option></select></td><td contenteditable="true" onblur="updateDB('projects',${p.id},'note',this.innerText)">${escapeHTML(p.note||'')}</td></tr>`); }); }
@@ -389,8 +644,19 @@ window.signIn = async function(){ try { await ensureSupabaseClient(); const emai
       const mtBody=document.getElementById('dashboard-meeting-body'); const recentMeetings=[...cache.meetings].slice(0,6); mtBody.innerHTML = recentMeetings.length ? recentMeetings.map(m=>`<tr><td>${escapeHTML(m.meeting_date||'-')}</td><td>${escapeHTML(m.title||'-')}</td><td>${escapeHTML(m.project||'-')}</td><td>${escapeHTML(m.next_meeting_date||'-')}</td></tr>`).join('') : `<tr><td colspan="4" class="muted">회의록 없음</td></tr>`;
       const mpBody=document.getElementById('dashboard-manpower-body'); const latestLogs=[...cache.logs].slice(0,8); mpBody.innerHTML = latestLogs.length ? latestLogs.map(l=>`<tr><td>${escapeHTML(l.assignee||'')}</td><td>${escapeHTML(l.project||'')}</td><td>${escapeHTML(l.task||'')}</td><td>${toNum(l.spent_hours,0).toFixed(2)}</td><td>${escapeHTML(l.date||'')}</td></tr>`).join('') : `<tr><td colspan="5" class="muted">맨파워 기록 없음</td></tr>`; }
     function renderStats(){ if(currentProfile.role!=='admin') return; if(!statsState.start || !statsState.end){ setStatsPreset('week'); return; } const logs=cache.logs.filter(l=>{ const d=String(l.date||'').slice(0,10); if(!d) return false; if(statsState.start && d<statsState.start) return false; if(statsState.end && d>statsState.end) return false; return true; }); document.getElementById('statsRangeLabel').innerText=`기간: ${statsState.start} ~ ${statsState.end}`; const totalHours=logs.reduce((sum,l)=>sum+toNum(l.spent_hours,0),0); document.getElementById('statsTotalHours').innerText=totalHours.toFixed(2); document.getElementById('statsTotalLogs').innerText=String(logs.length); const byAssignee={}, byProject={}, byDate={}; logs.forEach(l=>{ const h=toNum(l.spent_hours,0); const a=(l.assignee||'미정').trim()||'미정'; const p=(l.project||'미정').trim()||'미정'; const d=String(l.date||'미정').slice(0,10)||'미정'; if(!byAssignee[a]) byAssignee[a]={hours:0,count:0}; if(!byProject[p]) byProject[p]={hours:0,count:0}; if(!byDate[d]) byDate[d]={hours:0,count:0}; byAssignee[a].hours += h; byAssignee[a].count += 1; byProject[p].hours += h; byProject[p].count += 1; byDate[d].hours += h; byDate[d].count += 1; }); const assigneeList=Object.entries(byAssignee).map(([k,v])=>({k,...v})).sort((a,b)=>b.hours-a.hours); const projectList=Object.entries(byProject).map(([k,v])=>({k,...v})).sort((a,b)=>b.hours-a.hours); const dateList=Object.entries(byDate).map(([k,v])=>({k,...v})).sort((a,b)=>String(b.k).localeCompare(String(a.k))); document.getElementById('statsTopAssignee').innerText=assigneeList.length?assigneeList[0].k:'-'; document.getElementById('statsTopProject').innerText=projectList.length?projectList[0].k:'-'; document.getElementById('statsAssigneeBody').innerHTML=assigneeList.length?assigneeList.slice(0,50).map(x=>`<tr><td>${escapeHTML(x.k)}</td><td>${x.hours.toFixed(2)}</td><td>${x.count}</td></tr>`).join(''):`<tr><td colspan="3" class="muted">데이터 없음</td></tr>`; document.getElementById('statsProjectBody').innerHTML=projectList.length?projectList.slice(0,50).map(x=>`<tr><td>${escapeHTML(x.k)}</td><td>${x.hours.toFixed(2)}</td><td>${x.count}</td></tr>`).join(''):`<tr><td colspan="3" class="muted">데이터 없음</td></tr>`; document.getElementById('statsDateBody').innerHTML=dateList.length?dateList.slice(0,90).map(x=>`<tr><td>${escapeHTML(x.k)}</td><td>${x.hours.toFixed(2)}</td><td>${x.count}</td></tr>`).join(''):`<tr><td colspan="3" class="muted">데이터 없음</td></tr>`; }
-  
+
+
+    window.addEventListener('error', (event) => {
+      console.error(event.error || event.message);
+      notify('스크립트 오류가 발생했습니다. 브라우저 새로고침 후 다시 시도해 주세요.', 'error');
+    });
+    window.addEventListener('unhandledrejection', (event) => {
+      console.error(event.reason);
+      notify('처리되지 않은 오류가 발생했습니다. '+escapeHTML(event.reason?.message || String(event.reason || '')), 'error');
+    });
+
     document.addEventListener('DOMContentLoaded', () => {
+
       const loginBtn = document.getElementById('loginBtn');
       const resetBtn = document.getElementById('resetBtn');
       const passwordEl = document.getElementById('loginPassword');
@@ -398,6 +664,6 @@ window.signIn = async function(){ try { await ensureSupabaseClient(); const emai
       if (resetBtn) resetBtn.addEventListener('click', () => window.resetPassword());
       if (passwordEl) passwordEl.addEventListener('keypress', (e) => { if (e.key === 'Enter') window.signIn(); });
     });
-</script>
+  </script>
 </body>
 </html>
