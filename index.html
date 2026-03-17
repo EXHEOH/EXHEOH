@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EXHEOH SYSTEM V37 (Supabase Function Chat)</title>
+  <script>
+    window.__supabaseReadyPromise = new Promise((resolve, reject) => {
+      function loadScript(src, onFail) {
+        const s = document.createElement('script');
+        s.src = src;
+        s.async = true;
+        s.onload = () => {
+          if (window.supabase && window.supabase.createClient) resolve();
+          else reject(new Error('Supabase library loaded but createClient is unavailable'));
+        };
+        s.onerror = () => {
+          if (onFail) onFail();
+          else reject(new Error('Failed to load Supabase library'));
+        };
+        document.head.appendChild(s);
+      }
+      loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2', () => {
+        loadScript('https://unpkg.com/@supabase/supabase-js@2', null);
+      });
+    });
+  </script>
+  <style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap');
+:root{
+  --primary:#111111;
+  --primary-2:#e5785d;
+  --accent:#dce86a;
+  --bg:#f3efe6;
+  --panel:#fbf8f1;
+  --white:#fffdf9;
+  --text:#111111;
+  --border:#d8d1c3;
+  --danger:#df5f48;
+  --muted:#5e584e;
+  --shadow:0 10px 28px rgba(17,17,17,.06);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-size:13px;overflow-x:hidden}
+body{font-family:'Inter','Pretendard',system-ui,sans-serif;letter-spacing:-0.01em}
+.btn{padding:10px 16px;background:var(--primary);color:#fff;border:none;border-radius:12px;cursor:pointer;font-size:12px;font-weight:800;transition:.18s ease}
+.btn:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(17,17,17,.14)}
+.btn.secondary{background:var(--panel);border:1px solid var(--border);color:var(--text)}
+.btn.danger{background:var(--danger)}
+.card{background:var(--panel);border-radius:18px;border:1px solid var(--border);box-shadow:var(--shadow);overflow-x:auto;margin-bottom:18px}
+.muted{color:var(--muted);font-weight:700}.pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:#fff;font-weight:800;color:var(--text)}.pill small{color:var(--muted);font-weight:800}
+input[type="text"],input[type="password"],input[type="date"],input[type="number"],textarea,select{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:#fffefb;font-size:12px;color:var(--text)}
+input:focus,textarea:focus,select:focus{outline:none;border-color:#111;box-shadow:0 0 0 3px rgba(17,17,17,.06)}
+textarea{min-height:84px;resize:vertical}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.row>*{flex:1;min-width:160px}.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media (max-width:1100px){.grid-2{grid-template-columns:1fr}}
+#authContainer{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:26px;background:linear-gradient(180deg,#f3efe6 0%,#efe8da 100%)}.auth-wrap{width:100%;max-width:430px}.auth-title{font-size:24px;font-weight:700;color:#111;margin:0 0 10px;font-family:'Space Grotesk','Inter',sans-serif;letter-spacing:-0.04em}.auth-sub{margin:0 0 18px;color:var(--muted);font-weight:800}.auth-form{padding:22px}.field{margin-bottom:12px}.label{font-weight:800;color:#111;margin-bottom:6px}.auth-actions{display:flex;gap:10px;margin-top:12px}.auth-note{margin-top:10px;font-size:12px;color:var(--muted);font-weight:800;line-height:1.6}.error-box{margin-top:10px;padding:10px 12px;border:1px solid rgba(223,95,72,.35);background:#fff4f1;color:#9b2d18;border-radius:14px;font-weight:900;display:none}
+#appContainer{display:none}.sidebar{position:fixed;top:0;left:0;bottom:0;width:280px;background:linear-gradient(180deg,#f4efe5 0%,#efe7d8 100%);border-right:1px solid var(--border);padding:22px;z-index:100;overflow-y:auto;display:flex;flex-direction:column}.main{margin-left:280px;padding:36px;min-height:100vh;width:calc(100% - 280px);padding-bottom:110px;background:var(--bg)}
+.logo-container{margin-bottom:26px}.logo-img{max-width:100%;height:auto;display:block;margin-bottom:10px}.logo-text{font-size:19px;font-weight:700;color:#111;line-height:1.02;font-family:'Space Grotesk','Inter',sans-serif;letter-spacing:-0.05em}
+.menu-category{font-size:11px;color:#8a7b63;font-weight:900;margin-top:18px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em}.menu-item{padding:12px 14px;margin-bottom:6px;cursor:pointer;border-radius:14px;font-weight:800;color:#3f3a32;display:flex;align-items:center;gap:8px;transition:.16s ease}.menu-item:hover{background:#ebe4d6;color:#111;transform:translateX(1px)}.menu-item.active{background:linear-gradient(90deg,rgba(229,120,93,.18) 0%,rgba(220,232,106,.18) 100%);color:#111;box-shadow:inset 3px 0 0 #111}.menu-item.active span,.menu-item.active{font-weight:900}
+.sidebar-footer{margin-top:auto;padding-top:14px;border-top:1px solid #ddd3c1}.userbox{display:flex;flex-direction:column;gap:8px}.userline{display:flex;align-items:center;justify-content:space-between;gap:8px}.useremail{font-weight:900;color:#111;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rolebadge{padding:4px 10px;border-radius:999px;font-weight:900;font-size:11px;border:1px solid var(--border)}.role-admin{background:rgba(220,232,106,.55);color:#111}.role-member{background:#f6f2e8;color:#3a352e}
+.page-section{display:none}.page-section.active{display:block;animation:fadeIn .25s}@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;gap:10px;flex-wrap:wrap}.header h1{font-size:28px;margin:0;font-weight:700;color:#111;font-family:'Space Grotesk','Inter',sans-serif;letter-spacing:-0.05em}
+.dashboard-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:16px}.stat-card{background:var(--panel);padding:18px;border-radius:18px;border:1px solid var(--border);box-shadow:var(--shadow)}.stat-top{display:flex;align-items:center;justify-content:space-between;gap:10px}.stat-title{color:#3e3a32;font-weight:800}.stat-value{font-size:34px;font-weight:800;color:#111;margin-top:10px;line-height:1.05;font-family:'Space Grotesk','Inter',sans-serif}
+table{border-collapse:collapse;width:100%;white-space:nowrap}thead th{position:sticky;top:0;z-index:5;background:#eee7da;color:#4a4339;padding:12px;text-align:left;font-weight:800;border-bottom:1px solid var(--border)}td{padding:12px;border-bottom:1px solid #e5ddcf;vertical-align:top;color:#1d1b17}.action-col{width:44px;text-align:center}.delete-btn{color:#c2b8a6;cursor:pointer;border:none;background:none;font-size:16px}.delete-btn:hover{color:var(--danger)}
+.tag-badge{padding:4px 10px;border-radius:999px;font-size:11px;font-weight:900;display:inline-block;min-width:84px;text-align:center}.color-new{background:#efe09a;color:#6c4d00}.color-progress{background:#bfd0f3;color:#173e8f}.color-deliver{background:#f1c9c1;color:#8f2413}.color-site{background:#d8e79a;color:#355700}.color-default{background:#ebe6db;color:#5f5a50}
+.schedule-group{margin-bottom:22px}.schedule-header{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--border);border-bottom:none;border-radius:18px 18px 0 0;font-weight:900;color:#111;background:#f3ede0}.schedule-header small{color:var(--muted);font-weight:900}.schedule-card{border-radius:0 0 18px 18px;margin-bottom:0}.schedule-card table{min-width:2200px}.schedule-status-select{min-width:98px;font-weight:900}.short-cell{min-width:90px}.mid-cell{min-width:140px}.long-cell{min-width:260px;white-space:pre-line;line-height:1.5}.xl-cell{min-width:360px;white-space:pre-line;line-height:1.5}.center-cell{text-align:center}
+.status-badge{padding:4px 10px;border-radius:999px;font-weight:900;font-size:11px;display:inline-block}.s-todo{background:#ebe6db;color:#534c42}.s-doing{background:#bfd0f3;color:#173e8f}.s-done{background:#d8e79a;color:#355700}.prio-badge{padding:4px 10px;border-radius:999px;font-weight:900;font-size:11px;display:inline-block}.p-high{background:#f1c9c1;color:#8f2413}.p-medium{background:#efe09a;color:#6c4d00}.p-low{background:#d8e79a;color:#355700}
+.empty-box{padding:18px;color:var(--muted);font-weight:900}.admin-only{display:none}
+.chat-btn{position:fixed;bottom:30px;right:30px;left:auto;width:60px;height:60px;background:linear-gradient(135deg,#111 0%,#3b342e 100%);color:#fff;border-radius:50%;display:flex;justify-content:center;align-items:center;font-size:30px;box-shadow:0 12px 24px rgba(17,17,17,.22);cursor:pointer;z-index:999;border:2px solid rgba(220,232,106,.65)}
+.chat-window{display:none;position:fixed;bottom:100px;right:30px;left:auto;width:390px;height:560px;background:#f6f1e8;border-radius:24px;box-shadow:0 22px 54px rgba(17,17,17,.16);border:1px solid var(--border);z-index:999;flex-direction:column;overflow:hidden}.chat-header{background:linear-gradient(90deg,#111 0%,#29231f 100%);color:#fff;padding:15px;font-weight:900;display:flex;justify-content:space-between;align-items:center}.chat-body{flex:1;padding:15px;overflow-y:auto;background:#f6f1e8;display:flex;flex-direction:column;gap:10px}.chat-input-area{padding:15px;border-top:1px solid var(--border);background:#f6f1e8;display:flex;gap:8px}.chat-input{flex:1;padding:10px;border:1px solid var(--border);border-radius:999px;outline:none;background:#fffefb}.chat-send{background:var(--primary-2);color:#111;border:none;padding:0 16px;border-radius:999px;cursor:pointer;font-weight:900}.msg{padding:12px 14px;border-radius:16px;font-size:13px;max-width:90%;line-height:1.6}.msg-bot{background:#fffefb;border:1px solid var(--border);align-self:flex-start}.msg-user{background:#111;color:#fff;align-self:flex-end}
+.toast-wrap{position:fixed;top:20px;right:20px;z-index:2000;display:flex;flex-direction:column;gap:10px;max-width:420px}.toast{padding:14px 16px;border-radius:16px;border:1px solid var(--border);box-shadow:var(--shadow);font-weight:800;background:#fffefb;color:var(--text)}.toast.error{background:#fff4f1;border-color:rgba(223,95,72,.35);color:#9b2d18}.toast.success{background:#f3fbef;border-color:#cfe5be;color:#2e5b16}.toast.info{background:#fffefb}
+::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-thumb{background:#d2c8b7;border-radius:999px}::-webkit-scrollbar-track{background:transparent}
+  </style>
+</head>
+<body>
+  <div class="toast-wrap" id="toastWrap"></div>
+  <div id="authContainer">
+    <div class="auth-wrap">
+      <div class="card"><div class="auth-form">
+        <h2 class="auth-title">EXHEOH SYSTEM 로그인</h2>
+        <p class="auth-sub">사내 계정(이메일/비밀번호)로 로그인하세요.</p>
+        <div class="field"><div class="label">이메일</div><input type="text" id="loginEmail" placeholder="name@company.com" autocomplete="username"></div>
+        <div class="field"><div class="label">비밀번호</div><input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password"></div>
+        <div class="auth-actions"><button id="loginBtn" type="button" class="btn" onclick="window.signIn && window.signIn()">로그인</button><button id="resetBtn" type="button" class="btn secondary" onclick="window.resetPassword && window.resetPassword()">비밀번호 재설정</button></div><div id="authStatus" class="muted" style="margin-top:10px;display:none;">처리 중...</div>
+        <div class="auth-note">* 직원은 현재 <b>자가 회원가입</b>이 아니라, 관리자 생성/초대 방식입니다.<br>* 관리자에서 role이 admin인 계정만 관리자 메뉴가 보입니다.</div>
+        <div class="error-box" id="authError"></div>
+      </div></div>
+      <div class="muted" style="text-align:center;margin-top:10px;">© 2026 EXHEOH. All Rights Reserved.</div>
+    </div>
+  </div>
+
+  <div id="appContainer">
+    <div class="chat-btn" onclick="toggleChat()">🤖</div>
+    <div class="chat-window" id="chatWindow">
+      <div class="chat-header"><span>EXHEOH AI</span><span style="cursor:pointer" onclick="toggleChat()">✕</span></div>
+      <div class="chat-body" id="chatBody">
+        <div class="msg msg-bot">🔎 질문 예시<br><span class="muted">- D2514 이번 주 진행상황 알려줘<br>- 김주경 담당 일정 정리해줘<br>- 이번 주 회의록 핵심만 요약해줘<br>- 마감 임박 TO DO 보여줘</span></div>
+      </div>
+      <div class="chat-input-area"><input type="text" id="chatInput" class="chat-input" placeholder="질문 입력..." onkeypress="if(event.key==='Enter') sendChat()"><button class="chat-send" onclick="sendChat()">전송</button></div>
+    </div>
+
+    <div class="sidebar">
+      <div class="logo-container">
+        <img src="EXHEOH LOGO-01-01.png" alt="EXHEOH" class="logo-img" onerror="this.style.display='none'">
+        <div class="logo-text">EXHEOH<br>DESIGN TEAM</div>
+      </div>
+      <div class="menu-category">MAIN</div>
+      <div class="menu-item active" data-page="dashboard" onclick="showPage('dashboard', this)">📊 대시보드</div>
+      <div class="menu-item" data-page="project" onclick="showPage('project', this)">📂 프로젝트 관리</div>
+      <div class="menu-item" data-page="manpower" onclick="showPage('manpower', this)">👥 맨파워 기록</div>
+
+      <div class="menu-category">PLANNING</div>
+      <div class="menu-item" data-page="schedule" onclick="showPage('schedule', this)">📅 프로젝트 일정표</div>
+      <div class="menu-item" data-page="todo" onclick="showPage('todo', this)">✅ TO DO LIST</div>
+      <div class="menu-item" data-page="meeting" onclick="showPage('meeting', this)">📝 회의록</div>
+
+      <div class="menu-category admin-only">ADMIN</div>
+      <div class="menu-item admin-only" data-page="stats" onclick="showPage('stats', this)">📈 통계(시간)</div>
+      <div class="menu-item admin-only" data-page="admin" onclick="showPage('admin', this)">👑 관리자(권한)</div>
+
+      <div class="menu-category admin-only">SETTINGS</div>
+      <div class="menu-item admin-only" data-page="setting-upper" onclick="showPage('setting-upper', this)">⚙️ 상위업무 설정</div>
+      <div class="menu-item admin-only" data-page="setting-lower" onclick="showPage('setting-lower', this)">⚙️ 하위업무 설정</div>
+
+      <div class="sidebar-footer">
+        <div class="userbox">
+          <div class="userline"><div class="useremail" id="userEmail">-</div><div class="rolebadge role-member" id="userRole">member</div></div>
+          <div class="row"><button class="btn secondary" onclick="location.reload()">새로고침</button><button class="btn danger" onclick="signOut()">로그아웃</button></div>
+          <div class="muted" id="userNameLine"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="main">
+      <div id="page-dashboard" class="page-section active">
+        <div class="header"><h1>종합 현황 대시보드</h1><div class="muted">로그인된 사용자 기준 데이터</div></div>
+        <div class="dashboard-grid">
+          <div class="stat-card" style="border-top:4px solid #d6be53;"><div class="stat-top"><div class="stat-title">기획</div><span class="pill"><small>Projects</small></span></div><div class="stat-value" id="count-plan">0</div></div>
+          <div class="stat-card" style="border-top:4px solid #95aedf;"><div class="stat-top"><div class="stat-title">기본</div><span class="pill"><small>Projects</small></span></div><div class="stat-value" id="count-basic">0</div></div>
+          <div class="stat-card" style="border-top:4px solid #e5785d;"><div class="stat-top"><div class="stat-title">실시</div><span class="pill"><small>Projects</small></span></div><div class="stat-value" id="count-exec">0</div></div>
+          <div class="stat-card" style="border-top:4px solid #b7d459;"><div class="stat-top"><div class="stat-title">현장지원</div><span class="pill"><small>Projects</small></span></div><div class="stat-value" id="count-site">0</div></div>
+        </div>
+        <div class="dashboard-grid">
+          <div class="stat-card" style="border-top:4px solid #c4a84c;"><div class="stat-top"><div class="stat-title">A 신규(일정)</div><span class="pill"><small>Schedule</small></span></div><div class="stat-value" id="schedule-count-new">0</div></div>
+          <div class="stat-card" style="border-top:4px solid #8ea8e0;"><div class="stat-top"><div class="stat-title">B 진행(일정)</div><span class="pill"><small>Schedule</small></span></div><div class="stat-value" id="schedule-count-progress">0</div></div>
+          <div class="stat-card" style="border-top:4px solid #d97158;"><div class="stat-top"><div class="stat-title">C 납품(일정)</div><span class="pill"><small>Schedule</small></span></div><div class="stat-value" id="schedule-count-deliver">0</div></div>
+          <div class="stat-card" style="border-top:4px solid #a8c94a;"><div class="stat-top"><div class="stat-title">E 현장(일정)</div><span class="pill"><small>Schedule</small></span></div><div class="stat-value" id="schedule-count-site">0</div></div>
+        </div>
+        <div class="grid-2">
+          <div class="card" style="padding:16px;"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;"><h3 style="margin:0;">🆕 신규 일정(A) 진행사항 요약</h3><span class="muted" id="dash-new-count">0건</span></div><table style="margin-top:12px;"><thead><tr><th>프로젝트</th><th>상/하위업무</th><th>담당자</th><th>금주 진행사항</th></tr></thead><tbody id="dashboard-new-schedule-body"></tbody></table></div>
+          <div class="card" style="padding:16px;"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;"><h3 style="margin:0;">⏰ TO DO 마감 임박(7일)</h3><span class="muted" id="dash-due-count">0건</span></div><table style="margin-top:12px;"><thead><tr><th>우선순위</th><th>작업</th><th>담당자</th><th>마감일</th></tr></thead><tbody id="dashboard-todo-due-body"></tbody></table></div>
+        </div>
+        <div class="grid-2">
+          <div class="card" style="padding:16px;"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;"><h3 style="margin:0;">📅 일정표 최근 항목</h3><span class="muted">최근 8건</span></div><table style="margin-top:12px;"><thead><tr><th>상태</th><th>프로젝트</th><th>상/하위업무</th><th>담당자</th><th>D-DAY</th></tr></thead><tbody id="dashboard-schedule-body"></tbody></table></div>
+          <div class="card" style="padding:16px;"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;"><h3 style="margin:0;">📝 최근 회의록</h3><span class="muted">최근 6건</span></div><table style="margin-top:12px;"><thead><tr><th>일자</th><th>제목</th><th>프로젝트</th><th>다음 일정</th></tr></thead><tbody id="dashboard-meeting-body"></tbody></table></div>
+        </div>
+        <div class="card" style="padding:16px;"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;"><h3 style="margin:0;">📋 최근 맨파워 기록</h3><span class="muted">최근 8건</span></div><table style="margin-top:12px;"><thead><tr><th>이름</th><th>프로젝트</th><th>업무내용</th><th>소요시간(h)</th><th>날짜</th></tr></thead><tbody id="dashboard-manpower-body"></tbody></table></div>
+      </div>
+
+      <div id="page-project" class="page-section"><div class="header"><h1>프로젝트 현황판</h1><div><button class="btn secondary" onclick="document.getElementById('csvInput').click()">📂 CSV 업로드</button><button class="btn" onclick="addNewProject()">+ 추가</button><input type="file" id="csvInput" accept=".csv,text/csv" onchange="handleFileUpload(this,'project')" style="display:none"></div></div><div class="card"><table><thead><tr><th>삭제</th><th>코드</th><th>프로젝트명</th><th>이력코드</th><th>발주처</th><th>건설사</th><th>소속팀</th><th>담당자</th><th>단계</th><th>비고</th></tr></thead><tbody id="tableBody"></tbody></table></div><div class="muted">※ 상/하위업무 선택은 “프로젝트 일정표”에서 진행합니다.</div></div>
+
+      <div id="page-manpower" class="page-section"><div class="header"><h1>일일 업무 기록</h1><button class="btn" onclick="addDailyLog()">+ 기록 추가</button></div><div class="muted" style="margin:-8px 0 14px;">소요시간은 <b>시간 단위</b>로 입력하세요. 예) 1.5 = 1시간30분 / 0.25 = 15분</div><div id="dailyLogContainer"></div></div>
+
+      <div id="page-schedule" class="page-section"><div class="header"><h1>프로젝트 일정표</h1><div><button class="btn secondary" onclick="document.getElementById('csvInputSchedule').click()">📂 CSV 업로드</button><button class="btn" onclick="addSchedule()">+ 일정 추가</button><input type="file" id="csvInputSchedule" accept=".csv,text/csv" onchange="handleFileUpload(this,'schedule')" style="display:none"></div></div><div class="muted" style="margin:-8px 0 14px;">일정표에서 <b>상위업무/하위업무</b>를 선택하고, 전주/금주 진행사항을 입력해 관리합니다.</div><div id="scheduleContainer"></div></div>
+
+      <div id="page-todo" class="page-section"><div class="header"><h1>✅ TO DO LIST</h1><button class="btn" onclick="addTodo()">+ TO DO 추가</button></div><div class="muted" style="margin:-8px 0 14px;">그룹/우선순위/진행상황/마감일 기반으로 관리합니다.</div><div id="todoContainer"></div></div>
+
+      <div id="page-meeting" class="page-section"><div class="header"><h1>📝 회의록</h1><button class="btn" onclick="addMeeting()">+ 회의록 추가</button></div><div class="muted" style="margin:-8px 0 14px;">회의 후 “회의 내용 + 액션 아이템 + 다음 일정(Next)”까지 함께 기록합니다.</div><div id="meetingContainer"></div></div>
+
+      <div id="page-stats" class="page-section"><div class="header"><h1>📈 시간 통계 (관리자)</h1><div class="row" style="max-width:720px;"><button class="btn secondary" onclick="setStatsPreset('week')">이번 주</button><button class="btn secondary" onclick="setStatsPreset('month')">이번 달</button><button class="btn secondary" onclick="setStatsPreset('quarter')">이번 분기</button><button class="btn secondary" onclick="setStatsPreset('year')">올해</button></div></div><div class="card" style="padding:16px;"><div class="row"><div><div class="muted" style="margin-bottom:6px;">기간 시작</div><input type="date" id="statsStart"></div><div><div class="muted" style="margin-bottom:6px;">기간 종료</div><input type="date" id="statsEnd"></div><div><div class="muted" style="margin-bottom:6px;">적용</div><button class="btn" onclick="applyStatsRange()">통계 갱신</button></div></div><div class="muted" style="margin-top:10px;" id="statsRangeLabel">기간: -</div></div><div class="dashboard-grid"><div class="stat-card" style="border-top:4px solid #0ea5e9;"><div class="stat-top"><div class="stat-title">총 투입시간</div><span class="pill"><small>Hours</small></span></div><div class="stat-value" id="statsTotalHours">0</div></div><div class="stat-card" style="border-top:4px solid #8b5cf6;"><div class="stat-top"><div class="stat-title">기록 건수</div><span class="pill"><small>Logs</small></span></div><div class="stat-value" id="statsTotalLogs">0</div></div><div class="stat-card" style="border-top:4px solid #b7d459;"><div class="stat-top"><div class="stat-title">Top 담당자</div><span class="pill"><small>Assignee</small></span></div><div class="stat-value" id="statsTopAssignee">-</div></div><div class="stat-card" style="border-top:4px solid #f59e0b;"><div class="stat-top"><div class="stat-title">Top 프로젝트</div><span class="pill"><small>Project</small></span></div><div class="stat-value" id="statsTopProject">-</div></div></div><div class="grid-2"><div class="card" style="padding:16px;"><h3 style="margin:0 0 10px;">담당자별 투입시간</h3><table><thead><tr><th>담당자</th><th>시간(h)</th><th>건수</th></tr></thead><tbody id="statsAssigneeBody"></tbody></table></div><div class="card" style="padding:16px;"><h3 style="margin:0 0 10px;">프로젝트별 투입시간</h3><table><thead><tr><th>프로젝트</th><th>시간(h)</th><th>건수</th></tr></thead><tbody id="statsProjectBody"></tbody></table></div></div><div class="card" style="padding:16px;"><h3 style="margin:0 0 10px;">날짜별 투입시간</h3><table><thead><tr><th>날짜</th><th>시간(h)</th><th>건수</th></tr></thead><tbody id="statsDateBody"></tbody></table></div></div>
+
+      <div id="page-admin" class="page-section"><div class="header"><h1>👑 관리자(권한 관리)</h1><button class="btn secondary" onclick="refreshAdmin()">새로고침</button></div><div class="card" style="padding:16px;"><div class="muted" style="margin-bottom:10px;">* 계정 생성은 Supabase Dashboard(Authentication → Users)에서 하세요.<br>* 이 페이지에서는 role(admin/member)만 수정합니다.</div><table><thead><tr><th>Email</th><th>Name</th><th>Role</th><th>Created</th></tr></thead><tbody id="adminProfilesBody"></tbody></table></div></div>
+
+      <div id="page-setting-upper" class="page-section"><div class="header"><h1>⚙️ 상위업무 설정</h1><button class="btn" onclick="addSetting('upper')">+ 추가</button></div><div class="card"><table><thead><tr><th>삭제</th><th>상위업무명</th></tr></thead><tbody id="upperBody"></tbody></table></div></div>
+      <div id="page-setting-lower" class="page-section"><div class="header"><h1>⚙️ 하위업무 설정</h1><button class="btn" onclick="addSetting('lower')">+ 추가</button></div><div class="card"><table><thead><tr><th>삭제</th><th>하위업무명</th></tr></thead><tbody id="lowerBody"></tbody></table></div></div>
+      <div id="page-denied" class="page-section"><div class="header"><h1>접근 제한</h1></div><div class="card"><div class="empty-box">이 페이지는 관리자(admin)만 접근 가능합니다.</div></div></div>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://vtewlnyikmzdylksozua.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ0ZXdsbnlpa216ZHlsa3NvenVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NTEwOTAsImV4cCI6MjA4ODIyNzA5MH0.FpxlzqoK7TvqvCKDZsRt7XBK7ml1hfRaqLB4U8brY8g';
+    let sb = null;
+    const CHAT_MODE = 'database-only';
+
+    async function ensureSupabaseClient() {
+      if (sb) return sb;
+      await window.__supabaseReadyPromise;
+      if (!window.supabase || !window.supabase.createClient) {
+        throw new Error('Supabase 라이브러리를 불러오지 못했습니다. 새로고침 후 다시 시도하세요.');
+      }
+      sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      return sb;
+    }
+
+    let currentUser = null;
+    let currentProfile = { role:'member', full_name:'', email:'' };
+    let cache = { projects:[], logs:[], schedules:[], upper:[], lower:[], todo:[], meetings:[], profiles:[] };
+    const statsState = { start:null, end:null };
+    const APP_BASE_URL = (window.location.origin + window.location.pathname).replace(/index\.html$/,'');
+
+    function escapeHTML(str=''){ return String(str).replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
+    function showToast(message, type='info'){
+      const wrap=document.getElementById('toastWrap');
+      if(!wrap) return;
+      const el=document.createElement('div');
+      el.className=`toast ${type}`;
+      el.textContent=String(message||'');
+      wrap.appendChild(el);
+      setTimeout(()=>{ el.remove(); }, 5000);
+    }
+    window.addEventListener('error', (e)=>{ if(e?.message) showToast('오류: ' + e.message, 'error'); });
+    window.addEventListener('unhandledrejection', (e)=>{ const msg=e?.reason?.message||e?.reason||'알 수 없는 오류'; showToast('오류: ' + msg, 'error'); });
+    function getTableRows(table){ const map={ projects:cache.projects, manpower_logs:cache.logs, schedules:cache.schedules, todo_items:cache.todo, meeting_notes:cache.meetings, settings_upper:cache.upper, settings_lower:cache.lower, profiles:cache.profiles }; return map[table] || []; }
+    function detectFieldName(table, preferred){ const rows=getTableRows(table); const sample=rows.find(Boolean)||{}; if(preferred in sample) return preferred; if(table==='manpower_logs' && preferred==='spent_hours'){ for(const k of ['spent_hours','hours','spent_hour','duration','time_spent']){ if(k in sample) return k; } } return preferred; }
+    function getHoursValue(row){ if(!row) return 0; for(const k of ['spent_hours','hours','spent_hour','duration','time_spent']){ if(k in row && row[k] !== null && row[k] !== undefined && row[k] !== '') return toNum(row[k],0); } return 0; }
+    async function runAction(fn, successMessage=''){
+      try{
+        await ensureSupabaseClient();
+        const result = await fn();
+        if(successMessage) showToast(successMessage, 'success');
+        return result;
+      }catch(err){
+        console.error(err);
+        showToast(err?.message || err || '작업 중 오류가 발생했습니다.', 'error');
+        throw err;
+      }
+    }
+    function toNum(v, fallback=0){ const n=parseFloat(String(v ?? '').trim()); return Number.isFinite(n)?n:fallback; }
+    function isoDate(d){ return new Date(d.getFullYear(),d.getMonth(),d.getDate()).toISOString().split('T')[0]; }
+    function startOfWeekMonday(d){ const x=new Date(d.getFullYear(),d.getMonth(),d.getDate()); const day=x.getDay(); const diff=(day===0?-6:1-day); x.setDate(x.getDate()+diff); return x; }
+    function startOfMonth(d){ return new Date(d.getFullYear(), d.getMonth(), 1); }
+    function startOfQuarter(d){ const q=Math.floor(d.getMonth()/3); return new Date(d.getFullYear(), q*3, 1); }
+    function startOfYear(d){ return new Date(d.getFullYear(), 0, 1); }
+    function normalizeHeader(v=''){ return String(v).replace(/^\uFEFF/,'').replace(/\s+/g,'').replace(/"/g,'').trim().toUpperCase(); }
+    function detectDelimiter(text){ const sample=text.split(/\r?\n/).slice(0,5).join('\n'); const candidates=[',','\t',';']; let best=',', bestCount=-1; for(const d of candidates){ const regex=d==='\t'?/\t/g:new RegExp('\\'+d,'g'); const count=(sample.match(regex)||[]).length; if(count>bestCount){best=d;bestCount=count;} } return best; }
+    function parseRobustCSV(text, delimiter=','){ const rows=[]; let row=[], cell='', inQuotes=false; for(let i=0;i<text.length;i++){ const ch=text[i], next=text[i+1]; if(ch==='"'){ if(inQuotes && next==='"'){ cell+='"'; i++; } else inQuotes=!inQuotes; } else if(ch===delimiter && !inQuotes){ row.push(cell.trim()); cell=''; } else if((ch==='\n'||ch==='\r') && !inQuotes){ if(ch==='\r' && next==='\n') i++; row.push(cell.trim()); cell=''; if(row.some(v=>String(v).trim()!=='')) rows.push(row); row=[]; } else cell+=ch; } if(cell.length>0 || row.length>0){ row.push(cell.trim()); if(row.some(v=>String(v).trim()!=='')) rows.push(row); } return rows; }
+    async function readCsvText(file){ const buffer=await file.arrayBuffer(); let text=new TextDecoder('utf-8').decode(buffer); if((text.match(/�/g)||[]).length>3){ try{ text=new TextDecoder('euc-kr').decode(buffer); }catch(e){} } return text; }
+    function findHeaderIndex(headers, keywords, exact=false){ const H=headers.map(normalizeHeader); const K=keywords.map(normalizeHeader); if(exact){ const idx=H.findIndex(h=>K.includes(h)); if(idx!==-1) return idx; } return H.findIndex(h=>K.some(k=>h.includes(k))); }
+    function getCell(row, idx){ if(idx<0 || idx>=row.length) return ''; return String(row[idx] ?? '').trim().substring(0, 4000); }
+    function normalizeScheduleStatus(value=''){ const raw=String(value).trim().toUpperCase(); if(raw.startsWith('A')||raw.includes('신규')) return 'new'; if(raw.startsWith('B')||raw.includes('진행')) return 'progress'; if(raw.startsWith('C')||raw.includes('납품')) return 'deliver'; if(raw.startsWith('E')||raw.includes('현장')) return 'site'; return 'default'; }
+    function getStatusMeta(status='default'){ const map={ new:{label:'A 신규',className:'color-new',bg:'#fef9c3'}, progress:{label:'B 진행',className:'color-progress',bg:'#dbeafe'}, deliver:{label:'C 납품',className:'color-deliver',bg:'#fee2e2'}, default:{label:'D 대기',className:'color-default',bg:'#f3f4f6'}, site:{label:'E 현장',className:'color-site',bg:'#dcfce7'} }; return map[status]||map.default; }
+    function sortSchedules(items){ const order={new:1,progress:2,deliver:3,default:4,site:5}; return [...items].sort((a,b)=>{ const oa=order[a.status||'default']||99, ob=order[b.status||'default']||99; if(oa!==ob) return oa-ob; return String(a.project_code||a.code||'').localeCompare(String(b.project_code||b.code||'')); }); }
+    function optionsFromSettings(list, selected){ const sel=String(selected||''); return list.map(x=>{ const name=x?.name ?? ''; const esc=escapeHTML(name); return `<option value="${esc}" ${name===sel?'selected':''}>${esc}</option>`; }).join(''); }
+    function projectNameOptions(selected){ const sel=String(selected||''); return cache.projects.map(p=>p?.name||'').filter(Boolean).map(name=>{ const esc=escapeHTML(name); return `<option value="${esc}" ${name===sel?'selected':''}>${esc}</option>`; }).join(''); }
+    function dateDiffDays(due){ const t=new Date(); const today=new Date(t.getFullYear(),t.getMonth(),t.getDate()); const dd=new Date(due.getFullYear(),due.getMonth(),due.getDate()); return Math.round((dd-today)/(1000*60*60*24)); }
+
+    function showAuth(msg=''){
+      document.getElementById('appContainer').style.display='none';
+      document.getElementById('authContainer').style.display='flex';
+      const box=document.getElementById('authError');
+      if(msg){ box.style.display='block'; box.innerText=msg; }
+      else { box.style.display='none'; box.innerText=''; }
+      setAuthBusy(false);
+      // 버튼 강제 복원 (disabled 상태 방지)
+      const lb=document.getElementById('loginBtn');
+      const rb=document.getElementById('resetBtn');
+      if(lb){ lb.disabled=false; lb.style.pointerEvents='auto'; lb.style.opacity='1'; }
+      if(rb){ rb.disabled=false; rb.style.pointerEvents='auto'; rb.style.opacity='1'; }
+    }
+    function setAuthBusy(isBusy, message='처리 중...'){
+      const el=document.getElementById('authStatus');
+      const loginBtn=document.getElementById('loginBtn');
+      const resetBtn=document.getElementById('resetBtn');
+      if(el){ el.style.display=isBusy?'block':'none'; el.textContent=message; }
+      if(loginBtn){ loginBtn.disabled=!!isBusy; loginBtn.style.opacity=isBusy?'0.55':'1'; loginBtn.style.cursor=isBusy?'not-allowed':'pointer'; }
+      if(resetBtn){ resetBtn.disabled=!!isBusy; resetBtn.style.opacity=isBusy?'0.55':'1'; resetBtn.style.cursor=isBusy?'not-allowed':'pointer'; }
+    }
+    function showApp(){ document.getElementById('authContainer').style.display='none'; document.getElementById('appContainer').style.display='block'; }
+    function applyRoleUI(){ const isAdmin = currentProfile.role === 'admin'; document.querySelectorAll('.admin-only').forEach(el=>{ if(!isAdmin){ el.style.display='none'; } else if(el.classList.contains('menu-item')){ el.style.display='flex'; } else if(el.classList.contains('menu-category')){ el.style.display='block'; } else { el.style.display='block'; } }); const roleEl=document.getElementById('userRole'); roleEl.innerText=currentProfile.role||'member'; roleEl.className='rolebadge '+(isAdmin?'role-admin':'role-member'); }
+    window.showPage = function(id, el){ const isAdmin=currentProfile.role==='admin'; const adminPages=['stats','admin','setting-upper','setting-lower']; if(adminPages.includes(id)&&!isAdmin) id='denied'; document.querySelectorAll('.page-section').forEach(e=>e.classList.remove('active')); const target=document.getElementById('page-'+id); if(target) target.classList.add('active'); document.querySelectorAll('.menu-item').forEach(item=>item.classList.remove('active')); if(el) el.classList.add('active'); if(id==='dashboard') renderDashboard(); if(id==='schedule') renderSchedules(); if(id==='todo') renderTodo(); if(id==='meeting') renderMeetings(); if(id==='manpower') renderLogs(); if(id==='admin') renderAdmin(); if(id==='stats') renderStats(); };
+    window.toggleChat=function(){ const w=document.getElementById('chatWindow'); w.style.display=(w.style.display==='flex')?'none':'flex'; };
+    function appendChatMessage(type, html){ const body=document.getElementById('chatBody'); body.innerHTML += `<div class="msg ${type==='user'?'msg-user':'msg-bot'}">${html}</div>`; body.scrollTop = body.scrollHeight; }
+    
+    function normalizeText(value=''){
+      return String(value || '').toLowerCase().replace(/\s+/g, ' ').trim();
+    }
+    function tokenizeQuery(query=''){
+      const base = normalizeText(query);
+      const parts = base.split(/[\s,\/\\|:;()\[\]{}]+/).filter(Boolean);
+      const tokens = [...new Set([base, ...parts.filter(t => t.length > 1)])];
+      return tokens;
+    }
+    function includesAny(text, keywords){
+      const s = normalizeText(text);
+      return keywords.some(k => s.includes(normalizeText(k)));
+    }
+    function itemText(type, item){
+      if(type==='project') return [item.code,item.name,item.history,item.client,item.constructor,item.team,item.manager,item.note,item.type].join(' ');
+      if(type==='schedule') return [item.team,item.project_code,item.code,item.project_name,item.name,item.upper_task,item.lower_task,item.assignee,item.status,item.prev_progress,item.this_week_progress,item.client,item.constructor,item.dday,item.task_code,item.scale].join(' ');
+      if(type==='todo') return [item.group_tag,item.project,item.task_name,item.assignee,item.priority,item.status,item.due_date,item.category].join(' ');
+      if(type==='meeting') return [item.meeting_date,item.title,item.project,item.attendees,item.agenda,item.notes,item.actions,item.next_meeting_date].join(' ');
+      if(type==='log') return [item.date,item.assignee,item.project,item.task,item.spent_hours].join(' ');
+      return '';
+    }
+    function scoreItem(type, item, tokens, original){
+      const text = normalizeText(itemText(type, item));
+      if(!text) return 0;
+      let score = 0;
+      tokens.forEach(token => {
+        if(!token) return;
+        if(text.includes(token)) score += token.length > 3 ? 5 : 3;
+      });
+      if(original && text.includes(original)) score += 8;
+      if(type==='schedule' && includesAny(original, ['일정','진행','담당','이번주','금주'])) score += 2;
+      if(type==='todo' && includesAny(original, ['todo','할일','마감','업무'])) score += 2;
+      if(type==='meeting' && includesAny(original, ['회의','회의록','요약','미팅'])) score += 2;
+      if(type==='log' && includesAny(original, ['맨파워','업무기록','시간','투입'])) score += 2;
+      return score;
+    }
+    function searchDbOnly(query){
+      const original = normalizeText(query);
+      const tokens = tokenizeQuery(query);
+      const result = { projects:[], schedules:[], todo:[], meetings:[], logs:[] };
+
+      const pushScored = (arr, type, items) => {
+        items.forEach(item => {
+          const score = scoreItem(type, item, tokens, original);
+          if(score > 0) arr.push({ score, item });
+        });
+        arr.sort((a,b)=>b.score-a.score);
+        return arr.slice(0, 8).map(x => x.item);
+      };
+
+      result.projects = pushScored([], 'project', cache.projects || []);
+      result.schedules = pushScored([], 'schedule', cache.schedules || []);
+      result.todo = pushScored([], 'todo', cache.todo || []);
+      result.meetings = pushScored([], 'meeting', cache.meetings || []);
+      result.logs = pushScored([], 'log', cache.logs || []);
+      return result;
+    }
+    function formatSchedule(item){
+      const title = `${escapeHTML(item.project_code || item.code || '-')} / ${escapeHTML(item.project_name || item.name || '-')}`;
+      const task = `${item.upper_task || '-'} / ${item.lower_task || '-'}`;
+      const progress = item.this_week_progress || item.prev_progress || item.note || '-';
+      return `- ${title}<br>&nbsp;&nbsp;업무: ${escapeHTML(task)} / 담당: ${escapeHTML(item.assignee || '-')}<br>&nbsp;&nbsp;진행: ${escapeHTML(progress)}`;
+    }
+    function formatProject(item){
+      return `- ${escapeHTML(item.code || '-')} / ${escapeHTML(item.name || '-')}<br>&nbsp;&nbsp;발주처: ${escapeHTML(item.client || '-')} / 담당: ${escapeHTML(item.manager || '-')} / 단계: ${escapeHTML(item.type || '-')}`;
+    }
+    function formatTodo(item){
+      return `- ${escapeHTML(item.task_name || '-')}<br>&nbsp;&nbsp;프로젝트: ${escapeHTML(item.project || '-')} / 담당: ${escapeHTML(item.assignee || '-')} / 상태: ${escapeHTML(item.status || '-')}${item.due_date ? ` / 마감: ${escapeHTML(item.due_date)}` : ''}`;
+    }
+    function formatMeeting(item){
+      return `- ${escapeHTML(item.meeting_date || '-')} / ${escapeHTML(item.title || '-')}<br>&nbsp;&nbsp;프로젝트: ${escapeHTML(item.project || '-')} / 다음 일정: ${escapeHTML(item.next_meeting_date || '-')}`;
+    }
+    function formatLog(item){
+      return `- ${escapeHTML(item.date || '-')} / ${escapeHTML(item.assignee || '-')}<br>&nbsp;&nbsp;프로젝트: ${escapeHTML(item.project || '-')} / 업무: ${escapeHTML(item.task || '-')} / 시간: ${getHoursValue(item).toFixed(2)}h`;
+    }
+    function buildDbOnlyReply(message){
+      const q = normalizeText(message);
+      if(includesAny(q, ['gpt','ai 모델','openai','api'])){
+        return '지금 챗봇은 외부 GPT API 없이 <b>Supabase 데이터베이스 검색 기반</b>으로 답하고 있습니다.';
+      }
+
+      const found = searchDbOnly(message);
+      const blocks = [];
+
+      if(found.schedules.length){
+        blocks.push(`<b>일정표 관련 ${found.schedules.length}건</b><br>${found.schedules.slice(0,4).map(formatSchedule).join('<br><br>')}`);
+      }
+      if(found.todo.length && includesAny(q, ['todo','할일','마감','업무','정리'])){
+        blocks.push(`<b>TO DO 관련 ${found.todo.length}건</b><br>${found.todo.slice(0,4).map(formatTodo).join('<br><br>')}`);
+      }
+      if(found.meetings.length && includesAny(q, ['회의','회의록','요약','미팅'])){
+        blocks.push(`<b>회의록 관련 ${found.meetings.length}건</b><br>${found.meetings.slice(0,3).map(formatMeeting).join('<br><br>')}`);
+      }
+      if(found.logs.length && includesAny(q, ['맨파워','업무기록','시간','투입','얼마나'])){
+        blocks.push(`<b>업무기록 관련 ${found.logs.length}건</b><br>${found.logs.slice(0,4).map(formatLog).join('<br><br>')}`);
+      }
+      if(found.projects.length && blocks.length < 2){
+        blocks.push(`<b>프로젝트 관련 ${found.projects.length}건</b><br>${found.projects.slice(0,3).map(formatProject).join('<br><br>')}`);
+      }
+
+      if(!blocks.length){
+        const allCounts = found.projects.length + found.schedules.length + found.todo.length + found.meetings.length + found.logs.length;
+        if(allCounts){
+          const fallback = [];
+          if(found.schedules.length) fallback.push(`<b>일정표</b><br>${found.schedules.slice(0,3).map(formatSchedule).join('<br><br>')}`);
+          if(found.projects.length && fallback.length < 2) fallback.push(`<b>프로젝트</b><br>${found.projects.slice(0,2).map(formatProject).join('<br><br>')}`);
+          if(found.todo.length && fallback.length < 2) fallback.push(`<b>TO DO</b><br>${found.todo.slice(0,2).map(formatTodo).join('<br><br>')}`);
+          if(found.meetings.length && fallback.length < 2) fallback.push(`<b>회의록</b><br>${found.meetings.slice(0,2).map(formatMeeting).join('<br><br>')}`);
+          return fallback.join('<br><br>');
+        }
+        return '데이터상 일치하는 항목을 찾지 못했습니다.<br><span class="muted">예: D2514 이번 주 진행사항, 김주경 담당 일정, 이번 주 회의록, 마감 임박 TO DO</span>';
+      }
+
+      return blocks.join('<br><br>');
+    }
+
+    window.sendChat = async function(){
+      const inp=document.getElementById('chatInput');
+      const msg=inp.value.trim();
+      if(!msg) return;
+      appendChatMessage('user', escapeHTML(msg));
+      inp.value='';
+      try{
+        const loadingId='chat-loading-'+Date.now();
+        appendChatMessage('bot', `<span id="${loadingId}">데이터베이스에서 찾는 중입니다...</span>`);
+        await fetchAllData();
+        const reply = buildDbOnlyReply(msg);
+        const loadingEl=document.getElementById(loadingId);
+        if(loadingEl) loadingEl.parentElement.innerHTML = reply;
+      } catch(err){
+        appendChatMessage('bot', `오류: ${escapeHTML(err.message||'검색 중 오류')}`);
+      }
+    };
+
+    let _signInCooldown = false;
+    window.signIn = async function(){
+      if(_signInCooldown){ showToast('잠시 후 다시 시도해 주세요.', 'error'); return; }
+      _signInCooldown = true;
+      setTimeout(()=>{ _signInCooldown=false; }, 3000);
+      try {
+        setAuthBusy(true, '로그인 중...');
+        await ensureSupabaseClient();
+        const email=document.getElementById('loginEmail').value.trim();
+        const password=document.getElementById('loginPassword').value;
+        if(!email||!password){ return showAuth('이메일과 비밀번호를 입력하세요.'); }
+        const { data, error } = await sb.auth.signInWithPassword({ email, password });
+        if(error){
+          let msg = error.message || '로그인 실패';
+          if(msg.includes('rate limit') || msg.includes('Rate limit') || msg.includes('too many')){
+            msg = '요청이 너무 많습니다. 잠시 후(1~2분) 다시 시도해 주세요.';
+          } else if(msg.includes('Invalid login credentials') || msg.includes('invalid_credentials')){
+            msg = '이메일 또는 비밀번호가 올바르지 않습니다.';
+          } else if(msg.includes('Email not confirmed')){
+            msg = '이메일 인증이 완료되지 않았습니다. 메일함을 확인해 주세요.';
+          }
+          return showAuth('로그인 실패: ' + msg);
+        }
+        // 로그인 성공 시 직접 부트스트랩 호출
+        if(data?.user){
+          await bootstrapAfterAuth();
+        }
+      } catch(err){
+        console.error(err);
+        showAuth('로그인 실행 오류: ' + (err?.message || err));
+      }
+    };
+
+    window.resetPassword = async function(){
+      try {
+        setAuthBusy(true, '메일 발송 중...');
+        await ensureSupabaseClient();
+        const email=document.getElementById('loginEmail').value.trim();
+        if(!email){ setAuthBusy(false); return showAuth('비밀번호 재설정할 이메일을 입력하세요.'); }
+        const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + window.location.pathname });
+        setAuthBusy(false);
+        if(error) return showAuth('재설정 메일 실패: '+error.message);
+        showAuth('비밀번호 재설정 메일을 발송했습니다. 메일함을 확인하세요.');
+      } catch(err) {
+        setAuthBusy(false);
+        showAuth('오류: ' + (err?.message || err));
+      }
+    };
+
+    window.signOut = async function(){
+      await ensureSupabaseClient();
+      await sb.auth.signOut();
+      currentUser=null;
+      currentProfile={role:'member',full_name:'',email:''};
+      cache={projects:[],logs:[],schedules:[],upper:[],lower:[],todo:[],meetings:[],profiles:[]};
+      showAuth('');
+    };
+
+    async function loadMyProfile(){
+      try {
+        const { data:userData } = await sb.auth.getUser();
+        currentUser=userData?.user||null;
+        if(!currentUser) return;
+        // profiles 테이블 조회 실패해도 로그인은 계속 진행
+        try {
+          const { data, error } = await sb.from('profiles').select('id,email,full_name,role').eq('id', currentUser.id).maybeSingle();
+          if(!error && data){
+            currentProfile={ role:data?.role||'member', full_name:data?.full_name||'', email:data?.email||(currentUser.email||'') };
+          } else {
+            console.warn('profiles 조회 실패 (RLS 또는 행 없음) - 기본값 사용:', error?.message);
+            currentProfile={ role:'member', full_name:'', email: currentUser.email||'' };
+          }
+        } catch(profileErr){
+          console.warn('profiles 테이블 예외 - 기본값으로 진행:', profileErr?.message);
+          currentProfile={ role:'member', full_name:'', email: currentUser.email||'' };
+        }
+        const emailEl=document.getElementById('userEmail');
+        const nameEl=document.getElementById('userNameLine');
+        if(emailEl) emailEl.innerText=currentProfile.email||'-';
+        if(nameEl) nameEl.innerText=currentProfile.full_name?('이름: '+currentProfile.full_name):'';
+        applyRoleUI();
+      } catch(err){
+        console.error('loadMyProfile 치명적 오류:', err);
+        // auth.getUser() 실패해도 기본값으로 진행
+        currentProfile={ role:'member', full_name:'', email:'' };
+      }
+    }
+    async function safeSelect(table, orderCol='id', ascending=true){
+      try{
+        await ensureSupabaseClient();
+        const q = sb.from(table).select('*').order(orderCol,{ascending});
+        const { data, error } = await q;
+        if(error){ console.error(table+' load error:', error); showToast(table + ' 로딩 실패: ' + error.message, 'error'); return []; }
+        return data || [];
+      }catch(err){
+        console.error(table+' load exception:', err); showToast(table + ' 로딩 예외: ' + (err?.message || err), 'error'); return [];
+      }
+    }
+    async function fetchAllData(){
+      cache.projects = await safeSelect('projects','id',true);
+      cache.logs = await safeSelect('manpower_logs','date',false);
+      cache.schedules = await safeSelect('schedules','id',true);
+      cache.upper = await safeSelect('settings_upper','id',true);
+      cache.lower = await safeSelect('settings_lower','id',true);
+      cache.todo = await safeSelect('todo_items','id',true);
+      cache.meetings = await safeSelect('meeting_notes','meeting_date',false);
+    }
+    async function fetchProfilesAdmin(){ if(currentProfile.role!=='admin'){ cache.profiles=[]; return; } const { data, error } = await sb.from('profiles').select('id,email,full_name,role,created_at').order('created_at',{ascending:false}); cache.profiles=(!error && data)?data:[]; }
+
+    async function bootstrapAfterAuth(){
+      // ★ 화면 전환 최우선 — 어떤 에러가 나도 앱이 열림
+      setAuthBusy(false);
+      showApp();
+      showPage('dashboard', document.querySelector('.menu-item[data-page="dashboard"]'));
+
+      // 프로필 로드
+      try{
+        const { data:userData } = await sb.auth.getUser();
+        currentUser = userData?.user || null;
+        if(currentUser){
+          const { data } = await sb.from('profiles')
+            .select('id,email,full_name,role')
+            .eq('id', currentUser.id)
+            .maybeSingle();
+          currentProfile = {
+            role: data?.role || 'member',
+            full_name: data?.full_name || '',
+            email: data?.email || currentUser.email || ''
+          };
+          const emailEl = document.getElementById('userEmail');
+          const nameEl  = document.getElementById('userNameLine');
+          if(emailEl) emailEl.innerText = currentProfile.email || '-';
+          if(nameEl)  nameEl.innerText  = currentProfile.full_name ? ('이름: ' + currentProfile.full_name) : '';
+          applyRoleUI();
+        }
+      } catch(e){ console.warn('프로필 로드 실패 (무시):', e?.message); }
+
+      // 데이터 로드
+      try{
+        await fetchAllData();
+        if(currentProfile.role==='admin') await fetchProfilesAdmin();
+        renderAll();
+        renderDashboard();
+      } catch(err){
+        console.error('데이터 로딩 오류:', err);
+        showToast('일부 데이터 로딩 실패: ' + (err?.message || err), 'error');
+      }
+    }
+
+    (async function init(){
+      try {
+        await ensureSupabaseClient();
+
+        // onAuthStateChange: SIGNED_OUT만 처리 (SIGNED_IN은 signIn()에서 직접 처리)
+        sb.auth.onAuthStateChange((event, session)=>{
+          console.log('[Auth event]', event);
+          if(event === 'SIGNED_OUT'){
+            currentUser=null;
+            currentProfile={role:'member',full_name:'',email:''};
+            cache={projects:[],logs:[],schedules:[],upper:[],lower:[],todo:[],meetings:[],profiles:[]};
+            showAuth('');
+          }
+        });
+
+        // 페이지 첫 로드 시 기존 세션 확인
+        const { data } = await sb.auth.getSession();
+        if(data?.session){
+          await bootstrapAfterAuth();
+        } else {
+          showAuth('');
+        }
+      } catch(err){
+        console.error('init 오류:', err);
+        showAuth('초기화 오류: ' + (err?.message || err));
+      }
+    })();
+
+    window.addNewProject = async function(){ await runAction(async()=>{ await ensureSupabaseClient(); const { error } = await sb.from('projects').insert([{ code:'', name:'', history:'', client:'', constructor:'', team:'', manager:'', note:'', type:'default' }]); if(error) throw error; await fetchAllData(); renderProjects(); renderDashboard(); }, '프로젝트를 추가했습니다.'); };
+    window.addDailyLog = async function(){ await runAction(async()=>{ await ensureSupabaseClient(); const today=new Date().toISOString().split('T')[0]; const { error } = await sb.from('manpower_logs').insert([{ date:today, assignee:'', project:'', task:'', spent_hours:0 }]); if(error) throw error; await fetchAllData(); renderLogs(); renderDashboard(); }, '업무 기록을 추가했습니다.'); };
+    window.addSchedule = async function(){ await runAction(async()=>{ const { error } = await sb.from('schedules').insert([{ status:'new', date:new Date().toISOString().split('T')[0], team:'', project_code:'', code:'', project_name:'', name:'', upper_task:'', lower_task:'', prev_progress:'', note:'', this_week_progress:'', client:'', constructor:'', dday:'', assignee:'', task_code:'', remark:'', scale:'' }]); if(error) throw error; await fetchAllData(); renderSchedules(); renderDashboard(); }, '일정을 추가했습니다.'); };
+    window.addTodo = async function(){ await runAction(async()=>{ const { error } = await sb.from('todo_items').insert([{ group_tag:'GROUP 1', project:'', priority:'medium', task_name:'새 작업', assignee:'', status:'todo', due_date:null, category:'' }]); if(error) throw error; await fetchAllData(); renderTodo(); renderDashboard(); }, 'TO DO를 추가했습니다.'); };
+    window.addMeeting = async function(){ await runAction(async()=>{ const { error } = await sb.from('meeting_notes').insert([{ meeting_date:new Date().toISOString().split('T')[0], title:'새 회의', project:'', attendees:'', agenda:'', notes:'', actions:'', next_meeting_date:null }]); if(error) throw error; await fetchAllData(); renderMeetings(); renderDashboard(); }, '회의록을 추가했습니다.'); };
+    window.addSetting = async function(type){ if(currentProfile.role!=='admin') return showToast('관리자만 가능합니다.', 'error'); await runAction(async()=>{ const { error } = await sb.from('settings_'+type).insert([{ name:'새 항목' }]); if(error) throw error; await fetchAllData(); renderSettings(type); renderSchedules(); }, '설정을 추가했습니다.'); };
+    window.updateDB = async function(table,id,field,value){ await ensureSupabaseClient(); const payload={}; const actualField = detectFieldName(table, field); payload[actualField]= value; if(table==='manpower_logs' && field==='spent_hours') payload[actualField]=toNum(value,0); const { error } = await sb.from(table).update(payload).eq('id',id); if(error) throw error; await fetchAllData(); renderAll(); };
+    window.handleScheduleStatusChange = async function(el, id){ const value=el.value; const meta=getStatusMeta(value); el.className=`schedule-status-select ${meta.className}`; try{ await updateScheduleField(id,'status',value); }catch(err){} };
+    window.updateScheduleField = async function(id,field,value){ await ensureSupabaseClient(); const payload={ [field]: value }; if(field==='project_code') payload.code=value; if(field==='project_name') payload.name=value; if(field==='prev_progress') payload.note=value; if(field==='task_code') payload.remark=value; const { error } = await sb.from('schedules').update(payload).eq('id',id); if(error) throw error; await fetchAllData(); renderSchedules(); renderDashboard(); };
+    window.updateTodoField = async function(id,field,value){ await ensureSupabaseClient(); const v = (field==='due_date' && !value) ? null : (value === undefined ? null : value); const { error } = await sb.from('todo_items').update({ [field]: v }).eq('id',id); if(error) throw error; await fetchAllData(); renderTodo(); renderDashboard(); };
+    window.updateMeetingField = async function(id,field,value){ await ensureSupabaseClient(); const v = ((field==='meeting_date'||field==='next_meeting_date') && !value) ? null : (value === undefined ? null : value); const { error } = await sb.from('meeting_notes').update({ [field]: v }).eq('id',id); if(error) throw error; await fetchAllData(); renderMeetings(); renderDashboard(); };
+    window.deleteItem = async function(table,id){ if(!confirm('삭제하시겠습니까?')) return; await runAction(async()=>{ const { error } = await sb.from(table).delete().eq('id',id); if(error) throw error; await fetchAllData(); renderAll(); }, '삭제했습니다.'); };
+
+    window.handleFileUpload = async function(input, type){ const file=input.files?.[0]; if(!file) return; try{ await ensureSupabaseClient(); const text=await readCsvText(file); const delimiter=detectDelimiter(text); const rows=parseRobustCSV(text, delimiter); if(rows.length<2) throw new Error('헤더 포함 2행 이상이어야 합니다.'); const headers=rows[0].map(h=>String(h).trim()); let insertData=[]; if(type==='project'){ const idx={ code:findHeaderIndex(headers,['코드','CODE','NO','번호']), name:findHeaderIndex(headers,['프로젝트명','프로젝트','NAME','PROJECT']), history:findHeaderIndex(headers,['이력','HISTORY']), client:findHeaderIndex(headers,['발주처','발주','CLIENT']), const:findHeaderIndex(headers,['건설사','건설','CONSTRUCTOR']), team:findHeaderIndex(headers,['소속팀','소속','TEAM']), manager:findHeaderIndex(headers,['담당자','담당','MANAGER']), note:findHeaderIndex(headers,['비고','NOTE','REMARK']), phase:findHeaderIndex(headers,['단계','PHASE','TYPE']) }; if(idx.code===-1) throw new Error('프로젝트 CSV에서 코드 열을 찾지 못했습니다.'); for(let i=1;i<rows.length;i++){ const row=rows[i]; const code=getCell(row, idx.code); if(!code) continue; const phaseRaw=getCell(row, idx.phase); const phase=((v)=>{ v=(v||'').toLowerCase(); if(v.includes('기획')||v==='plan') return 'plan'; if(v.includes('기본')||v==='basic') return 'basic'; if(v.includes('실시')||v==='exec') return 'exec'; if(v.includes('현장')||v==='site') return 'site'; return 'default'; })(phaseRaw); insertData.push({ code, name:getCell(row, idx.name), history:getCell(row, idx.history), client:getCell(row, idx.client), constructor:getCell(row, idx.const), team:getCell(row, idx.team), manager:getCell(row, idx.manager), note:getCell(row, idx.note), type:phase }); } }
+      if(type==='schedule'){ const idx={ team:findHeaderIndex(headers,['소속','팀','TEAM']), project_code:findHeaderIndex(headers,['프로젝트코드','프로젝트 코드','업무코드','일정코드','코드','CODE','NO','번호']), status:findHeaderIndex(headers,['상태','구분','진행상태','STATUS']), project_name:findHeaderIndex(headers,['프로젝트명','프로젝트','현장명','업무명','NAME','PROJECT']), upper_task:findHeaderIndex(headers,['상위업무','상위','UPPER']), lower_task:findHeaderIndex(headers,['하위업무','하위','LOWER']), prev_progress:findHeaderIndex(headers,['전주진행사항','전주 진행사항','전주','지난주']), this_week_progress:findHeaderIndex(headers,['금주진행사항','금주 진행사항','금주','이번주']), client:findHeaderIndex(headers,['발주처','시행사','CLIENT']), constructor:findHeaderIndex(headers,['건설사','시공사','CONSTRUCTOR']), dday:findHeaderIndex(headers,['D-DAY','DDAY','D DAY']), assignee:findHeaderIndex(headers,['담당자','담당','ASSIGNEE','MANAGER']), task_code:findHeaderIndex(headers,['수행코드','수행 코드','TASK CODE','이력코드']), scale:findHeaderIndex(headers,['규모','SCALE']) }; if(idx.project_name===-1 && idx.project_code===-1) throw new Error('일정표 CSV 핵심 열(프로젝트명/코드)을 찾지 못했습니다.'); for(let i=1;i<rows.length;i++){ const row=rows[i]; const team=getCell(row, idx.team), project_code=getCell(row, idx.project_code), statusRaw=getCell(row, idx.status), project_name=getCell(row, idx.project_name), upper_task=getCell(row, idx.upper_task), lower_task=getCell(row, idx.lower_task), prev_progress=getCell(row, idx.prev_progress), this_week_progress=getCell(row, idx.this_week_progress), client=getCell(row, idx.client), constructor=getCell(row, idx.constructor), dday=getCell(row, idx.dday), assignee=getCell(row, idx.assignee), task_code=getCell(row, idx.task_code), scale=getCell(row, idx.scale); const hasAny=[team,project_code,project_name,upper_task,lower_task,prev_progress,this_week_progress,client,constructor,dday,assignee,task_code,scale].some(v=>v); if(!hasAny) continue; insertData.push({ team, project_code, code:project_code, status:normalizeScheduleStatus(statusRaw||project_code), project_name, name:project_name, upper_task, lower_task, prev_progress, note:prev_progress, this_week_progress, client, constructor, dday, assignee, task_code, remark:task_code, scale, date:new Date().toISOString().split('T')[0] }); } }
+      if(!insertData.length) throw new Error('업로드할 유효한 데이터가 없습니다.'); const tableName=type==='project'?'projects':'schedules'; const { error } = await sb.from(tableName).insert(insertData); if(error) throw error; showToast(`${insertData.length}건 저장 완료`, 'success'); await fetchAllData(); renderAll(); }catch(err){ console.error(err); showToast('업로드 오류: '+(err.message||err), 'error'); } finally { input.value=''; } };
+
+    window.refreshAdmin = async function(){ await runAction(async()=>{ await fetchProfilesAdmin(); renderAdmin(); }, '관리자 목록을 새로고침했습니다.'); };
+    window.setUserRole = async function(userId, newRole){ if(currentProfile.role!=='admin') return showToast('관리자만 가능합니다.', 'error'); await runAction(async()=>{ const { error } = await sb.from('profiles').update({ role:newRole }).eq('id', userId); if(error) throw error; await fetchProfilesAdmin(); renderAdmin(); }, '권한을 변경했습니다.'); };
+    window.setStatsPreset = function(preset){ const now=new Date(); let start; if(preset==='week') start=startOfWeekMonday(now); else if(preset==='month') start=startOfMonth(now); else if(preset==='quarter') start=startOfQuarter(now); else start=startOfYear(now); statsState.start=isoDate(start); statsState.end=isoDate(now); document.getElementById('statsStart').value=statsState.start; document.getElementById('statsEnd').value=statsState.end; renderStats(); };
+    window.applyStatsRange = function(){ statsState.start=document.getElementById('statsStart').value||null; statsState.end=document.getElementById('statsEnd').value||null; renderStats(); };
+
+    function renderAll(){ renderProjects(); renderLogs(); renderSchedules(); renderTodo(); renderMeetings(); if(currentProfile.role==='admin'){ renderSettings('upper'); renderSettings('lower'); renderAdmin(); } renderDashboard(); }
+    function renderProjects(){ const t=document.getElementById('tableBody'); t.innerHTML=''; cache.projects.forEach(p=>{ t.insertAdjacentHTML('beforeend', `<tr><td><button class="delete-btn" onclick="deleteItem('projects',${p.id})">×</button></td><td contenteditable="true" onblur="updateDB('projects',${p.id},'code',this.innerText)">${escapeHTML(p.code||'')}</td><td contenteditable="true" onblur="updateDB('projects',${p.id},'name',this.innerText)">${escapeHTML(p.name||'')}</td><td contenteditable="true" onblur="updateDB('projects',${p.id},'history',this.innerText)">${escapeHTML(p.history||'')}</td><td contenteditable="true" onblur="updateDB('projects',${p.id},'client',this.innerText)">${escapeHTML(p.client||'')}</td><td contenteditable="true" onblur="updateDB('projects',${p.id},'constructor',this.innerText)">${escapeHTML(p.constructor||'')}</td><td contenteditable="true" onblur="updateDB('projects',${p.id},'team',this.innerText)">${escapeHTML(p.team||'')}</td><td contenteditable="true" onblur="updateDB('projects',${p.id},'manager',this.innerText)">${escapeHTML(p.manager||'')}</td><td><select onchange="updateDB('projects',${p.id},'type',this.value).catch(()=>{})"><option value="default" ${p.type==='default'?'selected':''}>선택</option><option value="plan" ${p.type==='plan'?'selected':''}>기획</option><option value="basic" ${p.type==='basic'?'selected':''}>기본</option><option value="exec" ${p.type==='exec'?'selected':''}>실시</option><option value="site" ${p.type==='site'?'selected':''}>현장지원</option></select></td><td contenteditable="true" onblur="updateDB('projects',${p.id},'note',this.innerText)">${escapeHTML(p.note||'')}</td></tr>`); }); }
+    function renderLogs(){ const c=document.getElementById('dailyLogContainer'); if(!cache.logs.length){ c.innerHTML='<div class="card"><div class="empty-box">기록 없음</div></div>'; return; } const grouped={}; cache.logs.forEach(l=>{ const d=l.date||'미정'; if(!grouped[d]) grouped[d]=[]; grouped[d].push(l); }); const dates=Object.keys(grouped).sort((a,b)=>String(b).localeCompare(String(a))); let html=''; dates.forEach(date=>{ const logs=grouped[date]; const dayTotal=logs.reduce((sum,x)=>sum+getHoursValue(x),0); html += `<div class="card"><div style="padding:14px 16px;font-weight:900;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;gap:10px;"><div>▼ ${escapeHTML(date)}</div><div class="pill">총 <small>${dayTotal.toFixed(2)}h</small></div></div><table><thead><tr><th>삭제</th><th>Task</th><th>담당자</th><th>Project</th><th>소요시간(h)</th></tr></thead><tbody>`; logs.forEach(l=>{ const val=getHoursValue(l); html += `<tr><td><button class="delete-btn" onclick="deleteItem('manpower_logs',${l.id})">×</button></td><td contenteditable="true" onblur="updateDB('manpower_logs',${l.id},'task',this.innerText)">${escapeHTML(l.task||'')}</td><td contenteditable="true" onblur="updateDB('manpower_logs',${l.id},'assignee',this.innerText)">${escapeHTML(l.assignee||'')}</td><td><select onchange="updateDB('manpower_logs',${l.id},'project',this.value)"><option value="">선택</option>${projectNameOptions(l.project)}</select></td><td style="min-width:140px;"><input type="number" min="0" step="0.25" value="${val}" onblur="updateDB('manpower_logs',${l.id},'spent_hours',this.value).catch(()=>{})"><div class="muted" style="margin-top:6px;">0.25=15분</div></td></tr>`; }); html += '</tbody></table></div>'; }); c.innerHTML=html; }
+    function renderSchedules(){ const c=document.getElementById('scheduleContainer'); if(!cache.schedules.length){ c.innerHTML='<div class="card"><div class="empty-box">데이터 없음</div></div>'; return; } const grouped={new:[],progress:[],deliver:[],default:[],site:[]}; cache.schedules.forEach(s=>{ const st=s.status||'default'; (grouped[st]||grouped.default).push(s); }); const order=['new','progress','deliver','default','site']; let html=''; order.forEach(key=>{ const items=sortSchedules(grouped[key]||[]); if(!items.length) return; const meta=getStatusMeta(key); html += `<div class="schedule-group"><div class="schedule-header" style="background:${meta.bg}"><span class="tag-badge ${meta.className}">${meta.label}</span><small>${items.length}건</small></div><div class="card schedule-card"><table><thead><tr><th class="action-col">삭제</th><th class="short-cell">소속</th><th class="short-cell">프로젝트코드</th><th class="short-cell">상태</th><th class="long-cell">프로젝트명</th><th class="mid-cell">상위업무</th><th class="mid-cell">하위업무</th><th class="xl-cell">전주 진행사항</th><th class="xl-cell">금주 진행사항</th><th class="mid-cell">발주처</th><th class="mid-cell">건설사</th><th class="short-cell center-cell">D-DAY</th><th class="short-cell">담당자</th><th class="mid-cell">수행코드</th><th class="mid-cell">규모</th></tr></thead><tbody>`; items.forEach(s=>{ const current=getStatusMeta(s.status||'default'); html += `<tr><td class="action-col"><button class="delete-btn" onclick="deleteItem('schedules',${s.id})">×</button></td><td contenteditable="true" onblur="updateScheduleField(${s.id},'team',this.innerText)">${escapeHTML(s.team||'')}</td><td contenteditable="true" onblur="updateScheduleField(${s.id},'project_code',this.innerText)">${escapeHTML(s.project_code||s.code||'')}</td><td><select class="schedule-status-select ${current.className}" onchange="handleScheduleStatusChange(this, ${s.id})"><option value="new" ${s.status==='new'?'selected':''}>A 신규</option><option value="progress" ${s.status==='progress'?'selected':''}>B 진행</option><option value="deliver" ${s.status==='deliver'?'selected':''}>C 납품</option><option value="default" ${s.status==='default'?'selected':''}>D 대기</option><option value="site" ${s.status==='site'?'selected':''}>E 현장</option></select></td><td contenteditable="true" class="long-cell" onblur="updateScheduleField(${s.id},'project_name',this.innerText)">${escapeHTML(s.project_name||s.name||'')}</td><td><select onchange="updateScheduleField(${s.id},'upper_task',this.value)"><option value="">선택</option>${optionsFromSettings(cache.upper, s.upper_task)}</select></td><td><select onchange="updateScheduleField(${s.id},'lower_task',this.value)"><option value="">선택</option>${optionsFromSettings(cache.lower, s.lower_task)}</select></td><td contenteditable="true" class="xl-cell" onblur="updateScheduleField(${s.id},'prev_progress',this.innerText)">${escapeHTML(s.prev_progress||s.note||'')}</td><td contenteditable="true" class="xl-cell" onblur="updateScheduleField(${s.id},'this_week_progress',this.innerText)">${escapeHTML(s.this_week_progress||'')}</td><td contenteditable="true" onblur="updateScheduleField(${s.id},'client',this.innerText)">${escapeHTML(s.client||'')}</td><td contenteditable="true" onblur="updateScheduleField(${s.id},'constructor',this.innerText)">${escapeHTML(s.constructor||'')}</td><td contenteditable="true" class="center-cell" onblur="updateScheduleField(${s.id},'dday',this.innerText)">${escapeHTML(s.dday||'')}</td><td contenteditable="true" onblur="updateScheduleField(${s.id},'assignee',this.innerText)">${escapeHTML(s.assignee||'')}</td><td contenteditable="true" onblur="updateScheduleField(${s.id},'task_code',this.innerText)">${escapeHTML(s.task_code||s.remark||'')}</td><td contenteditable="true" onblur="updateScheduleField(${s.id},'scale',this.innerText)">${escapeHTML(s.scale||'')}</td></tr>`; }); html += '</tbody></table></div></div>'; }); c.innerHTML=html; }
+    function renderTodo(){ const c=document.getElementById('todoContainer'); if(!cache.todo.length){ c.innerHTML='<div class="card"><div class="empty-box">TO DO 없음</div></div>'; return; } const grouped={}; cache.todo.forEach(t=>{ const g=t.group_tag||'GROUP 1'; if(!grouped[g]) grouped[g]=[]; grouped[g].push(t); }); const keys=Object.keys(grouped).sort((a,b)=>a.localeCompare(b)); let html=''; keys.forEach(gk=>{ const items=[...grouped[gk]].sort((a,b)=>{ const ad=a.due_date?new Date(a.due_date):new Date('2999-12-31'); const bd=b.due_date?new Date(b.due_date):new Date('2999-12-31'); return ad-bd; }); html += `<div class="schedule-group"><div class="schedule-header" style="background:#fff"><span class="pill">🧩 ${escapeHTML(gk)} <small>${items.length}건</small></span><span class="muted">노션형 테이블</span></div><div class="card schedule-card"><table style="min-width:1500px;"><thead><tr><th class="action-col">삭제</th><th class="short-cell">GROUP</th><th class="long-cell">프로젝트</th><th class="short-cell">우선순위</th><th class="xl-cell">작업 이름</th><th class="short-cell">담당자</th><th class="short-cell">진행상황</th><th class="short-cell">마감일</th><th class="mid-cell">업무진행 분류</th></tr></thead><tbody>`; items.forEach(t=>{ const pr=t.priority||'medium'; const st=t.status||'todo'; const prBadge=pr==='high'?'p-high':pr==='low'?'p-low':'p-medium'; const stBadge=st==='done'?'s-done':st==='doing'?'s-doing':'s-todo'; html += `<tr><td class="action-col"><button class="delete-btn" onclick="deleteItem('todo_items',${t.id})">×</button></td><td><input type="text" value="${escapeHTML(t.group_tag||'')}" onblur="updateTodoField(${t.id},'group_tag',this.value)"></td><td><input type="text" value="${escapeHTML(t.project||'')}" onblur="updateTodoField(${t.id},'project',this.value)"></td><td><select onchange="updateTodoField(${t.id},'priority',this.value).catch(()=>{})"><option value="high" ${pr==='high'?'selected':''}>높음</option><option value="medium" ${pr==='medium'?'selected':''}>중간</option><option value="low" ${pr==='low'?'selected':''}>낮음</option></select><div style="margin-top:6px;"><span class="prio-badge ${prBadge}">${pr==='high'?'높음':pr==='low'?'낮음':'중간'}</span></div></td><td><input type="text" value="${escapeHTML(t.task_name||'')}" onblur="updateTodoField(${t.id},'task_name',this.value)"></td><td><input type="text" value="${escapeHTML(t.assignee||'')}" onblur="updateTodoField(${t.id},'assignee',this.value)"></td><td><select onchange="updateTodoField(${t.id},'status',this.value).catch(()=>{})"><option value="todo" ${st==='todo'?'selected':''}>시작 전</option><option value="doing" ${st==='doing'?'selected':''}>진행 중</option><option value="done" ${st==='done'?'selected':''}>완료</option></select><div style="margin-top:6px;"><span class="status-badge ${stBadge}">${st==='done'?'완료':st==='doing'?'진행 중':'시작 전'}</span></div></td><td><input type="date" value="${escapeHTML(t.due_date||'')}" onblur="updateTodoField(${t.id},'due_date',this.value)"></td><td><input type="text" value="${escapeHTML(t.category||'')}" onblur="updateTodoField(${t.id},'category',this.value)"></td></tr>`; }); html += '</tbody></table></div></div>'; }); c.innerHTML=html; }
+    function renderMeetings(){ const c=document.getElementById('meetingContainer'); if(!cache.meetings.length){ c.innerHTML='<div class="card"><div class="empty-box">회의록 없음</div></div>'; return; } const items=[...cache.meetings].sort((a,b)=>{ const ad=a.meeting_date?new Date(a.meeting_date):new Date('1970-01-01'); const bd=b.meeting_date?new Date(b.meeting_date):new Date('1970-01-01'); return bd-ad; }); let html=''; items.forEach(m=>{ html += `<div class="card" style="padding:16px;"><div class="row" style="margin-bottom:10px;"><div><div class="muted" style="margin-bottom:6px;">회의일</div><input type="date" value="${escapeHTML(m.meeting_date||'')}" onblur="updateMeetingField(${m.id},'meeting_date',this.value)"></div><div><div class="muted" style="margin-bottom:6px;">Next 일정</div><input type="date" value="${escapeHTML(m.next_meeting_date||'')}" onblur="updateMeetingField(${m.id},'next_meeting_date',this.value)"></div><div style="display:flex;align-items:flex-end;justify-content:flex-end;"><button class="btn danger" onclick="deleteItem('meeting_notes',${m.id})">삭제</button></div></div><div class="grid-2"><div><div class="muted" style="margin-bottom:6px;">회의 제목</div><input type="text" value="${escapeHTML(m.title||'')}" onblur="updateMeetingField(${m.id},'title',this.value)"></div><div><div class="muted" style="margin-bottom:6px;">프로젝트</div><input type="text" value="${escapeHTML(m.project||'')}" onblur="updateMeetingField(${m.id},'project',this.value)"></div></div><div class="grid-2" style="margin-top:12px;"><div><div class="muted" style="margin-bottom:6px;">참석자</div><input type="text" value="${escapeHTML(m.attendees||'')}" onblur="updateMeetingField(${m.id},'attendees',this.value)"></div><div><div class="muted" style="margin-bottom:6px;">아젠다</div><input type="text" value="${escapeHTML(m.agenda||'')}" onblur="updateMeetingField(${m.id},'agenda',this.value)"></div></div><div class="grid-2" style="margin-top:12px;"><div><div class="muted" style="margin-bottom:6px;">회의 내용</div><textarea onblur="updateMeetingField(${m.id},'notes',this.value)">${escapeHTML(m.notes||'')}</textarea></div><div><div class="muted" style="margin-bottom:6px;">액션 아이템</div><textarea onblur="updateMeetingField(${m.id},'actions',this.value)">${escapeHTML(m.actions||'')}</textarea></div></div></div>`; }); c.innerHTML=html; }
+    function renderSettings(type){ const body=document.getElementById(type+'Body'); body.innerHTML=''; cache[type].forEach(item=>{ body.insertAdjacentHTML('beforeend', `<tr><td><button class="delete-btn" onclick="deleteItem('settings_${type}',${item.id})">×</button></td><td contenteditable="true" onblur="updateDB('settings_${type}',${item.id},'name',this.innerText)">${escapeHTML(item.name||'')}</td></tr>`); }); }
+    function renderAdmin(){ if(currentProfile.role!=='admin') return; const body=document.getElementById('adminProfilesBody'); body.innerHTML=''; (cache.profiles||[]).forEach(p=>{ body.insertAdjacentHTML('beforeend', `<tr><td>${escapeHTML(p.email||'')}</td><td>${escapeHTML(p.full_name||'')}</td><td><select onchange="setUserRole('${p.id}',this.value).catch(()=>{})"><option value="member" ${p.role==='member'?'selected':''}>member</option><option value="admin" ${p.role==='admin'?'selected':''}>admin</option></select></td><td class="muted">${escapeHTML(String(p.created_at||'').slice(0,19))}</td></tr>`); }); }
+    function renderDashboard(){ document.getElementById('count-plan').innerText=cache.projects.filter(p=>p.type==='plan').length; document.getElementById('count-basic').innerText=cache.projects.filter(p=>p.type==='basic').length; document.getElementById('count-exec').innerText=cache.projects.filter(p=>p.type==='exec').length; document.getElementById('count-site').innerText=cache.projects.filter(p=>p.type==='site').length; document.getElementById('schedule-count-new').innerText=cache.schedules.filter(s=>s.status==='new').length; document.getElementById('schedule-count-progress').innerText=cache.schedules.filter(s=>s.status==='progress').length; document.getElementById('schedule-count-deliver').innerText=cache.schedules.filter(s=>s.status==='deliver').length; document.getElementById('schedule-count-site').innerText=cache.schedules.filter(s=>s.status==='site').length;
+      const newBody=document.getElementById('dashboard-new-schedule-body'); const newItems=sortSchedules(cache.schedules.filter(s=>s.status==='new')).slice(0,10); document.getElementById('dash-new-count').innerText=`${cache.schedules.filter(s=>s.status==='new').length}건`; newBody.innerHTML = newItems.length ? newItems.map(s=>`<tr><td>${escapeHTML((s.project_code||s.code||'')+' / '+(s.project_name||s.name||''))}</td><td>${escapeHTML((s.upper_task||'-')+' / '+(s.lower_task||'-'))}</td><td>${escapeHTML(s.assignee||'-')}</td><td>${escapeHTML(s.this_week_progress||'-')}</td></tr>`).join('') : `<tr><td colspan="4" class="muted">신규(A) 항목 없음</td></tr>`;
+      const dueBody=document.getElementById('dashboard-todo-due-body'); const dueSoon=cache.todo.filter(t=>(t.status||'todo')!=='done' && t.due_date).map(t=>({ t, d:dateDiffDays(new Date(t.due_date)) })).filter(x=>x.d>=0 && x.d<=7).sort((a,b)=>a.d-b.d).slice(0,10); document.getElementById('dash-due-count').innerText=`${dueSoon.length}건`; dueBody.innerHTML = dueSoon.length ? dueSoon.map(x=>{ const t=x.t; const pr=t.priority||'medium'; const prBadge=pr==='high'?'p-high':pr==='low'?'p-low':'p-medium'; const prText=pr==='high'?'높음':pr==='low'?'낮음':'중간'; return `<tr><td><span class="prio-badge ${prBadge}">${prText}</span></td><td>${escapeHTML(t.task_name||'')}</td><td>${escapeHTML(t.assignee||'-')}</td><td>${escapeHTML(t.due_date||'-')}</td></tr>`; }).join('') : `<tr><td colspan="4" class="muted">7일 이내 마감 TO DO 없음</td></tr>`;
+      const schedBody=document.getElementById('dashboard-schedule-body'); const recentSchedules=sortSchedules(cache.schedules).slice(0,8); schedBody.innerHTML = recentSchedules.length ? recentSchedules.map(s=>{ const meta=getStatusMeta(s.status||'default'); return `<tr><td><span class="tag-badge ${meta.className}">${meta.label}</span></td><td>${escapeHTML((s.project_code||s.code||'')+' / '+(s.project_name||s.name||''))}</td><td>${escapeHTML((s.upper_task||'-')+' / '+(s.lower_task||'-'))}</td><td>${escapeHTML(s.assignee||'-')}</td><td>${escapeHTML(s.dday||'-')}</td></tr>`; }).join('') : `<tr><td colspan="5" class="muted">일정표 데이터 없음</td></tr>`;
+      const mtBody=document.getElementById('dashboard-meeting-body'); const recentMeetings=[...cache.meetings].slice(0,6); mtBody.innerHTML = recentMeetings.length ? recentMeetings.map(m=>`<tr><td>${escapeHTML(m.meeting_date||'-')}</td><td>${escapeHTML(m.title||'-')}</td><td>${escapeHTML(m.project||'-')}</td><td>${escapeHTML(m.next_meeting_date||'-')}</td></tr>`).join('') : `<tr><td colspan="4" class="muted">회의록 없음</td></tr>`;
+      const mpBody=document.getElementById('dashboard-manpower-body'); const latestLogs=[...cache.logs].slice(0,8); mpBody.innerHTML = latestLogs.length ? latestLogs.map(l=>`<tr><td>${escapeHTML(l.assignee||'')}</td><td>${escapeHTML(l.project||'')}</td><td>${escapeHTML(l.task||'')}</td><td>${getHoursValue(l).toFixed(2)}</td><td>${escapeHTML(l.date||'')}</td></tr>`).join('') : `<tr><td colspan="5" class="muted">맨파워 기록 없음</td></tr>`; }
+    function renderStats(){ if(currentProfile.role!=='admin') return; if(!statsState.start || !statsState.end){ setStatsPreset('week'); return; } const logs=cache.logs.filter(l=>{ const d=String(l.date||'').slice(0,10); if(!d) return false; if(statsState.start && d<statsState.start) return false; if(statsState.end && d>statsState.end) return false; return true; }); document.getElementById('statsRangeLabel').innerText=`기간: ${statsState.start} ~ ${statsState.end}`; const totalHours=logs.reduce((sum,l)=>sum+toNum(l.spent_hours,0),0); document.getElementById('statsTotalHours').innerText=totalHours.toFixed(2); document.getElementById('statsTotalLogs').innerText=String(logs.length); const byAssignee={}, byProject={}, byDate={}; logs.forEach(l=>{ const h=getHoursValue(l); const a=(l.assignee||'미정').trim()||'미정'; const p=(l.project||'미정').trim()||'미정'; const d=String(l.date||'미정').slice(0,10)||'미정'; if(!byAssignee[a]) byAssignee[a]={hours:0,count:0}; if(!byProject[p]) byProject[p]={hours:0,count:0}; if(!byDate[d]) byDate[d]={hours:0,count:0}; byAssignee[a].hours += h; byAssignee[a].count += 1; byProject[p].hours += h; byProject[p].count += 1; byDate[d].hours += h; byDate[d].count += 1; }); const assigneeList=Object.entries(byAssignee).map(([k,v])=>({k,...v})).sort((a,b)=>b.hours-a.hours); const projectList=Object.entries(byProject).map(([k,v])=>({k,...v})).sort((a,b)=>b.hours-a.hours); const dateList=Object.entries(byDate).map(([k,v])=>({k,...v})).sort((a,b)=>String(b.k).localeCompare(String(a.k))); document.getElementById('statsTopAssignee').innerText=assigneeList.length?assigneeList[0].k:'-'; document.getElementById('statsTopProject').innerText=projectList.length?projectList[0].k:'-'; document.getElementById('statsAssigneeBody').innerHTML=assigneeList.length?assigneeList.slice(0,50).map(x=>`<tr><td>${escapeHTML(x.k)}</td><td>${x.hours.toFixed(2)}</td><td>${x.count}</td></tr>`).join(''):`<tr><td colspan="3" class="muted">데이터 없음</td></tr>`; document.getElementById('statsProjectBody').innerHTML=projectList.length?projectList.slice(0,50).map(x=>`<tr><td>${escapeHTML(x.k)}</td><td>${x.hours.toFixed(2)}</td><td>${x.count}</td></tr>`).join(''):`<tr><td colspan="3" class="muted">데이터 없음</td></tr>`; document.getElementById('statsDateBody').innerHTML=dateList.length?dateList.slice(0,90).map(x=>`<tr><td>${escapeHTML(x.k)}</td><td>${x.hours.toFixed(2)}</td><td>${x.count}</td></tr>`).join(''):`<tr><td colspan="3" class="muted">데이터 없음</td></tr>`; }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const loginBtn = document.getElementById('loginBtn');
+      const resetBtn = document.getElementById('resetBtn');
+      const passwordEl = document.getElementById('loginPassword');
+      if (loginBtn) {
+        loginBtn.onclick = () => { if(window.signIn) window.signIn(); };
+        loginBtn.style.pointerEvents = 'auto';
+        loginBtn.disabled = false;
+      }
+      if (resetBtn) {
+        resetBtn.onclick = () => { if(window.resetPassword) window.resetPassword(); };
+        resetBtn.style.pointerEvents = 'auto';
+        resetBtn.disabled = false;
+      }
+      if (passwordEl) {
+        passwordEl.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' && window.signIn) window.signIn();
+        });
+      }
+    });
+  </script>
+</body>
+</html>
