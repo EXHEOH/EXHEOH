@@ -148,6 +148,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .project-card .col-team{width:72px}
 .project-card .col-manager{width:68px}
 .project-card .col-type{width:68px}
+.project-card .col-contract{width:120px}
 .project-card .col-milestone{width:200px}
 .project-card td input.cell-input{width:calc(100% - 4px);box-sizing:border-box}
 .project-card td select.compact-select{width:calc(100% - 2px);box-sizing:border-box}
@@ -1031,7 +1032,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
         <div class="card" style="padding:16px;"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;"><h3 style="margin:0;">📋 최근 맨파워 기록</h3><span class="muted">최근 8건</span></div><table style="margin-top:12px;"><thead><tr><th>이름</th><th>프로젝트</th><th>업무내용</th><th>소요시간(h)</th><th>날짜</th></tr></thead><tbody id="dashboard-manpower-body"></tbody></table></div>
       </div>
 
-      <div id="page-project" class="page-section"><div class="header"><h1>프로젝트 현황판</h1><div class="page-actions"><button class="btn secondary admin-only" onclick="document.getElementById('csvInput').click()">📂 CSV 업로드</button><button class="btn" onclick="addNewProject()">+ 추가</button><input type="file" id="csvInput" accept=".csv,text/csv" onchange="handleFileUpload(this,'project')" style="display:none"></div></div><div class="card project-card table-compact"><table><thead><tr><th class="col-delete">삭제</th><th class="col-code">코드</th><th class="col-name">프로젝트명</th><th class="col-history">이력코드</th><th class="col-client">발주처</th><th class="col-constructor">건설사</th><th class="col-team">소속팀</th><th class="col-manager">담당자</th><th class="col-type">단계</th><th class="col-milestone">기성현황</th></tr></thead><tbody id="tableBody"></tbody></table></div><div class="table-hint">모바일에서는 표를 좌우로 밀어 더 많은 칼럼을 확인할 수 있습니다.</div><div class="muted">※ 기성현황: 막대 클릭→상태변경 / D(디자인)·M(경영지원) 클릭→크로스체크 / 설정→단계 수정</div></div>
+      <div id="page-project" class="page-section"><div class="header"><h1>프로젝트 현황판</h1><div class="page-actions"><button class="btn secondary admin-only" onclick="document.getElementById('csvInput').click()">📂 CSV 업로드</button><button class="btn" onclick="addNewProject()">+ 추가</button><input type="file" id="csvInput" accept=".csv,text/csv" onchange="handleFileUpload(this,'project')" style="display:none"></div></div><div class="card project-card table-compact"><table><thead><tr><th class="col-delete">삭제</th><th class="col-code">코드</th><th class="col-name">프로젝트명</th><th class="col-history">이력코드</th><th class="col-client">발주처</th><th class="col-constructor">건설사</th><th class="col-team">소속팀</th><th class="col-manager">담당자</th><th class="col-type">단계</th><th class="col-contract">계약</th><th class="col-milestone">기성현황</th></tr></thead><tbody id="tableBody"></tbody></table></div><div class="table-hint">모바일에서는 표를 좌우로 밀어 더 많은 칼럼을 확인할 수 있습니다.</div><div class="muted">※ 기성현황: 막대 클릭→상태변경 / D(디자인)·M(경영지원) 클릭→크로스체크 / 설정→단계 수정</div></div>
       <div class="milestone-dialog" id="milestoneDialog" onclick="if(event.target===this) closeMilestoneDialog()"><div class="milestone-dialog-card"><div class="milestone-dialog-header"><div class="milestone-dialog-title" id="milestoneDialogTitle">기성 상태 입력</div><button class="milestone-dialog-close" onclick="closeMilestoneDialog()">×</button></div><div class="milestone-dialog-body" id="milestoneDialogBody"></div></div></div>
 
       <div id="page-manpower" class="page-section"><div class="header"><h1>일일 업무 기록</h1><div class="page-actions page-actions-single"><button class="btn" onclick="addDailyLog()">+ 기록 추가</button></div></div><div class="muted" style="margin:-8px 0 14px;">소요시간은 <b>시간 단위</b>로 입력하세요. 예) 1.5 = 1시간30분 / 0.25 = 15분</div><div id="dailyLogContainer"></div></div>
@@ -1858,7 +1859,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
       else record=(cache.meetings||[]).find(x=>String(x.id)===String(id));
       const linked=findLinkedProject(record||{});
       if(!linked){
-        toast('연결된 프로젝트 정보가 없습니다.', 'info');
+        showToast('연결된 프로젝트 정보가 없습니다.', 'info');
         return;
       }
       const html = `<div class="kv-grid">
@@ -2775,6 +2776,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
         if(currentProfile.role==='admin') await fetchProfilesAdmin();
         renderAll();
         renderDashboard();
+        migrateLocalMilestonesToDB(); // 브라우저에 있던 기존 기성현황을 DB로 1회 동기화
       } catch(err){
         console.error('데이터 로딩 오류:', err);
         showToast('일부 데이터 로딩 실패: ' + (err?.message || err), 'error');
@@ -2829,6 +2831,28 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
 
     window.addNewProject = async function(){ await runAction(async()=>{ await ensureSupabaseClient(); const { error } = await sb.from('projects').insert([{ code:'', name:'', history:'', client:'', constructor:'', team:'', manager:'', note:'', type:'default' }]); if(error) throw error; await fetchAllData(); renderProjects(); renderDashboard(); }, '프로젝트를 추가했습니다.'); };
     window.addDailyLog = async function(){ await runAction(async()=>{ await ensureSupabaseClient(); const today=new Date().toISOString().split('T')[0]; const defaultLog = { date:today, assignee:'', project:'', task:'' }; const hoursField = await resolveManpowerHoursField(); defaultLog[hoursField] = 0; let { error } = await sb.from('manpower_logs').insert([defaultLog]); if(error && ((error.message||'').includes('schema cache') || (error.message||'').includes('Could not find'))){ resolvedHoursField = await resolveManpowerHoursField(true); const retryLog = { date:today, assignee:'', project:'', task:'', [resolvedHoursField]:0 }; const retry = await sb.from('manpower_logs').insert([retryLog]); error = retry.error; } if(error) throw error; await fetchAllData(); renderLogs(); renderDashboard(); }, '업무 기록을 추가했습니다.'); };
+    window.updateContractStatus = async function(id, value){
+      await runAction(async()=>{
+        const row = (cache.projects||[]).find(p=>String(p.id)===String(id)) || {};
+        const payload = { contract_status: value };
+        // 계약으로 바꾸면 계약일이 비어있을 때 오늘 날짜를 기본값으로
+        if(value==='signed' && !row.contract_date){ payload.contract_date = new Date().toISOString().split('T')[0]; }
+        const { error } = await sb.from('projects').update(payload).eq('id', id);
+        if(error) throw error;
+        await fetchAllData(); renderProjects(); renderDashboard();
+      });
+    };
+    window.updateContractDate = async function(id, value){
+      try{
+        await ensureSupabaseClient();
+        const v = value ? value : null; // 빈 값은 null (date 컬럼 오류 방지)
+        const { error } = await sb.from('projects').update({ contract_date: v }).eq('id', id);
+        if(error) throw error;
+        await fetchAllData(); renderProjects();
+      }catch(err){
+        showToast('계약일 저장 오류: ' + (err.message || err), 'error');
+      }
+    };
     window.openAddScheduleModal = function(){
       // 프로젝트 목록으로 선택 모달 열기
       const projects = (cache.projects||[]).filter(p=>p.name||p.code).sort((a,b)=>String(a.code||'').localeCompare(String(b.code||'')));
@@ -3148,12 +3172,35 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
       { name: '준공보고서', weight: 10 }
     ];
     
+    function normalizeMilestoneData(data){
+      const milestones = (Array.isArray(data?.milestones) && data.milestones.length)
+        ? data.milestones.map(m => ({ name: (m && m.name) || '', weight: Number(m && m.weight) || 0 }))
+        : defaultMilestones.map(m => ({...m}));
+      const n = milestones.length;
+      const fix = (arr, fill) => { const a = Array.isArray(arr) ? arr.slice(0, n) : []; while(a.length < n) a.push(fill); return a; };
+      return {
+        milestones,
+        status: fix(data?.status, 0),
+        designCheck: fix(data?.designCheck, false),
+        mgmtCheck: fix(data?.mgmtCheck, false)
+      };
+    }
+
     function getMilestoneData(projectId) {
-      const key = 'milestone_' + projectId;
-      const saved = localStorage.getItem(key);
-      if (saved) {
-        try { return JSON.parse(saved); } catch(e) {}
+      // 1) DB값(프로젝트 행의 milestone_data) 우선 — 팀 공유 + 영구 보존
+      const project = (cache.projects || []).find(p => String(p.id) === String(projectId));
+      if (project && project.milestone_data) {
+        try {
+          const parsed = (typeof project.milestone_data === 'string') ? JSON.parse(project.milestone_data) : project.milestone_data;
+          if (parsed && Array.isArray(parsed.milestones)) return normalizeMilestoneData(parsed);
+        } catch(e) {}
       }
+      // 2) localStorage (기존 데이터 마이그레이션용 fallback)
+      const saved = localStorage.getItem('milestone_' + projectId);
+      if (saved) {
+        try { return normalizeMilestoneData(JSON.parse(saved)); } catch(e) {}
+      }
+      // 3) 기본값
       return {
         milestones: defaultMilestones.map(m => ({...m})),
         status: [0, 0, 0, 0, 0],
@@ -3161,10 +3208,82 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
         mgmtCheck: [false, false, false, false, false]
       };
     }
-    
+
+    const _milestoneSaveTimers = {};
+    function persistMilestoneToDB(projectId, data) {
+      clearTimeout(_milestoneSaveTimers[projectId]);
+      // 빠른 연속 클릭은 마지막 한 번만 DB에 저장 (디바운스)
+      _milestoneSaveTimers[projectId] = setTimeout(async () => {
+        try {
+          await ensureSupabaseClient();
+          const { error } = await sb.from('projects').update({ milestone_data: data }).eq('id', projectId);
+          if (error) {
+            const msg = String(error.message || '').toLowerCase();
+            if (msg.includes('milestone_data') || msg.includes('schema') || msg.includes('column')) {
+              console.warn('milestone_data 컬럼이 없습니다. Supabase projects 테이블에 컬럼을 추가하세요.');
+              showToast('기성현황 DB 저장 실패: projects 테이블에 milestone_data 컬럼을 추가해야 합니다. (현재는 이 브라우저에만 저장됨)', 'error');
+            } else {
+              throw error;
+            }
+          }
+        } catch(err) {
+          console.warn('기성현황 DB 저장 실패:', err?.message || err);
+        }
+      }, 500);
+    }
+
     function saveMilestoneData(projectId, data) {
-      const key = 'milestone_' + projectId;
-      localStorage.setItem(key, JSON.stringify(data));
+      // localStorage 백업 (오프라인/임시)
+      try { localStorage.setItem('milestone_' + projectId, JSON.stringify(data)); } catch(e) {}
+      // 캐시에 즉시 반영 → 재렌더 시 바로 표시
+      const project = (cache.projects || []).find(p => String(p.id) === String(projectId));
+      if (project) project.milestone_data = data;
+      // DB에 저장 (디바운스)
+      persistMilestoneToDB(projectId, data);
+    }
+
+    // 이 브라우저(localStorage)에 저장돼 있던 기존 기성현황을 팀 공용 DB로 1회 동기화
+    let _milestoneMigrationDone = false;
+    async function migrateLocalMilestonesToDB(){
+      if(_milestoneMigrationDone) return;
+      _milestoneMigrationDone = true;
+      try{
+        await ensureSupabaseClient();
+        const pending = [];
+        for(let i=0; i<localStorage.length; i++){
+          const key = localStorage.key(i);
+          if(!key || key.indexOf('milestone_') !== 0) continue;
+          const pid = key.slice('milestone_'.length);
+          const project = (cache.projects || []).find(p => String(p.id) === String(pid));
+          if(!project) continue;              // 현재 DB에 없는 프로젝트는 스킵
+          if(project.milestone_data) continue; // 이미 DB에 값이 있으면 보존(덮어쓰지 않음)
+          let data = null;
+          try{ data = normalizeMilestoneData(JSON.parse(localStorage.getItem(key))); }catch(e){ continue; }
+          pending.push({ id: project.id, data });
+        }
+        if(!pending.length) return;
+        let migrated = 0;
+        for(const item of pending){
+          const { error } = await sb.from('projects').update({ milestone_data: item.data }).eq('id', item.id);
+          if(error){
+            const msg = String(error.message || '').toLowerCase();
+            if(msg.includes('milestone_data') || msg.includes('column') || msg.includes('schema')){
+              // milestone_data 컬럼이 아직 없음 → SQL 미실행. 다음 접속 때 다시 시도
+              _milestoneMigrationDone = false;
+              return;
+            }
+            continue;
+          }
+          migrated++;
+        }
+        if(migrated){
+          await fetchAllData();
+          renderProjects();
+          showToast(`이 브라우저에 저장돼 있던 기성현황 ${migrated}건을 팀 공용 DB로 동기화했습니다.`, 'success');
+        }
+      }catch(err){
+        console.warn('기성현황 마이그레이션 오류:', err?.message || err);
+      }
     }
     
     function calcMilestoneProgress(data) {
@@ -3384,7 +3503,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
       renderProjects();
     };
     
-    function renderProjects(){ const t=document.getElementById('tableBody'); t.innerHTML=''; [...cache.projects].sort((a,b)=>{ const ac=(a.code||'').toUpperCase(); const bc=(b.code||'').toUpperCase(); return ac.localeCompare(bc, 'ko', {numeric:true}); }).forEach(p=>{ t.insertAdjacentHTML('beforeend', `<tr><td class="col-delete"><button class="delete-btn" onclick="deleteItem('projects',${p.id})">×</button></td><td class="col-code"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.code||'')}" placeholder="-" onblur="updateDB('projects',${p.id},'code',this.value)"></td><td class="col-name">${makeEditPreview({table:'projects', id:p.id, field:'name', title:'프로젝트명', value:p.name||'', limit:18, empty:'프로젝트명'})}</td><td class="col-history">${makeEditPreview({table:'projects', id:p.id, field:'history', title:'이력코드', value:p.history||'', limit:10, empty:'-'})}</td><td class="col-client"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.client||'')}" placeholder="-" onblur="updateDB('projects',${p.id},'client',this.value)"></td><td class="col-constructor"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.constructor||'')}" placeholder="-" onblur="updateDB('projects',${p.id},'constructor',this.value)"></td><td class="col-team"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.team||'')}" placeholder="-" onblur="updateDB('projects',${p.id},'team',this.value)"></td><td class="col-manager"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.manager||'')}" placeholder="-" onblur="updateDB('projects',${p.id},'manager',this.value)"></td><td class="col-type"><select class="compact-select" onchange="updateDB('projects',${p.id},'type',this.value).catch(()=>{})"><option value="default" ${p.type==='default'?'selected':''}>선택</option><option value="plan" ${p.type==='plan'?'selected':''}>기획</option><option value="basic" ${p.type==='basic'?'selected':''}>기본</option><option value="exec" ${p.type==='exec'?'selected':''}>실시</option><option value="site" ${p.type==='site'?'selected':''}>현장</option></select></td>${renderMilestoneCell(p.id)}</tr>`); }); }
+    function renderProjects(){ const t=document.getElementById('tableBody'); t.innerHTML=''; [...cache.projects].sort((a,b)=>{ const ac=(a.code||'').toUpperCase(); const bc=(b.code||'').toUpperCase(); return ac.localeCompare(bc, 'ko', {numeric:true}); }).forEach(p=>{ t.insertAdjacentHTML('beforeend', `<tr><td class="col-delete"><button class="delete-btn" onclick="deleteItem('projects',${p.id})">×</button></td><td class="col-code"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.code||'')}" placeholder="-" onblur="updateDB('projects',${p.id},'code',this.value)"></td><td class="col-name">${makeEditPreview({table:'projects', id:p.id, field:'name', title:'프로젝트명', value:p.name||'', limit:18, empty:'프로젝트명'})}</td><td class="col-history">${makeEditPreview({table:'projects', id:p.id, field:'history', title:'이력코드', value:p.history||'', limit:10, empty:'-'})}</td><td class="col-client"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.client||'')}" placeholder="-" onblur="updateDB('projects',${p.id},'client',this.value)"></td><td class="col-constructor"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.constructor||'')}" placeholder="-" onblur="updateDB('projects',${p.id},'constructor',this.value)"></td><td class="col-team"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.team||'')}" placeholder="-" onblur="updateDB('projects',${p.id},'team',this.value)"></td><td class="col-manager"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.manager||'')}" placeholder="-" onblur="updateDB('projects',${p.id},'manager',this.value)"></td><td class="col-type"><select class="compact-select" onchange="updateDB('projects',${p.id},'type',this.value).catch(()=>{})"><option value="default" ${p.type==='default'?'selected':''}>선택</option><option value="plan" ${p.type==='plan'?'selected':''}>기획</option><option value="basic" ${p.type==='basic'?'selected':''}>기본</option><option value="exec" ${p.type==='exec'?'selected':''}>실시</option><option value="site" ${p.type==='site'?'selected':''}>현장</option></select></td><td class="col-contract">${(()=>{ const cs=(p.contract_status==='signed')?'signed':'none'; const cd=escapeHTML(String(p.contract_date||'').slice(0,10)); return `<select class="compact-select" onchange="updateContractStatus(${p.id},this.value)"><option value="none" ${cs!=='signed'?'selected':''}>미계약</option><option value="signed" ${cs==='signed'?'selected':''}>계약</option></select><input type="date" class="cell-input compact-input" style="margin-top:4px;${cs==='signed'?'':'display:none;'}" value="${cd}" onblur="updateContractDate(${p.id},this.value)">`; })()}</td>${renderMilestoneCell(p.id)}</tr>`); }); }
     function renderLogs(){
       const c=document.getElementById('dailyLogContainer');
       if(!cache.logs.length){ c.innerHTML='<div class="card"><div class="empty-box">기록 없음. 상단 "+ 기록 추가"를 눌러 첫 기록을 만들 수 있습니다.</div></div>'; return; }
