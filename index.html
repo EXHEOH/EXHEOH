@@ -887,6 +887,61 @@ b{color:var(--text)}
 .compact-preview.single{color:var(--text)}
 input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightness(0.8)}
 
+/* ===== 모바일: 하단 탭바 ===== */
+.mobile-tabbar{display:none}
+.project-mobile-list{display:none}
+@media (max-width:768px){
+  .mobile-tabbar{
+    display:flex; position:fixed; left:0; right:0; bottom:0; z-index:135;
+    background:rgba(10,10,10,.96); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+    border-top:1px solid rgba(255,255,255,.10);
+    padding:6px 6px calc(6px + env(safe-area-inset-bottom));
+  }
+  .mobile-tab{
+    flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+    background:none; border:none; color:rgba(255,255,255,.5); cursor:pointer;
+    padding:6px 2px; border-radius:14px; font-weight:800; min-height:52px; transition:.15s ease;
+  }
+  .mobile-tab .mt-ico{font-size:20px;line-height:1}
+  .mobile-tab .mt-lb{font-size:10px;letter-spacing:-0.02em}
+  .mobile-tab.active{color:var(--primary);background:rgba(0,255,195,.10)}
+  /* 탭바에 가리지 않게 본문/챗버튼 여백 */
+  .main{padding-bottom:84px !important}
+  .chat-btn{bottom:calc(74px + env(safe-area-inset-bottom)) !important}
+  .chat-window{height:calc(100dvh - 0px)}
+  /* 현황판: 표 숨기고 카드 표시 */
+  #page-project .project-card, #page-project .project-table-hint{display:none}
+  .project-mobile-list{display:block}
+}
+
+/* ===== 모바일: 프로젝트 현황판 카드 ===== */
+.pm-card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:14px;margin-bottom:12px;box-shadow:0 10px 24px rgba(0,0,0,.20)}
+.pm-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.pm-code{font-weight:900;max-width:140px}
+.pm-top .delete-btn{margin-left:auto;font-size:22px;line-height:1;padding:2px 8px}
+.pm-name{font-weight:800;margin-bottom:10px}
+.pm-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pm-card label{display:flex;flex-direction:column;gap:5px;min-width:0}
+.pm-card label>span{font-size:10px;font-weight:900;color:rgba(255,255,255,.45);letter-spacing:.02em}
+.pm-card .pm-full{margin-top:10px}
+.pm-card input,.pm-card select{min-height:42px;border-radius:14px;font-size:13px}
+.pm-milestone{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.pm-milestone .pm-label{font-size:10px;font-weight:900;color:rgba(255,255,255,.45);margin-bottom:8px}
+.pm-milestone .milestone-bar{height:20px;font-size:10px}
+.pm-milestone .milestone-check{height:16px;font-size:9px}
+.pm-milestone .milestone-btn{padding:5px 10px;font-size:11px}
+
+/* ===== 모바일: 맨파워 카드 ===== */
+.mp-card-list{padding:12px}
+.mp-card{background:rgba(255,255,255,.02);border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:10px}
+.mp-card-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.mp-card-top input[type="date"]{flex:1}
+.mp-card-top .delete-btn{font-size:22px;line-height:1;padding:2px 8px}
+.mp-field{display:flex;flex-direction:column;gap:5px;margin-bottom:10px}
+.mp-field>span{font-size:10px;font-weight:900;color:rgba(255,255,255,.45)}
+.mp-row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mp-card input,.mp-card select{min-height:42px;border-radius:14px;font-size:13px}
+
 </style>
 </head>
 <body>
@@ -952,6 +1007,14 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
       <button class="btn secondary mobile-compact-btn" type="button" onclick="location.reload()">새로고침</button>
     </div>
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+    <nav class="mobile-tabbar" id="mobileTabbar">
+      <button class="mobile-tab active" data-tab="dashboard" type="button" onclick="goTab('dashboard',this)"><span class="mt-ico">📊</span><span class="mt-lb">현황</span></button>
+      <button class="mobile-tab" data-tab="project" type="button" onclick="goTab('project',this)"><span class="mt-ico">📂</span><span class="mt-lb">프로젝트</span></button>
+      <button class="mobile-tab" data-tab="schedule" type="button" onclick="goTab('schedule',this)"><span class="mt-ico">📅</span><span class="mt-lb">일정</span></button>
+      <button class="mobile-tab" data-tab="todo" type="button" onclick="goTab('todo',this)"><span class="mt-ico">✅</span><span class="mt-lb">TODO</span></button>
+      <button class="mobile-tab" data-tab="manpower" type="button" onclick="goTab('manpower',this)"><span class="mt-ico">👥</span><span class="mt-lb">맨파워</span></button>
+    </nav>
 
     <div class="chat-btn" onclick="toggleChat()" aria-label="AI 챗봇 열기">🤖</div>
     <div class="chat-window" id="chatWindow">
@@ -1034,7 +1097,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
         <div class="card" style="padding:16px;"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;"><h3 style="margin:0;">📋 최근 맨파워 기록</h3><span class="muted">최근 8건</span></div><table style="margin-top:12px;"><thead><tr><th>이름</th><th>프로젝트</th><th>업무내용</th><th>소요시간(h)</th><th>날짜</th></tr></thead><tbody id="dashboard-manpower-body"></tbody></table></div>
       </div>
 
-      <div id="page-project" class="page-section"><div class="header"><h1>프로젝트 현황판</h1><div class="page-actions"><button class="btn secondary admin-only" onclick="document.getElementById('csvInput').click()">📂 CSV 업로드</button><button class="btn" onclick="addNewProject()">+ 추가</button><input type="file" id="csvInput" accept=".csv,text/csv" onchange="handleFileUpload(this,'project')" style="display:none"></div></div><div class="project-search-bar" style="margin:-6px 0 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;"><input type="text" id="projectSearchInput" placeholder="🔍 코드·프로젝트명·발주처·담당자·소속팀 검색" style="max-width:420px;" oninput="filterProjects(this.value)"><span class="muted" id="projectSearchCount"></span></div><div class="card project-card table-compact"><table><thead><tr><th class="col-delete">삭제</th><th class="col-code">코드</th><th class="col-name">프로젝트명</th><th class="col-history">이력코드</th><th class="col-client">발주처</th><th class="col-constructor">건설사</th><th class="col-team">소속팀</th><th class="col-manager">담당자</th><th class="col-type">단계</th><th class="col-contract">계약</th><th class="col-milestone">기성현황</th></tr></thead><tbody id="tableBody"></tbody></table></div><div class="table-hint">모바일에서는 표를 좌우로 밀어 더 많은 칼럼을 확인할 수 있습니다.</div><div class="muted">※ 기성현황: 막대 클릭→상태변경 / D(디자인)·M(경영지원) 클릭→크로스체크 / 설정→단계 수정</div></div>
+      <div id="page-project" class="page-section"><div class="header"><h1>프로젝트 현황판</h1><div class="page-actions"><button class="btn secondary admin-only" onclick="document.getElementById('csvInput').click()">📂 CSV 업로드</button><button class="btn" onclick="addNewProject()">+ 추가</button><input type="file" id="csvInput" accept=".csv,text/csv" onchange="handleFileUpload(this,'project')" style="display:none"></div></div><div class="project-search-bar" style="margin:-6px 0 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;"><input type="text" id="projectSearchInput" placeholder="🔍 코드·프로젝트명·발주처·담당자·소속팀 검색" style="max-width:420px;" oninput="filterProjects(this.value)"><span class="muted" id="projectSearchCount"></span></div><div class="card project-card table-compact"><table><thead><tr><th class="col-delete">삭제</th><th class="col-code">코드</th><th class="col-name">프로젝트명</th><th class="col-history">이력코드</th><th class="col-client">발주처</th><th class="col-constructor">건설사</th><th class="col-team">소속팀</th><th class="col-manager">담당자</th><th class="col-type">단계</th><th class="col-contract">계약</th><th class="col-milestone">기성현황</th></tr></thead><tbody id="tableBody"></tbody></table></div><div id="projectMobileList" class="project-mobile-list"></div><div class="table-hint project-table-hint">모바일에서는 표를 좌우로 밀어 더 많은 칼럼을 확인할 수 있습니다.</div><div class="muted">※ 기성현황: 막대 클릭→상태변경 / D(디자인)·M(경영지원) 클릭→크로스체크 / 설정→단계 수정</div></div>
       <div class="milestone-dialog" id="milestoneDialog" onclick="if(event.target===this) closeMilestoneDialog()"><div class="milestone-dialog-card"><div class="milestone-dialog-header"><div class="milestone-dialog-title" id="milestoneDialogTitle">기성 상태 입력</div><button class="milestone-dialog-close" onclick="closeMilestoneDialog()">×</button></div><div class="milestone-dialog-body" id="milestoneDialogBody"></div></div></div>
 
       <div id="page-manpower" class="page-section"><div class="header"><h1>일일 업무 기록</h1><div class="page-actions page-actions-single"><button class="btn" onclick="addDailyLog()">+ 기록 추가</button></div></div><div class="muted" style="margin:-8px 0 14px;">소요시간은 <b>시간 단위</b>로 입력하세요. 예) 1.5 = 1시간30분 / 0.25 = 15분</div><div id="dailyLogContainer"></div></div>
@@ -1346,9 +1409,20 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
       syncSidebarState(next);
     };
     window.closeSidebar = function(){ syncSidebarState(false); };
+    let _resizeTimer = null;
     window.addEventListener('resize', ()=>{
       if(window.innerWidth > 1024) syncSidebarState(false);
-      if(document.getElementById('page-todo')?.classList.contains('active')) renderTodo();
+      clearTimeout(_resizeTimer);
+      _resizeTimer = setTimeout(()=>{
+        // 활성 페이지를 다시 그려 모바일/데스크탑 레이아웃을 전환
+        const act = (id)=>document.getElementById('page-'+id)?.classList.contains('active');
+        if(act('project')) renderProjects();
+        if(act('manpower')) renderLogs();
+        if(act('schedule')) renderSchedules();
+        if(act('design-team-schedule')) renderDesignTeamSchedules();
+        if(act('todo')) renderTodo();
+        if(act('meeting')) renderMeetings();
+      }, 180);
     });
 
     function showToast(message, type='info'){
@@ -2002,7 +2076,10 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
       const metaEl=document.getElementById('mobilePageMeta');
       if(titleEl) titleEl.textContent=pageNames[id]||'EXHEOH SYSTEM';
       if(metaEl) metaEl.textContent=currentProfile.email||'프로젝트 관리 시스템';
-      if(window.innerWidth <= 1024) closeSidebar(); if(id==='dashboard') renderDashboard(); if(id==='schedule') renderSchedules(); if(id==='design-team-schedule') renderDesignTeamSchedules(); if(id==='todo') renderTodo(); if(id==='meeting') renderMeetings(); if(id==='manpower'){ refreshManpowerAndRender(); } if(id==='admin') renderAdmin(); if(id==='stats'){ refreshStatsAndRender(); } };
+      if(window.innerWidth <= 1024) closeSidebar();
+      document.querySelectorAll('.mobile-tab').forEach(t=>t.classList.toggle('active', t.getAttribute('data-tab')===id));
+      if(id==='dashboard') renderDashboard(); if(id==='project') renderProjects(); if(id==='schedule') renderSchedules(); if(id==='design-team-schedule') renderDesignTeamSchedules(); if(id==='todo') renderTodo(); if(id==='meeting') renderMeetings(); if(id==='manpower'){ refreshManpowerAndRender(); } if(id==='admin') renderAdmin(); if(id==='stats'){ refreshStatsAndRender(); } };
+    window.goTab = function(id, btn){ showPage(id, document.querySelector('.menu-item[data-page="'+id+'"]')); if(btn){ document.querySelectorAll('.mobile-tab').forEach(t=>t.classList.remove('active')); btn.classList.add('active'); } };
     window.toggleChat=function(){ const w=document.getElementById('chatWindow'); w.style.display=(w.style.display==='flex')?'none':'flex'; };
     function appendChatMessage(type, html){ const body=document.getElementById('chatBody'); body.innerHTML += `<div class="msg ${type==='user'?'msg-user':'msg-bot'}">${html}</div>`; body.scrollTop = body.scrollHeight; }
     
@@ -3346,22 +3423,16 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
       return data.designCheck.some((d, i) => d !== data.mgmtCheck[i]);
     }
     
-    function renderMilestoneCell(projectId) {
+    function renderMilestoneInner(projectId) {
       const data = getMilestoneData(projectId);
       const progress = calcMilestoneProgress(data);
-      const mismatch = hasMismatch(data);
-      
-      // 막대 너비 계산 (총합이 일정하도록)
       const totalBarWidth = 110;
       const barWidths = data.milestones.map(m => Math.max(Math.floor((m.weight / 100) * totalBarWidth), 10));
-      
       let barsHtml = data.milestones.map((m, i) => {
         const s = data.status[i] || 0;
         const w = barWidths[i];
         return `<div class="milestone-bar status-${s}" style="width:${w}px" onclick="cycleMilestoneStatus(${projectId},${i})" title="${escapeHTML(m.name)} (${m.weight}%)">${m.weight}</div>`;
       }).join('');
-      
-      // D/M 체크란도 막대와 동일한 너비로
       let checksHtml = data.milestones.map((m, i) => {
         const dc = data.designCheck[i] ? 'checked' : '';
         const mc = data.mgmtCheck[i] ? 'checked' : '';
@@ -3371,13 +3442,14 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
           <div class="milestone-check mgmt ${mc}" style="width:100%" onclick="toggleMilestoneCheck(${projectId},${i},'mgmt')" title="${escapeHTML(m.name)} - 경영지원팀">${mc ? 'M' : ''}</div>
         </div>`;
       }).join('');
-      
-      return `<td class="milestone-cell col-milestone ${mismatch ? 'milestone-mismatch' : ''}">
-        <div class="milestone-wrap">
+      return `<div class="milestone-wrap">
           <div class="milestone-bar-wrap">${barsHtml}<span class="milestone-progress ${progress===100?'complete':''}">${progress}%</span></div>
           <div class="milestone-bottom"><div class="milestone-checks">${checksHtml}</div><button class="milestone-btn" onclick="openMilestoneDialog(${projectId})">설정</button></div>
-        </div>
-      </td>`;
+        </div>`;
+    }
+    function renderMilestoneCell(projectId) {
+      const mismatch = hasMismatch(getMilestoneData(projectId));
+      return `<td class="milestone-cell col-milestone ${mismatch ? 'milestone-mismatch' : ''}">${renderMilestoneInner(projectId)}</td>`;
     }
     
     window.cycleMilestoneStatus = function(projectId, idx) {
@@ -3549,7 +3621,30 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
       renderProjects();
     };
     
-    function renderProjects(){ const t=document.getElementById('tableBody'); t.innerHTML=''; const q=String(projectSearchQuery||'').trim().toLowerCase(); let list=[...cache.projects].sort((a,b)=>{ const ac=(a.code||'').toUpperCase(); const bc=(b.code||'').toUpperCase(); return ac.localeCompare(bc, 'ko', {numeric:true}); }); if(q){ list=list.filter(p=>[p.code,p.name,p.history,p.client,p.constructor,p.team,p.manager].some(v=>String(v||'').toLowerCase().includes(q))); } const _cEl=document.getElementById('projectSearchCount'); if(_cEl) _cEl.innerText = q ? `${list.length}건 / 전체 ${cache.projects.length}건` : `전체 ${cache.projects.length}건`; if(!list.length){ t.innerHTML=`<tr><td colspan="11" class="muted" style="padding:16px;">${q?'검색 결과가 없습니다.':'프로젝트가 없습니다. 추가 버튼으로 등록하세요.'}</td></tr>`; return; } list.forEach(p=>{ t.insertAdjacentHTML('beforeend', `<tr><td class="col-delete"><button class="delete-btn" onclick="deleteItem('projects',${p.id})">×</button></td><td class="col-code"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.code||'')}" placeholder="-" onblur="updateCell('projects',${p.id},'code',this.value)"></td><td class="col-name">${makeEditPreview({table:'projects', id:p.id, field:'name', title:'프로젝트명', value:p.name||'', limit:18, empty:'프로젝트명'})}</td><td class="col-history">${makeEditPreview({table:'projects', id:p.id, field:'history', title:'이력코드', value:p.history||'', limit:10, empty:'-'})}</td><td class="col-client"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.client||'')}" placeholder="-" onblur="updateCell('projects',${p.id},'client',this.value)"></td><td class="col-constructor"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.constructor||'')}" placeholder="-" onblur="updateCell('projects',${p.id},'constructor',this.value)"></td><td class="col-team"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.team||'')}" placeholder="-" onblur="updateCell('projects',${p.id},'team',this.value)"></td><td class="col-manager"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.manager||'')}" placeholder="-" onblur="updateCell('projects',${p.id},'manager',this.value)"></td><td class="col-type"><select class="compact-select" onchange="updateCell('projects',${p.id},'type',this.value).catch(()=>{})"><option value="default" ${p.type==='default'?'selected':''}>선택</option><option value="plan" ${p.type==='plan'?'selected':''}>기획</option><option value="basic" ${p.type==='basic'?'selected':''}>기본</option><option value="exec" ${p.type==='exec'?'selected':''}>실시</option><option value="site" ${p.type==='site'?'selected':''}>현장</option></select></td><td class="col-contract"><select class="compact-select" onchange="updateContractStatus(${p.id},this.value)"><option value="none" ${p.contract_status==='signed'?'':'selected'}>미계약</option><option value="signed" ${p.contract_status==='signed'?'selected':''}>계약</option></select></td>${renderMilestoneCell(p.id)}</tr>`); }); }
+    function projectMobileCard(p){
+      const typeLabel = {default:'선택',plan:'기획',basic:'기본',exec:'실시',site:'현장'};
+      const typeSel = `<select class="compact-select" onchange="updateCell('projects',${p.id},'type',this.value)">`+
+        ['default','plan','basic','exec','site'].map(t=>`<option value="${t}" ${p.type===t?'selected':''}>${typeLabel[t]}</option>`).join('')+`</select>`;
+      const contractSel = `<select class="compact-select" onchange="updateContractStatus(${p.id},this.value)"><option value="none" ${p.contract_status==='signed'?'':'selected'}>미계약</option><option value="signed" ${p.contract_status==='signed'?'selected':''}>계약</option></select>`;
+      return `<div class="pm-card">
+        <div class="pm-top">
+          <input class="pm-code cell-input" type="text" value="${escapeHTML(p.code||'')}" placeholder="코드" onblur="updateCell('projects',${p.id},'code',this.value)">
+          <button class="delete-btn" onclick="deleteItem('projects',${p.id})">×</button>
+        </div>
+        <input class="pm-name cell-input" type="text" value="${escapeHTML(p.name||'')}" placeholder="프로젝트명" onblur="updateCell('projects',${p.id},'name',this.value)">
+        <div class="pm-grid">
+          <label><span>발주처</span><input class="cell-input" type="text" value="${escapeHTML(p.client||'')}" placeholder="-" onblur="updateCell('projects',${p.id},'client',this.value)"></label>
+          <label><span>건설사</span><input class="cell-input" type="text" value="${escapeHTML(p.constructor||'')}" placeholder="-" onblur="updateCell('projects',${p.id},'constructor',this.value)"></label>
+          <label><span>소속팀</span><input class="cell-input" type="text" value="${escapeHTML(p.team||'')}" placeholder="-" onblur="updateCell('projects',${p.id},'team',this.value)"></label>
+          <label><span>담당자</span><input class="cell-input" type="text" value="${escapeHTML(p.manager||'')}" placeholder="-" onblur="updateCell('projects',${p.id},'manager',this.value)"></label>
+          <label><span>단계</span>${typeSel}</label>
+          <label><span>계약</span>${contractSel}</label>
+        </div>
+        <label class="pm-full"><span>이력코드</span><input class="cell-input" type="text" value="${escapeHTML(p.history||'')}" placeholder="-" onblur="updateCell('projects',${p.id},'history',this.value)"></label>
+        <div class="pm-milestone"><div class="pm-label">기성현황</div>${renderMilestoneInner(p.id)}</div>
+      </div>`;
+    }
+    function renderProjects(){ const t=document.getElementById('tableBody'); t.innerHTML=''; const q=String(projectSearchQuery||'').trim().toLowerCase(); let list=[...cache.projects].sort((a,b)=>{ const ac=(a.code||'').toUpperCase(); const bc=(b.code||'').toUpperCase(); return ac.localeCompare(bc, 'ko', {numeric:true}); }); if(q){ list=list.filter(p=>[p.code,p.name,p.history,p.client,p.constructor,p.team,p.manager].some(v=>String(v||'').toLowerCase().includes(q))); } const _cEl=document.getElementById('projectSearchCount'); if(_cEl) _cEl.innerText = q ? `${list.length}건 / 전체 ${cache.projects.length}건` : `전체 ${cache.projects.length}건`; const _ml=document.getElementById('projectMobileList'); if(window.innerWidth<=768){ if(t) t.innerHTML=''; if(_ml){ _ml.innerHTML = list.length ? list.map(projectMobileCard).join('') : `<div class="card"><div class="empty-box">${q?'검색 결과가 없습니다.':'프로젝트가 없습니다.'}</div></div>`; } return; } if(_ml) _ml.innerHTML=''; if(!list.length){ t.innerHTML=`<tr><td colspan="11" class="muted" style="padding:16px;">${q?'검색 결과가 없습니다.':'프로젝트가 없습니다. 추가 버튼으로 등록하세요.'}</td></tr>`; return; } list.forEach(p=>{ t.insertAdjacentHTML('beforeend', `<tr><td class="col-delete"><button class="delete-btn" onclick="deleteItem('projects',${p.id})">×</button></td><td class="col-code"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.code||'')}" placeholder="-" onblur="updateCell('projects',${p.id},'code',this.value)"></td><td class="col-name">${makeEditPreview({table:'projects', id:p.id, field:'name', title:'프로젝트명', value:p.name||'', limit:18, empty:'프로젝트명'})}</td><td class="col-history">${makeEditPreview({table:'projects', id:p.id, field:'history', title:'이력코드', value:p.history||'', limit:10, empty:'-'})}</td><td class="col-client"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.client||'')}" placeholder="-" onblur="updateCell('projects',${p.id},'client',this.value)"></td><td class="col-constructor"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.constructor||'')}" placeholder="-" onblur="updateCell('projects',${p.id},'constructor',this.value)"></td><td class="col-team"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.team||'')}" placeholder="-" onblur="updateCell('projects',${p.id},'team',this.value)"></td><td class="col-manager"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.manager||'')}" placeholder="-" onblur="updateCell('projects',${p.id},'manager',this.value)"></td><td class="col-type"><select class="compact-select" onchange="updateCell('projects',${p.id},'type',this.value).catch(()=>{})"><option value="default" ${p.type==='default'?'selected':''}>선택</option><option value="plan" ${p.type==='plan'?'selected':''}>기획</option><option value="basic" ${p.type==='basic'?'selected':''}>기본</option><option value="exec" ${p.type==='exec'?'selected':''}>실시</option><option value="site" ${p.type==='site'?'selected':''}>현장</option></select></td><td class="col-contract"><select class="compact-select" onchange="updateContractStatus(${p.id},this.value)"><option value="none" ${p.contract_status==='signed'?'':'selected'}>미계약</option><option value="signed" ${p.contract_status==='signed'?'selected':''}>계약</option></select></td>${renderMilestoneCell(p.id)}</tr>`); }); }
     function renderLogs(){
       const c=document.getElementById('dailyLogContainer');
       if(!cache.logs.length){ c.innerHTML='<div class="card"><div class="empty-box">기록 없음. 상단 "+ 기록 추가"를 눌러 첫 기록을 만들 수 있습니다.</div></div>'; return; }
@@ -3567,23 +3662,43 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
         <span style="font-weight:900;font-size:12px;color:var(--text);">전체 기록: ${cache.logs.length}건 · 총 ${grandTotal.toFixed(2)}h</span>
         <span style="font-size:11px;color:var(--muted);font-weight:700;">시간 필드: ${escapeHTML(resolvedHoursField || 'auto-detect')}</span>
       </div>`;
+      const mpMobile = window.innerWidth <= 768;
       dates.forEach(date=>{
         const logs=grouped[date];
         const dayTotal=logs.reduce((sum,x)=>sum+getHoursValue(x),0);
-        html += `<div class="card log-card table-compact"><div style="padding:14px 16px;font-weight:900;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px;"><div>▼ ${escapeHTML(date)}</div><div class="pill">총 <small>${dayTotal.toFixed(2)}h</small> · <small>${logs.length}건</small></div></div><table><thead><tr><th>삭제</th><th>날짜</th><th>Task</th><th>담당자</th><th>Project</th><th>소요시간(h)</th></tr></thead><tbody>`;
-        logs.forEach(l=>{
-          const val=getHoursValue(l);
-          const logDate = String(l.date||'').slice(0,10) || '';
-          html += `<tr>
-            <td><button class="delete-btn" onclick="deleteItem('manpower_logs',${l.id})">×</button></td>
-            <td style="min-width:130px;"><input type="date" value="${escapeHTML(logDate)}" onblur="updateCell('manpower_logs',${l.id},'date',this.value)"></td>
-            <td contenteditable="true" onblur="updateCell('manpower_logs',${l.id},'task',this.innerText)">${escapeHTML(l.task||'')}</td>
-            <td contenteditable="true" onblur="updateCell('manpower_logs',${l.id},'assignee',this.innerText)">${escapeHTML(l.assignee||'')}</td>
-            <td><select onchange="updateCell('manpower_logs',${l.id},'project',this.value)"><option value="">선택</option>${projectNameOptions(l.project)}</select></td>
-            <td style="min-width:140px;"><input type="number" min="0" step="0.25" value="${val}" onblur="saveManpowerHours(${l.id},this.value)"><div class="muted" style="margin-top:4px;">0.25=15분</div></td>
-          </tr>`;
-        });
-        html += '</tbody></table></div>';
+        html += `<div class="card log-card table-compact"><div style="padding:14px 16px;font-weight:900;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px;"><div>▼ ${escapeHTML(date)}</div><div class="pill">총 <small>${dayTotal.toFixed(2)}h</small> · <small>${logs.length}건</small></div></div>`;
+        if(mpMobile){
+          html += `<div class="mp-card-list">`;
+          logs.forEach(l=>{
+            const val=getHoursValue(l);
+            const logDate = String(l.date||'').slice(0,10) || '';
+            html += `<div class="mp-card">
+              <div class="mp-card-top"><input type="date" value="${escapeHTML(logDate)}" onblur="updateCell('manpower_logs',${l.id},'date',this.value)"><button class="delete-btn" onclick="deleteItem('manpower_logs',${l.id})">×</button></div>
+              <label class="mp-field"><span>Task</span><input type="text" value="${escapeHTML(l.task||'')}" placeholder="업무 내용" onblur="updateCell('manpower_logs',${l.id},'task',this.value)"></label>
+              <div class="mp-row2">
+                <label class="mp-field"><span>담당자</span><input type="text" value="${escapeHTML(l.assignee||'')}" placeholder="이름" onblur="updateCell('manpower_logs',${l.id},'assignee',this.value)"></label>
+                <label class="mp-field"><span>시간(h)</span><input type="number" min="0" step="0.25" value="${val}" onblur="saveManpowerHours(${l.id},this.value)"></label>
+              </div>
+              <label class="mp-field"><span>프로젝트</span><select onchange="updateCell('manpower_logs',${l.id},'project',this.value)"><option value="">선택</option>${projectNameOptions(l.project)}</select></label>
+            </div>`;
+          });
+          html += `</div></div>`;
+        } else {
+          html += `<table><thead><tr><th>삭제</th><th>날짜</th><th>Task</th><th>담당자</th><th>Project</th><th>소요시간(h)</th></tr></thead><tbody>`;
+          logs.forEach(l=>{
+            const val=getHoursValue(l);
+            const logDate = String(l.date||'').slice(0,10) || '';
+            html += `<tr>
+              <td><button class="delete-btn" onclick="deleteItem('manpower_logs',${l.id})">×</button></td>
+              <td style="min-width:130px;"><input type="date" value="${escapeHTML(logDate)}" onblur="updateCell('manpower_logs',${l.id},'date',this.value)"></td>
+              <td contenteditable="true" onblur="updateCell('manpower_logs',${l.id},'task',this.innerText)">${escapeHTML(l.task||'')}</td>
+              <td contenteditable="true" onblur="updateCell('manpower_logs',${l.id},'assignee',this.innerText)">${escapeHTML(l.assignee||'')}</td>
+              <td><select onchange="updateCell('manpower_logs',${l.id},'project',this.value)"><option value="">선택</option>${projectNameOptions(l.project)}</select></td>
+              <td style="min-width:140px;"><input type="number" min="0" step="0.25" value="${val}" onblur="saveManpowerHours(${l.id},this.value)"><div class="muted" style="margin-top:4px;">0.25=15분</div></td>
+            </tr>`;
+          });
+          html += '</tbody></table></div>';
+        }
       });
       c.innerHTML=html;
     }
