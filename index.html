@@ -148,13 +148,12 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .project-card .col-team{width:72px}
 .project-card .col-manager{width:68px}
 .project-card .col-type{width:68px}
-.project-card .col-contract{width:152px}
+.project-card .col-contract{width:92px}
 .project-card .col-milestone{width:210px}
 .project-card td input.cell-input{width:calc(100% - 4px);box-sizing:border-box}
 .project-card td select.compact-select{width:calc(100% - 2px);box-sizing:border-box}
-/* 계약 컬럼: 상태 드롭다운 + 계약일을 세로로, 날짜칸 찌그러짐/겹침 방지 */
-.project-card .col-contract select.compact-select{width:100%;margin-bottom:4px}
-.project-card .col-contract input[type="date"]{width:100%;margin-top:0 !important;padding:8px 8px;font-size:11px;box-sizing:border-box}
+/* 계약 컬럼: 미계약/계약 드롭다운만 */
+.project-card .col-contract select.compact-select{width:100%}
 .milestone-cell{padding:4px 2px !important;vertical-align:middle !important}
 .milestone-wrap{display:flex;flex-direction:column;gap:2px}
 .milestone-bar-wrap{display:flex;align-items:center;gap:1px;flex-wrap:nowrap}
@@ -3005,6 +3004,50 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
     window.updateTodoField = async function(id,field,value){ await ensureSupabaseClient(); const v = (field==='due_date' && !value) ? null : (value === undefined ? null : value); const { error } = await sb.from('todo_items').update({ [field]: v }).eq('id',id); if(error) throw error; await fetchAllData(); renderTodo(); renderDashboard(); };
     window.applyProjectToTodo = async function(id, projectId){ const project=findProjectById(projectId); if(!project) return; const row=(cache.todo||[]).find(x=>String(x.id)===String(id))||{}; const payload={ project_id: project.id, project: project.name || project.code || '', assignee: row.assignee || project.manager || '' }; await updateRecordWithProjectFallback('todo_items', id, payload, ()=>renderTodo()); };
     window.updateMeetingField = async function(id,field,value){ await ensureSupabaseClient(); const v = ((field==='meeting_date'||field==='next_meeting_date') && !value) ? null : (value === undefined ? null : value); const { error } = await sb.from('meeting_notes').update({ [field]: v }).eq('id',id); if(error) throw error; await fetchAllData(); renderMeetings(); renderDashboard(); };
+    // === 회의록 AI (Claude / super-api Edge Function 사용) ===
+    async function callMeetingAI(systemPrompt, userText){
+      await ensureSupabaseClient();
+      if(!(sb && sb.functions && sb.functions.invoke)) throw new Error('AI 함수를 사용할 수 없습니다.');
+      const { data, error } = await sb.functions.invoke('super-api', { body: { message: userText, system: { prompt: systemPrompt, language: 'ko' } } });
+      if(error) throw new Error(error.message || 'AI 호출 실패 (Edge Function 확인)');
+      const reply = data?.reply || data?.text;
+      if(!reply) throw new Error(data?.error || 'AI 응답이 비어 있습니다. (Claude 연결을 확인하세요)');
+      return String(reply).trim();
+    }
+    function buildMeetingText(m){
+      return [ m.title?('제목: '+m.title):'', m.meeting_date?('일자: '+m.meeting_date):'', m.attendees?('참석자: '+m.attendees):'', m.agenda?('안건: '+m.agenda):'', '내용:\n'+(m.notes||'') ].filter(Boolean).join('\n');
+    }
+    window.summarizeMeeting = async function(id){
+      const m = (cache.meetings||[]).find(x=>String(x.id)===String(id));
+      if(!m) return;
+      if(!String(m.notes||'').trim()){ showToast('먼저 "회의 내용"을 입력하세요.', 'error'); return; }
+      openDetailDialog({ title:'✨ AI 회의 요약', subtitle:'Claude가 회의 내용을 정리하는 중입니다...', html:'<div class="muted">잠시만 기다려 주세요...</div>' });
+      try{
+        const sys = '당신은 건축·설계 회사의 회의록 정리 비서입니다. 주어진 회의 내용을 한국어로 정리하세요. 형식: 먼저 "핵심 요약"을 3~5개 불릿(•)으로, 그다음 "결정 사항"이 있으면 별도로. 군더더기·인사말 없이 간결하게.';
+        const reply = await callMeetingAI(sys, buildMeetingText(m));
+        openDetailDialog({ title:'✨ AI 회의 요약', subtitle:'필요하면 드래그해서 복사하세요.', html:`<div class="kv-value" style="white-space:pre-wrap;line-height:1.75;">${escapeHTML(reply)}</div>` });
+      }catch(err){
+        openDetailDialog({ title:'AI 요약 실패', subtitle:'', html:`<div class="muted" style="line-height:1.7;">${escapeHTML(err.message||String(err))}<br><br>Claude(Edge Function <code>super-api</code>) 배포 상태를 확인하세요.</div>` });
+      }
+    };
+    window.extractMeetingActions = async function(id){
+      const m = (cache.meetings||[]).find(x=>String(x.id)===String(id));
+      if(!m) return;
+      if(!String(m.notes||'').trim()){ showToast('먼저 "회의 내용"을 입력하세요.', 'error'); return; }
+      showToast('AI가 액션 아이템을 추출하는 중...', 'success');
+      try{
+        const sys = '당신은 회의록에서 후속 할 일(액션 아이템)을 뽑는 비서입니다. 회의 내용에서 실제로 누군가 해야 할 일을 추출해, 한 줄에 하나씩 "• [담당자] 할 일 (기한)" 형식으로 한국어로만 출력하세요. 담당자나 기한이 회의에 없으면 그 부분은 생략. 설명·머리말·맺음말 없이 목록만 출력.';
+        const cleaned = await callMeetingAI(sys, buildMeetingText(m));
+        let finalText = cleaned;
+        if(String(m.actions||'').trim()){
+          finalText = confirm('기존 액션 아이템이 있습니다.\n\n확인 = AI 결과로 교체\n취소 = 기존 내용 아래에 추가') ? cleaned : (String(m.actions).trim() + '\n' + cleaned);
+        }
+        await updateMeetingField(id, 'actions', finalText);
+        showToast('✅ 액션 아이템을 채웠습니다.', 'success');
+      }catch(err){
+        showToast('액션 추출 실패: ' + (err.message||err), 'error');
+      }
+    };
     window.applyProjectToMeeting = async function(id, projectId){ const project=findProjectById(projectId); if(!project) return; const row=(cache.meetings||[]).find(x=>String(x.id)===String(id))||{}; const payload={ project_id: project.id, project: project.name || project.code || '', attendees: row.attendees || project.manager || '', title: row.title || ((project.name || '프로젝트') + ' 회의') }; await updateRecordWithProjectFallback('meeting_notes', id, payload, ()=>renderMeetings()); };
     window.deleteItem = async function(table,id){ if(!confirm('삭제하시겠습니까?')) return; await runAction(async()=>{ const { error } = await sb.from(table).delete().eq('id',id); if(error) throw error; await fetchAllData(); renderAll(); }, '삭제했습니다.'); };
 
@@ -3506,7 +3549,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
       renderProjects();
     };
     
-    function renderProjects(){ const t=document.getElementById('tableBody'); t.innerHTML=''; const q=String(projectSearchQuery||'').trim().toLowerCase(); let list=[...cache.projects].sort((a,b)=>{ const ac=(a.code||'').toUpperCase(); const bc=(b.code||'').toUpperCase(); return ac.localeCompare(bc, 'ko', {numeric:true}); }); if(q){ list=list.filter(p=>[p.code,p.name,p.history,p.client,p.constructor,p.team,p.manager].some(v=>String(v||'').toLowerCase().includes(q))); } const _cEl=document.getElementById('projectSearchCount'); if(_cEl) _cEl.innerText = q ? `${list.length}건 / 전체 ${cache.projects.length}건` : `전체 ${cache.projects.length}건`; if(!list.length){ t.innerHTML=`<tr><td colspan="11" class="muted" style="padding:16px;">${q?'검색 결과가 없습니다.':'프로젝트가 없습니다. 추가 버튼으로 등록하세요.'}</td></tr>`; return; } list.forEach(p=>{ t.insertAdjacentHTML('beforeend', `<tr><td class="col-delete"><button class="delete-btn" onclick="deleteItem('projects',${p.id})">×</button></td><td class="col-code"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.code||'')}" placeholder="-" onblur="updateCell('projects',${p.id},'code',this.value)"></td><td class="col-name">${makeEditPreview({table:'projects', id:p.id, field:'name', title:'프로젝트명', value:p.name||'', limit:18, empty:'프로젝트명'})}</td><td class="col-history">${makeEditPreview({table:'projects', id:p.id, field:'history', title:'이력코드', value:p.history||'', limit:10, empty:'-'})}</td><td class="col-client"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.client||'')}" placeholder="-" onblur="updateCell('projects',${p.id},'client',this.value)"></td><td class="col-constructor"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.constructor||'')}" placeholder="-" onblur="updateCell('projects',${p.id},'constructor',this.value)"></td><td class="col-team"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.team||'')}" placeholder="-" onblur="updateCell('projects',${p.id},'team',this.value)"></td><td class="col-manager"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.manager||'')}" placeholder="-" onblur="updateCell('projects',${p.id},'manager',this.value)"></td><td class="col-type"><select class="compact-select" onchange="updateCell('projects',${p.id},'type',this.value).catch(()=>{})"><option value="default" ${p.type==='default'?'selected':''}>선택</option><option value="plan" ${p.type==='plan'?'selected':''}>기획</option><option value="basic" ${p.type==='basic'?'selected':''}>기본</option><option value="exec" ${p.type==='exec'?'selected':''}>실시</option><option value="site" ${p.type==='site'?'selected':''}>현장</option></select></td><td class="col-contract">${(()=>{ const cs=(p.contract_status==='signed')?'signed':'none'; const cd=escapeHTML(String(p.contract_date||'').slice(0,10)); return `<select class="compact-select" onchange="updateContractStatus(${p.id},this.value)"><option value="none" ${cs!=='signed'?'selected':''}>미계약</option><option value="signed" ${cs==='signed'?'selected':''}>계약</option></select><input type="date" class="cell-input compact-input" style="margin-top:4px;${cs==='signed'?'':'display:none;'}" value="${cd}" onblur="updateContractDate(${p.id},this.value)">`; })()}</td>${renderMilestoneCell(p.id)}</tr>`); }); }
+    function renderProjects(){ const t=document.getElementById('tableBody'); t.innerHTML=''; const q=String(projectSearchQuery||'').trim().toLowerCase(); let list=[...cache.projects].sort((a,b)=>{ const ac=(a.code||'').toUpperCase(); const bc=(b.code||'').toUpperCase(); return ac.localeCompare(bc, 'ko', {numeric:true}); }); if(q){ list=list.filter(p=>[p.code,p.name,p.history,p.client,p.constructor,p.team,p.manager].some(v=>String(v||'').toLowerCase().includes(q))); } const _cEl=document.getElementById('projectSearchCount'); if(_cEl) _cEl.innerText = q ? `${list.length}건 / 전체 ${cache.projects.length}건` : `전체 ${cache.projects.length}건`; if(!list.length){ t.innerHTML=`<tr><td colspan="11" class="muted" style="padding:16px;">${q?'검색 결과가 없습니다.':'프로젝트가 없습니다. 추가 버튼으로 등록하세요.'}</td></tr>`; return; } list.forEach(p=>{ t.insertAdjacentHTML('beforeend', `<tr><td class="col-delete"><button class="delete-btn" onclick="deleteItem('projects',${p.id})">×</button></td><td class="col-code"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.code||'')}" placeholder="-" onblur="updateCell('projects',${p.id},'code',this.value)"></td><td class="col-name">${makeEditPreview({table:'projects', id:p.id, field:'name', title:'프로젝트명', value:p.name||'', limit:18, empty:'프로젝트명'})}</td><td class="col-history">${makeEditPreview({table:'projects', id:p.id, field:'history', title:'이력코드', value:p.history||'', limit:10, empty:'-'})}</td><td class="col-client"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.client||'')}" placeholder="-" onblur="updateCell('projects',${p.id},'client',this.value)"></td><td class="col-constructor"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.constructor||'')}" placeholder="-" onblur="updateCell('projects',${p.id},'constructor',this.value)"></td><td class="col-team"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.team||'')}" placeholder="-" onblur="updateCell('projects',${p.id},'team',this.value)"></td><td class="col-manager"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.manager||'')}" placeholder="-" onblur="updateCell('projects',${p.id},'manager',this.value)"></td><td class="col-type"><select class="compact-select" onchange="updateCell('projects',${p.id},'type',this.value).catch(()=>{})"><option value="default" ${p.type==='default'?'selected':''}>선택</option><option value="plan" ${p.type==='plan'?'selected':''}>기획</option><option value="basic" ${p.type==='basic'?'selected':''}>기본</option><option value="exec" ${p.type==='exec'?'selected':''}>실시</option><option value="site" ${p.type==='site'?'selected':''}>현장</option></select></td><td class="col-contract"><select class="compact-select" onchange="updateContractStatus(${p.id},this.value)"><option value="none" ${p.contract_status==='signed'?'':'selected'}>미계약</option><option value="signed" ${p.contract_status==='signed'?'selected':''}>계약</option></select></td>${renderMilestoneCell(p.id)}</tr>`); }); }
     function renderLogs(){
       const c=document.getElementById('dailyLogContainer');
       if(!cache.logs.length){ c.innerHTML='<div class="card"><div class="empty-box">기록 없음. 상단 "+ 기록 추가"를 눌러 첫 기록을 만들 수 있습니다.</div></div>'; return; }
@@ -3789,6 +3832,8 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
             </div>
           </div>
           <div class="meeting-top-actions">
+            <button class="btn secondary" style="padding:7px 12px;font-size:12px;min-height:36px;" onclick="summarizeMeeting(${m.id})">✨ AI 요약</button>
+            <button class="btn secondary" style="padding:7px 12px;font-size:12px;min-height:36px;" onclick="extractMeetingActions(${m.id})">⚡ 액션 추출</button>
             <button class="btn danger" style="padding:7px 14px;font-size:12px;min-height:36px;" onclick="deleteItem('meeting_notes',${m.id})">삭제</button>
           </div>
         </div>
