@@ -138,7 +138,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .p-high{background:#FF6B6B;color:#0E0E0E}.p-medium{background:var(--accent);color:#0E0E0E}.p-low{background:rgba(255,255,255,.08);color:var(--text)}
 .empty-box{padding:18px;color:var(--muted);font-weight:900}.admin-only{display:none}
 /* 기성 관리 스타일 */
-.project-card table{table-layout:fixed;min-width:1250px}
+.project-card table{table-layout:fixed;min-width:1300px}
 .project-card .col-delete{width:32px;padding:6px 2px;text-align:center}
 .project-card .col-code{width:78px;padding:6px 4px}
 .project-card .col-name{width:190px}
@@ -148,14 +148,17 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .project-card .col-team{width:72px}
 .project-card .col-manager{width:68px}
 .project-card .col-type{width:68px}
-.project-card .col-contract{width:120px}
-.project-card .col-milestone{width:200px}
+.project-card .col-contract{width:152px}
+.project-card .col-milestone{width:210px}
 .project-card td input.cell-input{width:calc(100% - 4px);box-sizing:border-box}
 .project-card td select.compact-select{width:calc(100% - 2px);box-sizing:border-box}
+/* 계약 컬럼: 상태 드롭다운 + 계약일을 세로로, 날짜칸 찌그러짐/겹침 방지 */
+.project-card .col-contract select.compact-select{width:100%;margin-bottom:4px}
+.project-card .col-contract input[type="date"]{width:100%;margin-top:0 !important;padding:8px 8px;font-size:11px;box-sizing:border-box}
 .milestone-cell{padding:4px 2px !important;vertical-align:middle !important}
 .milestone-wrap{display:flex;flex-direction:column;gap:2px}
 .milestone-bar-wrap{display:flex;align-items:center;gap:1px;flex-wrap:nowrap}
-.milestone-bar{height:14px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;color:#fff;cursor:pointer;transition:all .15s ease;flex-shrink:0}
+.milestone-bar{height:17px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#fff;cursor:pointer;transition:all .15s ease;flex-shrink:0}
 .milestone-bar:hover{transform:scaleY(1.2);box-shadow:0 2px 8px rgba(0,0,0,.3)}
 .milestone-bar.status-0{background:#555;color:rgba(255,255,255,.6)}
 .milestone-bar.status-1{background:#378ADD}
@@ -165,7 +168,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .milestone-bottom{display:flex;align-items:center;gap:1px}
 .milestone-checks{display:flex;gap:1px;flex-wrap:nowrap}
 .milestone-check-group{display:flex;flex-direction:column;gap:1px;align-items:center}
-.milestone-check{height:10px;border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:6px;font-weight:900;cursor:pointer;border:1px solid rgba(255,255,255,.2);transition:all .12s ease;flex-shrink:0}
+.milestone-check{height:14px;border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;cursor:pointer;border:1px solid rgba(255,255,255,.2);transition:all .12s ease;flex-shrink:0}
 .milestone-check:hover{transform:scale(1.05)}
 .milestone-check.design{background:transparent;color:rgba(255,255,255,.3)}
 .milestone-check.design.checked{background:#00D4AA;border-color:#00D4AA;color:#0E0E0E}
@@ -953,7 +956,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
 
     <div class="chat-btn" onclick="toggleChat()" aria-label="AI 챗봇 열기">🤖</div>
     <div class="chat-window" id="chatWindow">
-      <div class="chat-header"><span>EXHEOH AI · Gemini</span><div style="display:flex;gap:8px;align-items:center;"><button class="chat-clear-btn" onclick="clearChat()" title="대화 초기화">🗑</button><span style="cursor:pointer;font-size:18px;" onclick="toggleChat()">✕</span></div></div>
+      <div class="chat-header"><span>EXHEOH AI · Claude</span><div style="display:flex;gap:8px;align-items:center;"><button class="chat-clear-btn" onclick="clearChat()" title="대화 초기화">🗑</button><span style="cursor:pointer;font-size:18px;" onclick="toggleChat()">✕</span></div></div>
       <div class="chat-body" id="chatBody">
         <div class="msg msg-bot">안녕하세요! EXHEOH AI입니다. 프로젝트 데이터를 기반으로 답변합니다.<br><br><b>💡 이런 질문을 해보세요:</b><br><span class="muted">• D2514 이번 주 진행상황 핵심만 요약해줘<br>• 김주경 담당 프로젝트/투두/회의를 묶어서 정리해줘<br>• 마감 임박 TO DO를 우선순위 순으로 보여줘<br>• 이번 주 전체 현황 브리핑해줘</span></div>
         <div class="chat-quick-btns" id="chatQuickBtns">
@@ -1032,7 +1035,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
         <div class="card" style="padding:16px;"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;"><h3 style="margin:0;">📋 최근 맨파워 기록</h3><span class="muted">최근 8건</span></div><table style="margin-top:12px;"><thead><tr><th>이름</th><th>프로젝트</th><th>업무내용</th><th>소요시간(h)</th><th>날짜</th></tr></thead><tbody id="dashboard-manpower-body"></tbody></table></div>
       </div>
 
-      <div id="page-project" class="page-section"><div class="header"><h1>프로젝트 현황판</h1><div class="page-actions"><button class="btn secondary admin-only" onclick="document.getElementById('csvInput').click()">📂 CSV 업로드</button><button class="btn" onclick="addNewProject()">+ 추가</button><input type="file" id="csvInput" accept=".csv,text/csv" onchange="handleFileUpload(this,'project')" style="display:none"></div></div><div class="card project-card table-compact"><table><thead><tr><th class="col-delete">삭제</th><th class="col-code">코드</th><th class="col-name">프로젝트명</th><th class="col-history">이력코드</th><th class="col-client">발주처</th><th class="col-constructor">건설사</th><th class="col-team">소속팀</th><th class="col-manager">담당자</th><th class="col-type">단계</th><th class="col-contract">계약</th><th class="col-milestone">기성현황</th></tr></thead><tbody id="tableBody"></tbody></table></div><div class="table-hint">모바일에서는 표를 좌우로 밀어 더 많은 칼럼을 확인할 수 있습니다.</div><div class="muted">※ 기성현황: 막대 클릭→상태변경 / D(디자인)·M(경영지원) 클릭→크로스체크 / 설정→단계 수정</div></div>
+      <div id="page-project" class="page-section"><div class="header"><h1>프로젝트 현황판</h1><div class="page-actions"><button class="btn secondary admin-only" onclick="document.getElementById('csvInput').click()">📂 CSV 업로드</button><button class="btn" onclick="addNewProject()">+ 추가</button><input type="file" id="csvInput" accept=".csv,text/csv" onchange="handleFileUpload(this,'project')" style="display:none"></div></div><div class="project-search-bar" style="margin:-6px 0 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;"><input type="text" id="projectSearchInput" placeholder="🔍 코드·프로젝트명·발주처·담당자·소속팀 검색" style="max-width:420px;" oninput="filterProjects(this.value)"><span class="muted" id="projectSearchCount"></span></div><div class="card project-card table-compact"><table><thead><tr><th class="col-delete">삭제</th><th class="col-code">코드</th><th class="col-name">프로젝트명</th><th class="col-history">이력코드</th><th class="col-client">발주처</th><th class="col-constructor">건설사</th><th class="col-team">소속팀</th><th class="col-manager">담당자</th><th class="col-type">단계</th><th class="col-contract">계약</th><th class="col-milestone">기성현황</th></tr></thead><tbody id="tableBody"></tbody></table></div><div class="table-hint">모바일에서는 표를 좌우로 밀어 더 많은 칼럼을 확인할 수 있습니다.</div><div class="muted">※ 기성현황: 막대 클릭→상태변경 / D(디자인)·M(경영지원) 클릭→크로스체크 / 설정→단계 수정</div></div>
       <div class="milestone-dialog" id="milestoneDialog" onclick="if(event.target===this) closeMilestoneDialog()"><div class="milestone-dialog-card"><div class="milestone-dialog-header"><div class="milestone-dialog-title" id="milestoneDialogTitle">기성 상태 입력</div><button class="milestone-dialog-close" onclick="closeMilestoneDialog()">×</button></div><div class="milestone-dialog-body" id="milestoneDialogBody"></div></div></div>
 
       <div id="page-manpower" class="page-section"><div class="header"><h1>일일 업무 기록</h1><div class="page-actions page-actions-single"><button class="btn" onclick="addDailyLog()">+ 기록 추가</button></div></div><div class="muted" style="margin:-8px 0 14px;">소요시간은 <b>시간 단위</b>로 입력하세요. 예) 1.5 = 1시간30분 / 0.25 = 15분</div><div id="dailyLogContainer"></div></div>
@@ -1086,6 +1089,8 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
     function syncEffectiveRole(){ currentProfile.role = getEffectiveRole(currentProfile); }
     let cache = { projects:[], logs:[], schedules:[], designTeamSchedules:[], upper:[], lower:[], todo:[], meetings:[], profiles:[] };
     const statsState = { start:null, end:null };
+    let projectSearchQuery = '';
+    window.filterProjects = function(q){ projectSearchQuery = String(q||''); renderProjects(); };
     const APP_BASE_URL = (window.location.origin + window.location.pathname).replace(/index\.html$/,'');
     const HOURS_FIELD_CANDIDATES = ['spent_hours','hours','spent_hour','duration','time_spent'];
     let resolvedHoursField = null;
@@ -1358,7 +1363,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
     }
     window.addEventListener('error', (e)=>{ if(e?.message) showToast('오류: ' + e.message, 'error'); });
     window.addEventListener('unhandledrejection', (e)=>{ const msg=e?.reason?.message||e?.reason||'알 수 없는 오류'; showToast('오류: ' + msg, 'error'); });
-    function getTableRows(table){ const map={ projects:cache.projects, manpower_logs:cache.logs, schedules:cache.schedules, todo_items:cache.todo, meeting_notes:cache.meetings, settings_upper:cache.upper, settings_lower:cache.lower, profiles:cache.profiles }; return map[table] || []; }
+    function getTableRows(table){ const map={ projects:cache.projects, manpower_logs:cache.logs, schedules:cache.schedules, design_team_schedule:cache.designTeamSchedules, todo_items:cache.todo, meeting_notes:cache.meetings, settings_upper:cache.upper, settings_lower:cache.lower, profiles:cache.profiles }; return map[table] || []; }
     function detectFieldName(table, preferred){ const rows=getTableRows(table); const sample=rows.find(Boolean)||{}; if(preferred in sample) return preferred; if(table==='manpower_logs' && preferred==='spent_hours'){ for(const k of HOURS_FIELD_CANDIDATES){ if(k in sample) return k; } if(resolvedHoursField) return resolvedHoursField; } return preferred; }
     function getHoursValue(row){ if(!row) return 0; for(const k of HOURS_FIELD_CANDIDATES){ if(k in row && row[k] !== null && row[k] !== undefined && row[k] !== '') return toNum(row[k],0); } return 0; }
     async function resolveExistingColumn(table, candidates){
@@ -1575,7 +1580,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
                     </div>
                     <div class="schedule-field">
                       <div class="schedule-field-label">담당</div>
-                      <input class="cell-input compact-input" type="text" value="${escapeHTML(s.assignee||'')}" placeholder="-" onblur="updateScheduleField(${s.id},'assignee',this.value)">
+                      <input class="cell-input compact-input" type="text" value="${escapeHTML(s.assignee||'')}" placeholder="-" onblur="updateCell('schedules',${s.id},'assignee',this.value)">
                     </div>
                   </div>
                   <div class="schedule-progress-grid">
@@ -1684,7 +1689,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
     function getStatusMeta(status='default'){ const map={ new:{label:'A 신규',className:'color-new',bg:'#fff0e6'}, progress:{label:'B 진행',className:'color-progress',bg:'#dcfce7'}, deliver:{label:'C 납품',className:'color-deliver',bg:'#fef9c3'}, default:{label:'D 대기',className:'color-default',bg:'#f3f4f6'}, site:{label:'E 현장',className:'color-site',bg:'#f0fae0'} }; return map[status]||map.default; }
     function sortSchedules(items){ const order={new:1,progress:2,deliver:3,default:4,site:5}; return [...items].sort((a,b)=>{ const oa=order[a.status||'default']||99, ob=order[b.status||'default']||99; if(oa!==ob) return oa-ob; return String(a.project_code||a.code||'').localeCompare(String(b.project_code||b.code||'')); }); }
     function optionsFromSettings(list, selected){ const sel=String(selected||''); return list.map(x=>{ const name=x?.name ?? ''; const esc=escapeHTML(name); return `<option value="${esc}" ${name===sel?'selected':''}>${esc}</option>`; }).join(''); }
-    function getSortedProjects(){ return [...(cache.projects||[])].sort((a,b)=>String(a.code||'').localeCompare(String(b.code||'')) || String(a.name||'').localeCompare(String(b.name||''))); }
+    function getSortedProjects(){ return [...(cache.projects||[])].sort((a,b)=>{ const an=String(a.name||'').trim(), bn=String(b.name||'').trim(); if(!an && bn) return 1; if(an && !bn) return -1; return an.localeCompare(bn,'ko',{numeric:true}) || String(a.code||'').localeCompare(String(b.code||''),'ko',{numeric:true}); }); }
     function getProjectTypeLabel(type='default'){ const map={plan:'기획', basic:'기본', exec:'실시', site:'현장지원', default:'선택'}; return map[type] || '선택'; }
     function formatProjectCode(value=''){
       const raw=String(value||'').trim();
@@ -1978,6 +1983,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
       box.innerText=msg||'';
       setAuthBusy(false);
       setSetupBusy(false);
+      if(window.__resumeParticles) window.__resumeParticles();
     }
 
     function setAuthBusy(isBusy, message='처리 중...'){
@@ -1988,7 +1994,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
       if(loginBtn){ loginBtn.disabled=!!isBusy; loginBtn.style.opacity=isBusy?'0.55':'1'; loginBtn.style.cursor=isBusy?'not-allowed':'pointer'; }
       if(resetBtn){ resetBtn.disabled=!!isBusy; resetBtn.style.opacity=isBusy?'0.55':'1'; resetBtn.style.cursor=isBusy?'not-allowed':'pointer'; }
     }
-    function showApp(){ document.getElementById('authContainer').style.display='none'; document.getElementById('passwordSetupContainer').style.display='none'; document.getElementById('appContainer').style.display='block'; }
+    function showApp(){ document.getElementById('authContainer').style.display='none'; document.getElementById('passwordSetupContainer').style.display='none'; document.getElementById('appContainer').style.display='block'; if(window.__pauseParticles) window.__pauseParticles(); }
     function applyRoleUI(){ syncEffectiveRole(); const isAdmin = currentProfile.role === 'admin'; document.querySelectorAll('.admin-only').forEach(el=>{ if(!isAdmin){ el.style.display='none'; } else if(el.classList.contains('menu-item')){ el.style.display='flex'; } else if(el.classList.contains('menu-category')){ el.style.display='block'; } else { el.style.display='block'; } }); const roleEl=document.getElementById('userRole'); roleEl.innerText=currentProfile.role||'member'; roleEl.className='rolebadge '+(isAdmin?'role-admin':'role-member'); }
     window.showPage = function(id, el){ syncEffectiveRole(); const isAdmin=currentProfile.role==='admin'; const adminPages=['stats','admin','setting-upper','setting-lower']; if(adminPages.includes(id)&&!isAdmin) id='denied'; document.querySelectorAll('.page-section').forEach(e=>e.classList.remove('active')); const target=document.getElementById('page-'+id); if(target) target.classList.add('active'); document.querySelectorAll('.menu-item').forEach(item=>item.classList.remove('active')); if(el) el.classList.add('active');
       // 모바일 topbar 페이지명 업데이트
@@ -2078,8 +2084,8 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
     }
     function buildDbOnlyReply(message){
       const q = normalizeText(message);
-      if(includesAny(q, ['gpt','ai 모델','openai','api','gemini','챗봇'])){
-        return '현재 챗봇은 <b>Gemini + Supabase 하이브리드</b> 구조로 동작합니다. 내부 DB를 검색하고, Gemini가 맥락을 이해해서 답변합니다.';
+      if(includesAny(q, ['gpt','ai 모델','openai','api','gemini','claude','클로드','챗봇'])){
+        return '현재 챗봇은 <b>Claude + Supabase 하이브리드</b> 구조로 동작합니다. 내부 DB를 검색하고, Claude가 맥락을 이해해서 답변합니다.';
       }
 
       // 현황 브리핑 요청
@@ -2403,34 +2409,6 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
       const msg=inp.value.trim();
       if(!msg) return;
 
-      // !key 명령어: Gemini API 키 설정
-      if(msg.startsWith('!key ')){
-        const key = msg.replace('!key ','').trim();
-        if(key.length > 10){
-          setGeminiApiKey(key);
-          inp.value='';
-          appendChatMessage('bot', '✅ <b>Gemini API 키가 저장되었습니다.</b><br>이제 AI 응답이 활성화됩니다. 질문을 입력해보세요!');
-        } else {
-          inp.value='';
-          appendChatMessage('bot', '⚠ API 키가 너무 짧습니다. <code>!key YOUR_API_KEY</code> 형식으로 입력하세요.');
-        }
-        return;
-      }
-      if(msg === '!key'){
-        inp.value='';
-        const hasKey = !!getGeminiApiKey();
-        appendChatMessage('bot', hasKey
-          ? '✅ Gemini API 키가 설정되어 있습니다.<br>변경하려면 <code>!key NEW_KEY</code>, 삭제하려면 <code>!key clear</code>'
-          : '❌ API 키가 없습니다.<br><code>!key YOUR_API_KEY</code> 로 설정하세요.<br><a href="https://aistudio.google.com/apikey" target="_blank" style="color:#00FFC3;text-decoration:underline;">Google AI Studio에서 무료 발급 →</a>');
-        return;
-      }
-      if(msg === '!key clear'){
-        setGeminiApiKey('');
-        inp.value='';
-        appendChatMessage('bot', '🗑 API 키가 삭제되었습니다.');
-        return;
-      }
-
       const quickBtns = document.getElementById('chatQuickBtns');
       if(quickBtns) quickBtns.style.display = 'none';
       appendChatMessage('user', escapeHTML(msg));
@@ -2447,7 +2425,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
         console.error(err);
         const fallback = buildDbOnlyReply(msg);
         if(loadingEl) {
-          loadingEl.parentElement.innerHTML = `${fallback}<br><br><span class="muted" style="font-size:11px;">⚠ Gemini 연결 실패 → DB 검색 결과로 대체</span>`;
+          loadingEl.parentElement.innerHTML = `${fallback}<br><br><span class="muted" style="font-size:11px;">⚠ AI 연결 실패 → DB 검색 결과로 대체</span>`;
         } else {
           appendChatMessage('bot', `오류: ${escapeHTML(err.message||'검색 중 오류')}`);
         }
@@ -2986,13 +2964,37 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
     window.addMeeting = async function(){ await runAction(async()=>{ const { error } = await sb.from('meeting_notes').insert([{ meeting_date:new Date().toISOString().split('T')[0], title:'새 회의', project:'', attendees:'', agenda:'', notes:'', actions:'', next_meeting_date:null }]); if(error) throw error; await fetchAllData(); renderMeetings(); renderDashboard(); }, '회의록을 추가했습니다.'); };
     window.addSetting = async function(type){ if(currentProfile.role!=='admin') return showToast('관리자만 가능합니다.', 'error'); await runAction(async()=>{ const { error } = await sb.from('settings_'+type).insert([{ name:'새 항목' }]); if(error) throw error; await fetchAllData(); renderSettings(type); renderSchedules(); }, '설정을 추가했습니다.'); };
     window.updateDB = async function(table,id,field,value){ await ensureSupabaseClient(); if(table==='manpower_logs' && field==='spent_hours'){ await updateManpowerHoursField(id, value); await fetchAllData(); renderAll(); return; } const payload={}; const actualField = detectFieldName(table, field); payload[actualField]= value; const { error } = await sb.from(table).update(payload).eq('id',id); if(error) throw error; await fetchAllData(); renderAll(); };
+    // 인라인 셀 편집 전용: DB 저장 후 표를 다시 그리지 않고 메모리(cache)만 갱신 → 입력 포커스 유지(두 번 클릭 문제 해결)
+    window.updateCell = async function(table, id, field, value){
+      try{
+        await ensureSupabaseClient();
+        if(table==='manpower_logs' && field==='spent_hours'){
+          await updateManpowerHoursField(id, toNum(value,0));
+        } else {
+          const actualField = detectFieldName(table, field);
+          const isDate = /date$/i.test(field);
+          const payload = { [actualField]: (isDate && !value) ? null : value };
+          const { error } = await sb.from(table).update(payload).eq('id', id);
+          if(error) throw error;
+        }
+        // 캐시만 갱신 (DOM 재생성 X)
+        const row = getTableRows(table).find(r=>String(r.id)===String(id));
+        if(row){
+          if(table==='manpower_logs' && field==='spent_hours'){ row[resolvedHoursField||'spent_hours'] = toNum(value,0); }
+          else { row[detectFieldName(table, field)] = value; }
+        }
+      }catch(err){
+        console.error('updateCell 오류:', err);
+        showToast('저장 오류: ' + (err.message || err), 'error');
+      }
+    };
     window.saveManpowerHours = async function(id, value){
       try{
         await ensureSupabaseClient();
         await updateManpowerHoursField(id, toNum(value, 0));
-        await fetchAllData();
-        renderLogs();
-        renderDashboard();
+        // 표를 다시 그리지 않고 메모리만 갱신 → 입력 포커스 유지
+        const row = (cache.logs||[]).find(r=>String(r.id)===String(id));
+        if(row){ row[resolvedHoursField||'spent_hours'] = toNum(value, 0); }
       }catch(err){
         console.error('시간 저장 오류:', err);
         showToast('⚠ 시간 저장 실패: ' + (err.message || err) + '\n시간 필드명이 DB와 불일치할 수 있습니다.', 'error');
@@ -3089,12 +3091,13 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
         if(!parsed.length) throw new Error('파싱된 일정 데이터가 없습니다. 엑셀 형식을 확인해주세요.');
 
         // 확인 다이얼로그
-        const msg = `"${lastSheet}" 시트에서 ${parsed.length}건의 일정을 파싱했습니다.\n\n기존 금주 일정을 삭제하고 새로 반영할까요?\n(이전 주차 기록도 함께 정리됩니다)`;
+        const currentWeek = getCurrentWeekStart();
+        const msg = `"${lastSheet}" 시트에서 ${parsed.length}건의 일정을 파싱했습니다.\n\n금주(${formatWeekLabel(currentWeek)}) 일정만 새로 교체합니다.\n과거 주차 기록은 그대로 보존됩니다.\n\n계속할까요?`;
         if(!confirm(msg)) return;
 
-        // 기존 일정 전체 삭제
-        const { error: delErr } = await sb.from('schedules').delete().neq('id', 0);
-        if(delErr) console.warn('기존 일정 삭제 중 오류:', delErr.message);
+        // 금주 일정만 삭제 (과거 주차 기록은 보존)
+        const { error: delErr } = await sb.from('schedules').delete().eq('date', currentWeek);
+        if(delErr) console.warn('금주 일정 삭제 중 오류:', delErr.message);
 
         // 새 데이터 삽입 (project_id 없이)
         const { error: insErr } = await sb.from('schedules').insert(parsed.map(p=>{
@@ -3503,7 +3506,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
       renderProjects();
     };
     
-    function renderProjects(){ const t=document.getElementById('tableBody'); t.innerHTML=''; [...cache.projects].sort((a,b)=>{ const ac=(a.code||'').toUpperCase(); const bc=(b.code||'').toUpperCase(); return ac.localeCompare(bc, 'ko', {numeric:true}); }).forEach(p=>{ t.insertAdjacentHTML('beforeend', `<tr><td class="col-delete"><button class="delete-btn" onclick="deleteItem('projects',${p.id})">×</button></td><td class="col-code"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.code||'')}" placeholder="-" onblur="updateDB('projects',${p.id},'code',this.value)"></td><td class="col-name">${makeEditPreview({table:'projects', id:p.id, field:'name', title:'프로젝트명', value:p.name||'', limit:18, empty:'프로젝트명'})}</td><td class="col-history">${makeEditPreview({table:'projects', id:p.id, field:'history', title:'이력코드', value:p.history||'', limit:10, empty:'-'})}</td><td class="col-client"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.client||'')}" placeholder="-" onblur="updateDB('projects',${p.id},'client',this.value)"></td><td class="col-constructor"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.constructor||'')}" placeholder="-" onblur="updateDB('projects',${p.id},'constructor',this.value)"></td><td class="col-team"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.team||'')}" placeholder="-" onblur="updateDB('projects',${p.id},'team',this.value)"></td><td class="col-manager"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.manager||'')}" placeholder="-" onblur="updateDB('projects',${p.id},'manager',this.value)"></td><td class="col-type"><select class="compact-select" onchange="updateDB('projects',${p.id},'type',this.value).catch(()=>{})"><option value="default" ${p.type==='default'?'selected':''}>선택</option><option value="plan" ${p.type==='plan'?'selected':''}>기획</option><option value="basic" ${p.type==='basic'?'selected':''}>기본</option><option value="exec" ${p.type==='exec'?'selected':''}>실시</option><option value="site" ${p.type==='site'?'selected':''}>현장</option></select></td><td class="col-contract">${(()=>{ const cs=(p.contract_status==='signed')?'signed':'none'; const cd=escapeHTML(String(p.contract_date||'').slice(0,10)); return `<select class="compact-select" onchange="updateContractStatus(${p.id},this.value)"><option value="none" ${cs!=='signed'?'selected':''}>미계약</option><option value="signed" ${cs==='signed'?'selected':''}>계약</option></select><input type="date" class="cell-input compact-input" style="margin-top:4px;${cs==='signed'?'':'display:none;'}" value="${cd}" onblur="updateContractDate(${p.id},this.value)">`; })()}</td>${renderMilestoneCell(p.id)}</tr>`); }); }
+    function renderProjects(){ const t=document.getElementById('tableBody'); t.innerHTML=''; const q=String(projectSearchQuery||'').trim().toLowerCase(); let list=[...cache.projects].sort((a,b)=>{ const ac=(a.code||'').toUpperCase(); const bc=(b.code||'').toUpperCase(); return ac.localeCompare(bc, 'ko', {numeric:true}); }); if(q){ list=list.filter(p=>[p.code,p.name,p.history,p.client,p.constructor,p.team,p.manager].some(v=>String(v||'').toLowerCase().includes(q))); } const _cEl=document.getElementById('projectSearchCount'); if(_cEl) _cEl.innerText = q ? `${list.length}건 / 전체 ${cache.projects.length}건` : `전체 ${cache.projects.length}건`; if(!list.length){ t.innerHTML=`<tr><td colspan="11" class="muted" style="padding:16px;">${q?'검색 결과가 없습니다.':'프로젝트가 없습니다. 추가 버튼으로 등록하세요.'}</td></tr>`; return; } list.forEach(p=>{ t.insertAdjacentHTML('beforeend', `<tr><td class="col-delete"><button class="delete-btn" onclick="deleteItem('projects',${p.id})">×</button></td><td class="col-code"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.code||'')}" placeholder="-" onblur="updateCell('projects',${p.id},'code',this.value)"></td><td class="col-name">${makeEditPreview({table:'projects', id:p.id, field:'name', title:'프로젝트명', value:p.name||'', limit:18, empty:'프로젝트명'})}</td><td class="col-history">${makeEditPreview({table:'projects', id:p.id, field:'history', title:'이력코드', value:p.history||'', limit:10, empty:'-'})}</td><td class="col-client"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.client||'')}" placeholder="-" onblur="updateCell('projects',${p.id},'client',this.value)"></td><td class="col-constructor"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.constructor||'')}" placeholder="-" onblur="updateCell('projects',${p.id},'constructor',this.value)"></td><td class="col-team"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.team||'')}" placeholder="-" onblur="updateCell('projects',${p.id},'team',this.value)"></td><td class="col-manager"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.manager||'')}" placeholder="-" onblur="updateCell('projects',${p.id},'manager',this.value)"></td><td class="col-type"><select class="compact-select" onchange="updateCell('projects',${p.id},'type',this.value).catch(()=>{})"><option value="default" ${p.type==='default'?'selected':''}>선택</option><option value="plan" ${p.type==='plan'?'selected':''}>기획</option><option value="basic" ${p.type==='basic'?'selected':''}>기본</option><option value="exec" ${p.type==='exec'?'selected':''}>실시</option><option value="site" ${p.type==='site'?'selected':''}>현장</option></select></td><td class="col-contract">${(()=>{ const cs=(p.contract_status==='signed')?'signed':'none'; const cd=escapeHTML(String(p.contract_date||'').slice(0,10)); return `<select class="compact-select" onchange="updateContractStatus(${p.id},this.value)"><option value="none" ${cs!=='signed'?'selected':''}>미계약</option><option value="signed" ${cs==='signed'?'selected':''}>계약</option></select><input type="date" class="cell-input compact-input" style="margin-top:4px;${cs==='signed'?'':'display:none;'}" value="${cd}" onblur="updateContractDate(${p.id},this.value)">`; })()}</td>${renderMilestoneCell(p.id)}</tr>`); }); }
     function renderLogs(){
       const c=document.getElementById('dailyLogContainer');
       if(!cache.logs.length){ c.innerHTML='<div class="card"><div class="empty-box">기록 없음. 상단 "+ 기록 추가"를 눌러 첫 기록을 만들 수 있습니다.</div></div>'; return; }
@@ -3530,10 +3533,10 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
           const logDate = String(l.date||'').slice(0,10) || '';
           html += `<tr>
             <td><button class="delete-btn" onclick="deleteItem('manpower_logs',${l.id})">×</button></td>
-            <td style="min-width:130px;"><input type="date" value="${escapeHTML(logDate)}" onblur="updateDB('manpower_logs',${l.id},'date',this.value)"></td>
-            <td contenteditable="true" onblur="updateDB('manpower_logs',${l.id},'task',this.innerText)">${escapeHTML(l.task||'')}</td>
-            <td contenteditable="true" onblur="updateDB('manpower_logs',${l.id},'assignee',this.innerText)">${escapeHTML(l.assignee||'')}</td>
-            <td><select onchange="updateDB('manpower_logs',${l.id},'project',this.value)"><option value="">선택</option>${projectNameOptions(l.project)}</select></td>
+            <td style="min-width:130px;"><input type="date" value="${escapeHTML(logDate)}" onblur="updateCell('manpower_logs',${l.id},'date',this.value)"></td>
+            <td contenteditable="true" onblur="updateCell('manpower_logs',${l.id},'task',this.innerText)">${escapeHTML(l.task||'')}</td>
+            <td contenteditable="true" onblur="updateCell('manpower_logs',${l.id},'assignee',this.innerText)">${escapeHTML(l.assignee||'')}</td>
+            <td><select onchange="updateCell('manpower_logs',${l.id},'project',this.value)"><option value="">선택</option>${projectNameOptions(l.project)}</select></td>
             <td style="min-width:140px;"><input type="number" min="0" step="0.25" value="${val}" onblur="saveManpowerHours(${l.id},this.value)"><div class="muted" style="margin-top:4px;">0.25=15분</div></td>
           </tr>`;
         });
@@ -3624,12 +3627,12 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
               <div class="design-team-actions"><button class="btn danger" type="button" onclick="deleteItem('design_team_schedule',${item.id})">삭제</button></div>
             </div>
             <div class="design-team-grid">
-              <div><span class="muted">담당자</span><input type="text" value="${escapeHTML(item.assignee||'')}" placeholder="담당자" onblur="updateDesignTeamField(${item.id},'assignee',this.value)"></div>
-              <div><span class="muted">예상설계일정</span><input type="text" value="${escapeHTML(item.expected_design_schedule||'')}" placeholder="예: 4월 2주 기본설계 완료" onblur="updateDesignTeamField(${item.id},'expected_design_schedule',this.value)">${makeExpandableText(item.expected_design_schedule||'', {limit:54})}</div>
+              <div><span class="muted">담당자</span><input type="text" value="${escapeHTML(item.assignee||'')}" placeholder="담당자" onblur="updateCell('design_team_schedule',${item.id},'assignee',this.value)"></div>
+              <div><span class="muted">예상설계일정</span><input type="text" value="${escapeHTML(item.expected_design_schedule||'')}" placeholder="예: 4월 2주 기본설계 완료" onblur="updateCell('design_team_schedule',${item.id},'expected_design_schedule',this.value)"></div>
             </div>
             <div class="design-team-grid">
-              <div><span class="muted">현재까지 진행사항</span><textarea placeholder="현재까지 진행사항을 입력하세요" onblur="updateDesignTeamField(${item.id},'progress_summary',this.value)">${escapeHTML(item.progress_summary||'')}</textarea>${makeExpandableText(item.progress_summary||'', {limit:110})}</div>
-              <div><span class="muted">비고</span><textarea placeholder="비고를 입력하세요" onblur="updateDesignTeamField(${item.id},'note',this.value)">${escapeHTML(item.note||'')}</textarea>${makeExpandableText(item.note||'', {limit:90})}</div>
+              <div><span class="muted">현재까지 진행사항</span><textarea placeholder="현재까지 진행사항을 입력하세요" onblur="updateCell('design_team_schedule',${item.id},'progress_summary',this.value)">${escapeHTML(item.progress_summary||'')}</textarea></div>
+              <div><span class="muted">비고</span><textarea placeholder="비고를 입력하세요" onblur="updateCell('design_team_schedule',${item.id},'note',this.value)">${escapeHTML(item.note||'')}</textarea></div>
             </div>
           </div>`;
         });
@@ -3642,7 +3645,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
         const linkedText = linked ? `${escapeHTML(formatProjectCode(linked.code||''))}${linked.name ? ' · ' + escapeHTML(linked.name) : ''}` : (item.project ? escapeHTML(item.project) : '-');
         return `<tr>
           <td class="design-team-col-project">${renderProjectPicker('design_team_schedule', item.id, item, '현황판 프로젝트 선택')}<div class="design-team-cell-title">${linkedText}</div></td>
-          <td class="design-team-col-assignee"><input type="text" value="${escapeHTML(item.assignee||'')}" placeholder="담당자" onblur="updateDesignTeamField(${item.id},'assignee',this.value)"></td>
+          <td class="design-team-col-assignee"><input type="text" value="${escapeHTML(item.assignee||'')}" placeholder="담당자" onblur="updateCell('design_team_schedule',${item.id},'assignee',this.value)"></td>
           <td class="design-team-col-progress">${makeEditPreview({table:'design_team_schedule', id:item.id, field:'progress_summary', title:'현재까지 진행사항', value:item.progress_summary||'', limit:42, empty:'진행사항 없음'})}</td>
           <td class="design-team-col-expected">${makeEditPreview({table:'design_team_schedule', id:item.id, field:'expected_design_schedule', title:'예상설계일정', value:item.expected_design_schedule||'', limit:34, empty:'예상설계일정 없음'})}</td>
           <td class="design-team-col-note">${makeEditPreview({table:'design_team_schedule', id:item.id, field:'note', title:'비고', value:item.note||'', limit:34, empty:'비고 없음'})}</td>
@@ -3700,16 +3703,16 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
               </div>
               <div class="todo-mobile-field" style="margin-top:10px;">
                 <div class="muted">작업 이름</div>
-                <input type="text" value="${escapeHTML(t.task_name||'')}" placeholder="새 작업" onblur="updateTodoField(${t.id},'task_name',this.value)">
+                <input type="text" value="${escapeHTML(t.task_name||'')}" placeholder="새 작업" onblur="updateCell('todo_items',${t.id},'task_name',this.value)">
               </div>
               <div class="todo-mobile-grid" style="margin-top:10px;">
                 <div class="todo-mobile-field">
                   <div class="muted">작업자</div>
-                  <input type="text" value="${escapeHTML(t.assignee||'')}" placeholder="-" onblur="updateTodoField(${t.id},'assignee',this.value)">
+                  <input type="text" value="${escapeHTML(t.assignee||'')}" placeholder="-" onblur="updateCell('todo_items',${t.id},'assignee',this.value)">
                 </div>
                 <div class="todo-mobile-field">
                   <div class="muted">마감일</div>
-                  <input type="date" value="${escapeHTML(t.due_date||'')}" onblur="updateTodoField(${t.id},'due_date',this.value)">
+                  <input type="date" value="${escapeHTML(t.due_date||'')}" onblur="updateCell('todo_items',${t.id},'due_date',this.value)">
                 </div>
               </div>
               <div class="todo-mobile-grid" style="margin-top:10px;">
@@ -3733,11 +3736,11 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
               <div class="todo-mobile-grid" style="margin-top:10px;">
                 <div class="todo-mobile-field">
                   <div class="muted">GROUP</div>
-                  <input type="text" value="${escapeHTML(t.group_tag||'')}" onblur="updateTodoField(${t.id},'group_tag',this.value)">
+                  <input type="text" value="${escapeHTML(t.group_tag||'')}" onblur="updateCell('todo_items',${t.id},'group_tag',this.value)">
                 </div>
                 <div class="todo-mobile-field">
                   <div class="muted">업무진행 분류</div>
-                  <input type="text" value="${escapeHTML(t.category||'')}" placeholder="-" onblur="updateTodoField(${t.id},'category',this.value)">
+                  <input type="text" value="${escapeHTML(t.category||'')}" placeholder="-" onblur="updateCell('todo_items',${t.id},'category',this.value)">
                 </div>
               </div>
             </div>`;
@@ -3752,14 +3755,14 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
             const stBadge=st==='done'?'s-done':st==='doing'?'s-doing':'s-todo';
             html += `<tr>
               <td class="action-col"><button class="delete-btn" onclick="deleteItem('todo_items',${t.id})">×</button></td>
-              <td class="todo-cell-group"><input type="text" value="${escapeHTML(t.group_tag||'')}" onblur="updateTodoField(${t.id},'group_tag',this.value)"></td>
+              <td class="todo-cell-group"><input type="text" value="${escapeHTML(t.group_tag||'')}" onblur="updateCell('todo_items',${t.id},'group_tag',this.value)"></td>
               <td class="todo-cell-project">${renderProjectPicker('todo_items', t.id, t, '현황판 프로젝트 선택')}<div class="todo-project-sub">${escapeHTML(t.project||'')}</div></td>
               <td class="todo-cell-priority"><span class="prio-badge ${prBadge}">${pr==='high'?'높음':pr==='low'?'낮음':'중간'}</span><select class="todo-inline-select" onchange="updateTodoField(${t.id},'priority',this.value).catch(()=>{})"><option value="high" ${pr==='high'?'selected':''}>높음</option><option value="medium" ${pr==='medium'?'selected':''}>중간</option><option value="low" ${pr==='low'?'selected':''}>낮음</option></select></td>
-              <td class="todo-cell-task"><input type="text" value="${escapeHTML(t.task_name||'')}" placeholder="새 작업" onblur="updateTodoField(${t.id},'task_name',this.value)"></td>
-              <td class="todo-cell-assignee"><input type="text" value="${escapeHTML(t.assignee||'')}" placeholder="-" onblur="updateTodoField(${t.id},'assignee',this.value)"></td>
+              <td class="todo-cell-task"><input type="text" value="${escapeHTML(t.task_name||'')}" placeholder="새 작업" onblur="updateCell('todo_items',${t.id},'task_name',this.value)"></td>
+              <td class="todo-cell-assignee"><input type="text" value="${escapeHTML(t.assignee||'')}" placeholder="-" onblur="updateCell('todo_items',${t.id},'assignee',this.value)"></td>
               <td class="todo-cell-status"><span class="status-badge ${stBadge}">${st==='done'?'완료':st==='doing'?'진행 중':'시작 전'}</span><select class="todo-inline-select" onchange="updateTodoField(${t.id},'status',this.value).catch(()=>{})"><option value="todo" ${st==='todo'?'selected':''}>시작 전</option><option value="doing" ${st==='doing'?'selected':''}>진행 중</option><option value="done" ${st==='done'?'selected':''}>완료</option></select></td>
-              <td class="todo-cell-due"><input type="date" value="${escapeHTML(t.due_date||'')}" onblur="updateTodoField(${t.id},'due_date',this.value)"></td>
-              <td class="todo-cell-category"><input type="text" value="${escapeHTML(t.category||'')}" placeholder="-" onblur="updateTodoField(${t.id},'category',this.value)"></td>
+              <td class="todo-cell-due"><input type="date" value="${escapeHTML(t.due_date||'')}" onblur="updateCell('todo_items',${t.id},'due_date',this.value)"></td>
+              <td class="todo-cell-category"><input type="text" value="${escapeHTML(t.category||'')}" placeholder="-" onblur="updateCell('todo_items',${t.id},'category',this.value)"></td>
             </tr>`;
           });
           html += `</tbody></table></div>`;
@@ -3795,16 +3798,16 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
             <div class="meeting-field"><label class="meeting-label">📅 Next 일정</label><input type="date" value="${escapeHTML(m.next_meeting_date||'')}" onblur="updateMeetingField(${m.id},'next_meeting_date',this.value)"></div>
           </div>
           <div class="meeting-row-2">
-            <div class="meeting-field"><label class="meeting-label">📌 회의 제목</label><input type="text" value="${escapeHTML(m.title||'')}" placeholder="회의 제목을 입력하세요" onblur="updateMeetingField(${m.id},'title',this.value)"></div>
+            <div class="meeting-field"><label class="meeting-label">📌 회의 제목</label><input type="text" value="${escapeHTML(m.title||'')}" placeholder="회의 제목을 입력하세요" onblur="updateCell('meeting_notes',${m.id},'title',this.value)"></div>
             <div class="meeting-field"><label class="meeting-label">📂 프로젝트</label>${renderProjectPicker('meeting_notes', m.id, m, '현황판 프로젝트 선택')}</div>
           </div>
           <div class="meeting-row-2">
-            <div class="meeting-field"><label class="meeting-label">👥 참석자</label><input type="text" value="${escapeHTML(m.attendees||'')}" placeholder="참석자 (쉼표로 구분)" onblur="updateMeetingField(${m.id},'attendees',this.value)"></div>
-            <div class="meeting-field"><label class="meeting-label">📋 아젠다</label><input type="text" value="${escapeHTML(m.agenda||'')}" placeholder="회의 안건" onblur="updateMeetingField(${m.id},'agenda',this.value)"></div>
+            <div class="meeting-field"><label class="meeting-label">👥 참석자</label><input type="text" value="${escapeHTML(m.attendees||'')}" placeholder="참석자 (쉼표로 구분)" onblur="updateCell('meeting_notes',${m.id},'attendees',this.value)"></div>
+            <div class="meeting-field"><label class="meeting-label">📋 아젠다</label><input type="text" value="${escapeHTML(m.agenda||'')}" placeholder="회의 안건" onblur="updateCell('meeting_notes',${m.id},'agenda',this.value)"></div>
           </div>
           <div class="meeting-row-2">
-            <div class="meeting-field meeting-textarea-field"><label class="meeting-label">💬 회의 내용</label><textarea placeholder="회의 내용을 기록하세요" onblur="updateMeetingField(${m.id},'notes',this.value)">${escapeHTML(m.notes||'')}</textarea></div>
-            <div class="meeting-field meeting-textarea-field"><label class="meeting-label">⚡ 액션 아이템</label><textarea placeholder="후속 조치 사항을 기록하세요" onblur="updateMeetingField(${m.id},'actions',this.value)">${escapeHTML(m.actions||'')}</textarea></div>
+            <div class="meeting-field meeting-textarea-field"><label class="meeting-label">💬 회의 내용</label><textarea placeholder="회의 내용을 기록하세요" onblur="updateCell('meeting_notes',${m.id},'notes',this.value)">${escapeHTML(m.notes||'')}</textarea></div>
+            <div class="meeting-field meeting-textarea-field"><label class="meeting-label">⚡ 액션 아이템</label><textarea placeholder="후속 조치 사항을 기록하세요" onblur="updateCell('meeting_notes',${m.id},'actions',this.value)">${escapeHTML(m.actions||'')}</textarea></div>
           </div>
         </div>
       </div>`;
@@ -3925,6 +3928,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
       const TOTAL = 2800;
       let pts = [];
       let mouse = {x:-9999, y:-9999};
+      let rafId = null, paused = false;
 
       function resize(){
         w = canvas.offsetWidth; h = canvas.offsetHeight;
@@ -4017,7 +4021,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
           ctx.fill();
         }
         ctx.globalAlpha = 1;
-        requestAnimationFrame(frame);
+        if(!paused) rafId = requestAnimationFrame(frame);
       }
 
       canvas.parentElement.addEventListener('mousemove', e=>{
@@ -4028,6 +4032,9 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
         mouse.x=-9999; mouse.y=-9999;
       });
       window.addEventListener('resize', resize);
+      // 로그인 후엔 정지(CPU/배터리 절약), 로그아웃 시 재개
+      window.__pauseParticles = function(){ if(paused) return; paused = true; if(rafId){ cancelAnimationFrame(rafId); rafId = null; } };
+      window.__resumeParticles = function(){ if(!paused) return; paused = false; frame(); };
       resize(); frame();
     })();
 
