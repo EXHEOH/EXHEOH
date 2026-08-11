@@ -962,17 +962,23 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
 .weekly-week-label{color:var(--muted);font-weight:800;font-size:12px}
 .weekly-card{padding:0;overflow-x:auto}
 .weekly-grid{border-collapse:collapse;width:100%;min-width:980px;table-layout:fixed}
-.weekly-grid th{background:rgba(255,255,255,.05);color:rgba(255,255,255,.75);font-weight:900;font-size:12px;padding:11px 8px;border:1px solid var(--line);text-align:center}
-.weekly-grid th.weekly-day-th small{display:block;font-weight:800;color:var(--muted);margin-top:2px}
-.weekly-grid td{border:1px solid var(--line);padding:6px;vertical-align:top}
+.weekly-grid th{background:#202023;color:#fff;font-weight:900;font-size:13px;padding:12px 8px;border:1px solid rgba(255,255,255,.14);text-align:center;letter-spacing:.02em}
+.weekly-grid th.weekly-day-th small{display:block;font-weight:800;color:#00FFC3;margin-top:3px;font-size:11px;letter-spacing:.04em}
+.weekly-grid th.is-today{background:rgba(0,255,195,.16);color:#00FFC3;box-shadow:inset 0 -3px 0 var(--primary)}
+.weekly-grid th.is-today small{color:#00FFC3}
+.weekly-grid td{border:1px solid rgba(255,255,255,.10);padding:6px;vertical-align:top}
+.weekly-grid tbody tr:nth-child(even) td{background:rgba(255,255,255,.025)}
+.weekly-grid td.is-today{background:rgba(0,255,195,.05)}
+.weekly-grid td.weekly-name-td{background:#232326;border-right:2px solid rgba(255,255,255,.18)}
 .weekly-grid col.weekly-name-col{width:110px}
 .weekly-grid col.weekly-del-col{width:46px}
-.weekly-name-cell{display:flex;flex-direction:column;gap:4px}
-.weekly-name-cell input{font-weight:900;text-align:center;padding:9px 8px;border-radius:12px}
+.weekly-name-cell{display:flex;flex-direction:column;gap:4px;height:100%;justify-content:center}
+.weekly-name-cell input{font-weight:900;text-align:center;padding:9px 8px;border-radius:12px;background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25);color:#fff;font-size:13px}
 .weekly-cell-lines{display:flex;flex-direction:column;gap:4px}
 .weekly-cell-lines input{padding:8px 10px;border-radius:12px;font-size:12px;white-space:normal}
-.weekly-cell-lines input.line2{opacity:.85}
-.weekly-send-row td{background:rgba(0,255,195,.04)}
+.weekly-cell-lines input.line2{opacity:.8;background:rgba(255,255,255,.03)}
+.weekly-send-row td{background:rgba(0,255,195,.05)}
+.weekly-send-row td.weekly-name-td{background:rgba(0,255,195,.14);border-right-color:rgba(0,255,195,.35)}
 .weekly-send-label{font-weight:900;color:#00FFC3;text-align:center;padding:8px 4px;letter-spacing:.02em}
 .weekly-del-btn{width:100%;padding:8px 0;border-radius:12px;border:1px solid rgba(255,107,107,.35);background:rgba(255,107,107,.10);color:#FF6B6B;font-weight:900;cursor:pointer;font-size:12px}
 .weekly-del-btn:hover{background:rgba(255,107,107,.22)}
@@ -3148,14 +3154,15 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
       const members=rows.filter(r=>(r.row_type||'member')==='member').sort((a,b)=>(a.sort_order||0)-(b.sort_order||0) || a.id-b.id);
       const sendRow=rows.find(r=>r.row_type==='send');
       const memoRow=rows.find(r=>r.row_type==='memo');
-      const dayHeads=WEEKLY_DAYS.map((d,i)=>`<th class="weekly-day-th">${d[1]}<small>${weeklyDayDate(i)}</small></th>`).join('');
-      const cellHtml=(r,key)=>`<td><div class="weekly-cell-lines"><input type="text" value="${escapeHTML(r[key+'1']||'')}" placeholder="" onblur="updateCell('weekly_team_schedule',${r.id},'${key}1',this.value)"><input type="text" class="line2" value="${escapeHTML(r[key+'2']||'')}" placeholder="" onblur="updateCell('weekly_team_schedule',${r.id},'${key}2',this.value)"></div></td>`;
+      const todayIdx = (weeklyWeekStart===getCurrentWeekStart()) ? (new Date().getDay()+6)%7 : -1; // 0=월 ... 4=금 (주말이면 5,6 → 하이라이트 없음)
+      const dayHeads=WEEKLY_DAYS.map((d,i)=>`<th class="weekly-day-th${i===todayIdx?' is-today':''}">${d[1]}<small>${weeklyDayDate(i)}</small></th>`).join('');
+      const cellHtml=(r,key,i)=>`<td${i===todayIdx?' class="is-today"':''}><div class="weekly-cell-lines"><input type="text" value="${escapeHTML(r[key+'1']||'')}" placeholder="" onblur="updateCell('weekly_team_schedule',${r.id},'${key}1',this.value)"><input type="text" class="line2" value="${escapeHTML(r[key+'2']||'')}" placeholder="" onblur="updateCell('weekly_team_schedule',${r.id},'${key}2',this.value)"></div></td>`;
       let bodyHtml='';
       members.forEach(r=>{
-        bodyHtml += `<tr><td><div class="weekly-name-cell"><input type="text" value="${escapeHTML(r.member||'')}" placeholder="이름" onblur="updateCell('weekly_team_schedule',${r.id},'member',this.value)"></div></td>${WEEKLY_DAYS.map(d=>cellHtml(r,d[0])).join('')}<td><button type="button" class="weekly-del-btn" onclick="deleteWeeklyRow(${r.id})">✕</button></td></tr>`;
+        bodyHtml += `<tr><td class="weekly-name-td"><div class="weekly-name-cell"><input type="text" value="${escapeHTML(r.member||'')}" placeholder="이름" onblur="updateCell('weekly_team_schedule',${r.id},'member',this.value)"></div></td>${WEEKLY_DAYS.map((d,i)=>cellHtml(r,d[0],i)).join('')}<td><button type="button" class="weekly-del-btn" onclick="deleteWeeklyRow(${r.id})">✕</button></td></tr>`;
       });
       if(sendRow){
-        bodyHtml += `<tr class="weekly-send-row"><td><div class="weekly-send-label">📦 발송</div></td>${WEEKLY_DAYS.map(d=>cellHtml(sendRow,d[0])).join('')}<td><button type="button" class="weekly-del-btn" onclick="deleteWeeklyRow(${sendRow.id})">✕</button></td></tr>`;
+        bodyHtml += `<tr class="weekly-send-row"><td class="weekly-name-td"><div class="weekly-send-label">📦 발송</div></td>${WEEKLY_DAYS.map((d,i)=>cellHtml(sendRow,d[0],i)).join('')}<td><button type="button" class="weekly-del-btn" onclick="deleteWeeklyRow(${sendRow.id})">✕</button></td></tr>`;
       }
       const tableHtml = bodyHtml
         ? `<div class="card weekly-card"><table class="weekly-grid"><colgroup><col class="weekly-name-col"><col><col><col><col><col><col class="weekly-del-col"></colgroup><thead><tr><th>담당자</th>${dayHeads}<th>삭제</th></tr></thead><tbody>${bodyHtml}</tbody></table></div>`
