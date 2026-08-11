@@ -95,7 +95,7 @@ textarea{min-height:84px;resize:vertical}
 .sidebar{position:fixed;top:0;left:0;bottom:0;width:280px;background:#0A0A0A;border-right:1px solid rgba(255,255,255,.06);padding:22px;z-index:100;overflow-y:auto;display:flex;flex-direction:column}
 .main{margin-left:280px;padding:36px;min-height:100vh;width:calc(100% - 280px);padding-bottom:110px;background:var(--bg)}
 .logo-container{margin-bottom:26px}
-.logo-img{max-width:100%;height:auto;display:block;margin-bottom:12px;filter:grayscale(1) brightness(2.4) contrast(1.05)}
+.logo-img{max-width:100%;height:auto;display:block;margin-bottom:12px;filter:brightness(0) invert(1)}
 .logo-text{font-size:19px;font-weight:800;color:#fff;line-height:1;font-family:'Inter Tight','Space Grotesk','Inter',sans-serif;letter-spacing:-0.07em}
 .menu-category{font-size:10px;color:rgba(255,255,255,.45);font-weight:900;margin-top:18px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.14em}
 .menu-item{padding:13px 14px;margin-bottom:7px;cursor:pointer;border-radius:18px;font-weight:800;color:rgba(255,255,255,.60);display:flex;align-items:center;gap:8px;transition:.16s ease;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.02)}
@@ -950,6 +950,61 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
 .mp-row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .mp-card input,.mp-card select{min-height:42px;border-radius:14px;font-size:13px}
 
+/* ===== 주간업무일정표 ===== */
+.weekly-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 16px}
+.weekly-team-tabs{display:flex;gap:6px}
+.weekly-tab{padding:10px 20px;border-radius:999px;border:1px solid var(--border-strong);background:rgba(255,255,255,.05);color:rgba(255,255,255,.65);font-weight:800;font-size:12px;cursor:pointer;transition:.16s ease;letter-spacing:-0.02em}
+.weekly-tab:hover{background:rgba(255,255,255,.10)}
+.weekly-tab.active{background:rgba(0,255,195,.12);border-color:rgba(0,255,195,.35);color:#00FFC3;box-shadow:0 0 14px rgba(0,255,195,.15)}
+.weekly-week-nav{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.weekly-week-nav input[type="date"]{width:150px;padding:9px 12px}
+.weekly-week-nav .btn{padding:9px 14px}
+.weekly-week-label{color:var(--muted);font-weight:800;font-size:12px}
+.weekly-card{padding:0;overflow-x:auto}
+.weekly-grid{border-collapse:collapse;width:100%;min-width:980px;table-layout:fixed}
+.weekly-grid th{background:rgba(255,255,255,.05);color:rgba(255,255,255,.75);font-weight:900;font-size:12px;padding:11px 8px;border:1px solid var(--line);text-align:center}
+.weekly-grid th.weekly-day-th small{display:block;font-weight:800;color:var(--muted);margin-top:2px}
+.weekly-grid td{border:1px solid var(--line);padding:6px;vertical-align:top}
+.weekly-grid col.weekly-name-col{width:110px}
+.weekly-grid col.weekly-del-col{width:46px}
+.weekly-name-cell{display:flex;flex-direction:column;gap:4px}
+.weekly-name-cell input{font-weight:900;text-align:center;padding:9px 8px;border-radius:12px}
+.weekly-cell-lines{display:flex;flex-direction:column;gap:4px}
+.weekly-cell-lines input{padding:8px 10px;border-radius:12px;font-size:12px;white-space:normal}
+.weekly-cell-lines input.line2{opacity:.85}
+.weekly-send-row td{background:rgba(0,255,195,.04)}
+.weekly-send-label{font-weight:900;color:#00FFC3;text-align:center;padding:8px 4px;letter-spacing:.02em}
+.weekly-del-btn{width:100%;padding:8px 0;border-radius:12px;border:1px solid rgba(255,107,107,.35);background:rgba(255,107,107,.10);color:#FF6B6B;font-weight:900;cursor:pointer;font-size:12px}
+.weekly-del-btn:hover{background:rgba(255,107,107,.22)}
+.weekly-actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 18px}
+.weekly-memo-card{padding:18px}
+.weekly-memo-card h3{margin:0 0 10px;color:#fff;font-size:15px}
+.weekly-memo-card textarea{min-height:110px;line-height:1.7}
+.weekly-empty{padding:34px 20px;text-align:center;color:var(--muted);font-weight:800}
+@media (max-width:640px){.weekly-toolbar{flex-direction:column;align-items:stretch}.weekly-week-nav{justify-content:space-between}}
+
+/* ===== A4 인쇄 (주간업무일정표) ===== */
+#weeklyPrintSheet{display:none}
+@media print{
+  @page{size:A4 landscape;margin:9mm}
+  html,body{background:#fff !important;overflow:visible !important;font-size:10pt}
+  body.print-weekly>*:not(#weeklyPrintSheet){display:none !important}
+  body.print-weekly #weeklyPrintSheet{display:block !important;color:#111;font-family:'Pretendard','Malgun Gothic',sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  #weeklyPrintSheet .wp-title{font-size:17pt;font-weight:900;text-align:center;margin:0 0 2mm;letter-spacing:-0.02em;color:#111}
+  #weeklyPrintSheet .wp-sub{display:flex;justify-content:space-between;align-items:baseline;font-size:9pt;font-weight:700;color:#444;margin:0 0 3mm}
+  #weeklyPrintSheet table{border-collapse:collapse;width:100%;table-layout:fixed;page-break-inside:avoid}
+  #weeklyPrintSheet th{border:0.5mm solid #222;background:#ececec !important;font-size:10pt;font-weight:900;padding:1.6mm 1mm;text-align:center;color:#111}
+  #weeklyPrintSheet th small{font-weight:700;color:#555;margin-left:1mm}
+  #weeklyPrintSheet td{border:0.4mm solid #333;padding:1.4mm 1.6mm;font-size:9pt;font-weight:600;vertical-align:top;word-break:break-all;line-height:1.45;color:#111}
+  #weeklyPrintSheet td.wp-name{font-weight:900;text-align:center;vertical-align:middle;font-size:10pt;background:#f6f6f6 !important}
+  #weeklyPrintSheet .wp-line{min-height:4.6mm}
+  #weeklyPrintSheet .wp-line+.wp-line{margin-top:0.8mm;padding-top:0.8mm;border-top:0.2mm dashed #bbb}
+  #weeklyPrintSheet tr.wp-send td{background:#f2f9f6 !important}
+  #weeklyPrintSheet tr.wp-send td.wp-name{background:#e2f2ec !important}
+  #weeklyPrintSheet .wp-memo{margin-top:3mm;border:0.4mm solid #333;padding:2mm 2.5mm;page-break-inside:avoid}
+  #weeklyPrintSheet .wp-memo-title{font-size:9.5pt;font-weight:900;margin:0 0 1mm;color:#111}
+  #weeklyPrintSheet .wp-memo-body{font-size:8.5pt;font-weight:600;white-space:pre-wrap;line-height:1.5;color:#222}
+}
 </style>
 </head>
 <body>
@@ -1050,6 +1105,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
 
       <div class="menu-category">PLANNING</div>
       <div class="menu-item" data-page="schedule" onclick="showPage('schedule', this)">📅 프로젝트 일정표</div>
+      <div class="menu-item" data-page="weekly-team" onclick="showPage('weekly-team', this)">🗓️ 주간업무일정표</div>
       <div class="menu-item" data-page="design-team-schedule" onclick="showPage('design-team-schedule', this)">🗂️ 설계팀일정</div>
       <div class="menu-item" data-page="todo" onclick="showPage('todo', this)">✅ TO DO LIST</div>
       <div class="menu-item" data-page="meeting" onclick="showPage('meeting', this)">📝 회의록</div>
@@ -1112,6 +1168,24 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
 
       <div id="page-schedule" class="page-section"><div class="header"><h1>프로젝트 일정표</h1><div class="page-actions"><button class="btn secondary" onclick="document.getElementById('xlsxInputSchedule').click()">📂 위클리브리핑 업로드</button><button class="btn" onclick="openAddScheduleModal()">+ 일정 추가</button><input type="file" id="xlsxInputSchedule" accept=".xlsx,.xls" onchange="handleWeeklyBriefingUpload(this)" style="display:none"></div></div><div class="muted" style="margin:-8px 0 14px;"><b>위클리브리핑 엑셀(.xlsx)</b>을 업로드하면 금주 일정이 자동 반영됩니다. 개별 추가/수정도 가능합니다.</div><div id="scheduleContainer"></div></div>
 
+      <div id="page-weekly-team" class="page-section"><div class="header"><h1>🗓️ 주간업무일정표</h1><div class="page-actions"><button class="btn secondary" onclick="printWeeklySchedule()">🖨️ A4 인쇄</button><button class="btn" onclick="addWeeklyMemberRow()">+ 인원 추가</button></div></div>
+        <div class="weekly-toolbar">
+          <div class="weekly-team-tabs">
+            <button type="button" class="weekly-tab" id="weeklyTab1" onclick="setWeeklyTeam('1팀')">디자인1팀</button>
+            <button type="button" class="weekly-tab" id="weeklyTab2" onclick="setWeeklyTeam('2팀')">디자인2팀</button>
+          </div>
+          <div class="weekly-week-nav">
+            <button type="button" class="btn secondary" onclick="shiftWeeklyWeek(-1)">◀ 이전주</button>
+            <input type="date" id="weeklyWeekPicker" onchange="setWeeklyWeek(this.value)">
+            <button type="button" class="btn secondary" onclick="shiftWeeklyWeek(1)">다음주 ▶</button>
+            <button type="button" class="btn" onclick="setWeeklyWeek('')">이번주</button>
+            <span class="weekly-week-label" id="weeklyWeekLabel"></span>
+          </div>
+        </div>
+        <div class="muted" style="margin:-6px 0 14px;">팀 탭에서 <b>디자인1팀/2팀</b>을 선택하고 주차를 이동하세요. 셀은 하루 <b>2줄</b>까지 입력, 입력 후 포커스가 빠지면 자동 저장됩니다.</div>
+        <div id="weeklyContainer"></div>
+      </div>
+
       <div id="page-design-team-schedule" class="page-section"><div class="header"><h1>설계팀일정</h1><div class="page-actions page-actions-single"><button class="btn" onclick="addDesignTeamSchedule()">+ 항목 추가</button></div></div><div class="design-team-help">프로젝트 현황판의 백데이터를 선택해 <b>프로젝트 · 담당자 · 현재까지 진행사항 · 예상설계일정 · 비고</b>를 한 화면에서 관리합니다.</div><div class="design-team-subhelp">프로젝트를 선택하면 담당자는 현황판 담당자 기준으로 먼저 채워지며, 필요하면 수정할 수 있습니다.</div><div id="designTeamScheduleContainer" class="design-team-list"></div></div>
 
       <div id="page-todo" class="page-section"><div class="header"><h1>✅ TO DO LIST</h1><div class="page-actions page-actions-single"><button class="btn" onclick="addTodo()">+ TO DO 추가</button></div></div><div class="muted" style="margin:-8px 0 14px;">프로젝트 현황판에서 프로젝트를 선택한 뒤 그룹/우선순위/진행상황/마감일 기반으로 관리합니다.</div><div class="table-hint">모바일에서는 긴 작업명과 프로젝트명이 줄여 표시됩니다.</div><div id="todoContainer"></div></div>
@@ -1127,6 +1201,9 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
       <div id="page-denied" class="page-section"><div class="header"><h1>접근 제한</h1></div><div class="card"><div class="empty-box">이 페이지는 관리자(admin)만 접근 가능합니다.</div></div></div>
     </div>
   </div>
+
+  <!-- 주간업무일정표 A4 인쇄 전용 영역 (인쇄 시에만 표시) -->
+  <div id="weeklyPrintSheet" aria-hidden="true"></div>
 
   <script>
     const SUPABASE_URL = 'https://vtewlnyikmzdylksozua.supabase.co';
@@ -1157,7 +1234,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
     function isAdminEmail(email){ return ADMIN_EMAILS.includes(normalizeEmail(email)); }
     function getEffectiveRole(profile){ return isAdminEmail(profile?.email) ? 'admin' : (profile?.role || 'member'); }
     function syncEffectiveRole(){ currentProfile.role = getEffectiveRole(currentProfile); }
-    let cache = { projects:[], logs:[], schedules:[], designTeamSchedules:[], upper:[], lower:[], todo:[], meetings:[], profiles:[] };
+    let cache = { projects:[], logs:[], schedules:[], designTeamSchedules:[], weeklyRows:[], upper:[], lower:[], todo:[], meetings:[], profiles:[] };
     const statsState = { start:null, end:null };
     let projectSearchQuery = '';
     window.filterProjects = function(q){ projectSearchQuery = String(q||''); renderProjects(); };
@@ -1444,7 +1521,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
     }
     window.addEventListener('error', (e)=>{ if(e?.message) showToast('오류: ' + e.message, 'error'); });
     window.addEventListener('unhandledrejection', (e)=>{ const msg=e?.reason?.message||e?.reason||'알 수 없는 오류'; showToast('오류: ' + msg, 'error'); });
-    function getTableRows(table){ const map={ projects:cache.projects, manpower_logs:cache.logs, schedules:cache.schedules, design_team_schedule:cache.designTeamSchedules, todo_items:cache.todo, meeting_notes:cache.meetings, settings_upper:cache.upper, settings_lower:cache.lower, profiles:cache.profiles }; return map[table] || []; }
+    function getTableRows(table){ const map={ projects:cache.projects, manpower_logs:cache.logs, schedules:cache.schedules, design_team_schedule:cache.designTeamSchedules, weekly_team_schedule:cache.weeklyRows, todo_items:cache.todo, meeting_notes:cache.meetings, settings_upper:cache.upper, settings_lower:cache.lower, profiles:cache.profiles }; return map[table] || []; }
     function detectFieldName(table, preferred){ const rows=getTableRows(table); const sample=rows.find(Boolean)||{}; if(preferred in sample) return preferred; if(table==='manpower_logs' && preferred==='spent_hours'){ for(const k of HOURS_FIELD_CANDIDATES){ if(k in sample) return k; } if(resolvedHoursField) return resolvedHoursField; } return preferred; }
     function getHoursValue(row){ if(!row) return 0; for(const k of HOURS_FIELD_CANDIDATES){ if(k in row && row[k] !== null && row[k] !== undefined && row[k] !== '') return toNum(row[k],0); } return 0; }
     async function resolveExistingColumn(table, candidates){
@@ -2079,14 +2156,14 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
     function applyRoleUI(){ syncEffectiveRole(); const isAdmin = currentProfile.role === 'admin'; document.querySelectorAll('.admin-only').forEach(el=>{ if(!isAdmin){ el.style.display='none'; } else if(el.classList.contains('menu-item')){ el.style.display='flex'; } else if(el.classList.contains('menu-category')){ el.style.display='block'; } else { el.style.display='block'; } }); const roleEl=document.getElementById('userRole'); roleEl.innerText=currentProfile.role||'member'; roleEl.className='rolebadge '+(isAdmin?'role-admin':'role-member'); }
     window.showPage = function(id, el){ syncEffectiveRole(); const isAdmin=currentProfile.role==='admin'; const adminPages=['stats','admin','setting-upper','setting-lower']; if(adminPages.includes(id)&&!isAdmin) id='denied'; document.querySelectorAll('.page-section').forEach(e=>e.classList.remove('active')); const target=document.getElementById('page-'+id); if(target) target.classList.add('active'); document.querySelectorAll('.menu-item').forEach(item=>item.classList.remove('active')); if(el) el.classList.add('active');
       // 모바일 topbar 페이지명 업데이트
-      const pageNames={dashboard:'종합 현황',project:'프로젝트 관리',manpower:'맨파워 기록',schedule:'프로젝트 일정표','design-team-schedule':'설계팀일정',todo:'TO DO LIST',meeting:'회의록',stats:'시간 통계',admin:'관리자',  'setting-upper':'상위업무 설정','setting-lower':'하위업무 설정'};
+      const pageNames={dashboard:'종합 현황',project:'프로젝트 관리',manpower:'맨파워 기록',schedule:'프로젝트 일정표','weekly-team':'주간업무일정표','design-team-schedule':'설계팀일정',todo:'TO DO LIST',meeting:'회의록',stats:'시간 통계',admin:'관리자',  'setting-upper':'상위업무 설정','setting-lower':'하위업무 설정'};
       const titleEl=document.getElementById('mobilePageTitle');
       const metaEl=document.getElementById('mobilePageMeta');
       if(titleEl) titleEl.textContent=pageNames[id]||'EXHEOH SYSTEM';
       if(metaEl) metaEl.textContent=currentProfile.email||'프로젝트 관리 시스템';
       if(window.innerWidth <= 1024) closeSidebar();
       document.querySelectorAll('.mobile-tab').forEach(t=>t.classList.toggle('active', t.getAttribute('data-tab')===id));
-      if(id==='dashboard') renderDashboard(); if(id==='project') renderProjects(); if(id==='schedule') renderSchedules(); if(id==='design-team-schedule') renderDesignTeamSchedules(); if(id==='todo') renderTodo(); if(id==='meeting') renderMeetings(); if(id==='manpower'){ refreshManpowerAndRender(); } if(id==='admin') renderAdmin(); if(id==='stats'){ refreshStatsAndRender(); } };
+      if(id==='dashboard') renderDashboard(); if(id==='project') renderProjects(); if(id==='schedule') renderSchedules(); if(id==='weekly-team') renderWeeklyWork(); if(id==='design-team-schedule') renderDesignTeamSchedules(); if(id==='todo') renderTodo(); if(id==='meeting') renderMeetings(); if(id==='manpower'){ refreshManpowerAndRender(); } if(id==='admin') renderAdmin(); if(id==='stats'){ refreshStatsAndRender(); } };
     window.goTab = function(id, btn){ showPage(id, document.querySelector('.menu-item[data-page="'+id+'"]')); if(btn){ document.querySelectorAll('.mobile-tab').forEach(t=>t.classList.remove('active')); btn.classList.add('active'); } };
     window.toggleChat=function(){ const w=document.getElementById('chatWindow'); w.style.display=(w.style.display==='flex')?'none':'flex'; };
     function appendChatMessage(type, html){ const body=document.getElementById('chatBody'); body.innerHTML += `<div class="msg ${type==='user'?'msg-user':'msg-bot'}">${html}</div>`; body.scrollTop = body.scrollHeight; }
@@ -2658,7 +2735,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
       }finally{
         currentUser=null;
         currentProfile={role:'member',full_name:'',email:''};
-        cache={projects:[],logs:[],schedules:[],designTeamSchedules:[],upper:[],lower:[],todo:[],meetings:[],profiles:[]};
+        cache={projects:[],logs:[],schedules:[],designTeamSchedules:[],weeklyRows:[],upper:[],lower:[],todo:[],meetings:[],profiles:[]};
         passwordFlowState.required=false;
         passwordFlowState.source='';
         cleanAuthUrl();
@@ -2671,7 +2748,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
       await sb.auth.signOut();
       currentUser=null;
       currentProfile={role:'member',full_name:'',email:''};
-      cache={projects:[],logs:[],schedules:[],designTeamSchedules:[],upper:[],lower:[],todo:[],meetings:[],profiles:[]};
+      cache={projects:[],logs:[],schedules:[],designTeamSchedules:[],weeklyRows:[],upper:[],lower:[],todo:[],meetings:[],profiles:[]};
       showAuth('');
     };
 
@@ -2776,6 +2853,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
       if(logsResult.length || !(cache.logs||[]).length) cache.logs = logsResult;
       cache.schedules = await safeSelect('schedules','id',true);
       cache.designTeamSchedules = await safeSelectOptional('design_team_schedule','id',true);
+      cache.weeklyRows = await safeSelectOptional('weekly_team_schedule','id',true);
       cache.upper = await safeSelect('settings_upper','id',true);
       cache.lower = await safeSelect('settings_lower','id',true);
       cache.todo = await safeSelect('todo_items','id',true);
@@ -2854,7 +2932,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
           if(event === 'SIGNED_OUT'){
             currentUser=null;
             currentProfile={role:'member',full_name:'',email:''};
-            cache={projects:[],logs:[],schedules:[],designTeamSchedules:[],upper:[],lower:[],todo:[],meetings:[],profiles:[]};
+            cache={projects:[],logs:[],schedules:[],designTeamSchedules:[],weeklyRows:[],upper:[],lower:[],todo:[],meetings:[],profiles:[]};
             passwordFlowState.required=false;
             passwordFlowState.source='';
             showAuth('');
@@ -3044,6 +3122,144 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
       const payload={ project_id: project.id, project: project.name || project.code || '', assignee: row.assignee || project.manager || '' };
       await updateRecordWithProjectFallback('design_team_schedule', id, payload, ()=>renderDesignTeamSchedules());
     };
+    /* ===== 주간업무일정표 ===== */
+    const WEEKLY_DAYS = [ ['mon','월'], ['tue','화'], ['wed','수'], ['thu','목'], ['fri','금'] ];
+    let weeklyTeam = localStorage.getItem('exheoh_weekly_team') || '2팀';
+    let weeklyWeekStart = getCurrentWeekStart();
+    function weeklyDayDate(idx){ const d=new Date(weeklyWeekStart+'T00:00:00'); d.setDate(d.getDate()+idx); return `${d.getMonth()+1}/${d.getDate()}`; }
+    function getWeeklyRowsFor(team, weekStart){
+      return (cache.weeklyRows||[]).filter(r=>String(r.team||'')===team && normalizeWeekStart(r.week_start)===weekStart);
+    }
+    async function refreshWeeklyAndRender(){
+      cache.weeklyRows = await safeSelectOptional('weekly_team_schedule','id',true);
+      renderWeeklyWork();
+    }
+    window.setWeeklyTeam = function(team){ weeklyTeam=team; localStorage.setItem('exheoh_weekly_team', team); renderWeeklyWork(); };
+    window.setWeeklyWeek = function(value){ weeklyWeekStart = value ? (normalizeWeekStart(value)||getCurrentWeekStart()) : getCurrentWeekStart(); renderWeeklyWork(); };
+    window.shiftWeeklyWeek = function(delta){ const d=new Date(weeklyWeekStart+'T00:00:00'); d.setDate(d.getDate()+delta*7); weeklyWeekStart=isoDate(d); renderWeeklyWork(); };
+    function renderWeeklyWork(){
+      const container=document.getElementById('weeklyContainer'); if(!container) return;
+      const t1=document.getElementById('weeklyTab1'), t2=document.getElementById('weeklyTab2');
+      if(t1) t1.classList.toggle('active', weeklyTeam==='1팀');
+      if(t2) t2.classList.toggle('active', weeklyTeam==='2팀');
+      const picker=document.getElementById('weeklyWeekPicker'); if(picker) picker.value=weeklyWeekStart;
+      const labelEl=document.getElementById('weeklyWeekLabel'); if(labelEl) labelEl.textContent=formatWeekLabel(weeklyWeekStart);
+      const rows=getWeeklyRowsFor(weeklyTeam, weeklyWeekStart);
+      const members=rows.filter(r=>(r.row_type||'member')==='member').sort((a,b)=>(a.sort_order||0)-(b.sort_order||0) || a.id-b.id);
+      const sendRow=rows.find(r=>r.row_type==='send');
+      const memoRow=rows.find(r=>r.row_type==='memo');
+      const dayHeads=WEEKLY_DAYS.map((d,i)=>`<th class="weekly-day-th">${d[1]}<small>${weeklyDayDate(i)}</small></th>`).join('');
+      const cellHtml=(r,key)=>`<td><div class="weekly-cell-lines"><input type="text" value="${escapeHTML(r[key+'1']||'')}" placeholder="" onblur="updateCell('weekly_team_schedule',${r.id},'${key}1',this.value)"><input type="text" class="line2" value="${escapeHTML(r[key+'2']||'')}" placeholder="" onblur="updateCell('weekly_team_schedule',${r.id},'${key}2',this.value)"></div></td>`;
+      let bodyHtml='';
+      members.forEach(r=>{
+        bodyHtml += `<tr><td><div class="weekly-name-cell"><input type="text" value="${escapeHTML(r.member||'')}" placeholder="이름" onblur="updateCell('weekly_team_schedule',${r.id},'member',this.value)"></div></td>${WEEKLY_DAYS.map(d=>cellHtml(r,d[0])).join('')}<td><button type="button" class="weekly-del-btn" onclick="deleteWeeklyRow(${r.id})">✕</button></td></tr>`;
+      });
+      if(sendRow){
+        bodyHtml += `<tr class="weekly-send-row"><td><div class="weekly-send-label">📦 발송</div></td>${WEEKLY_DAYS.map(d=>cellHtml(sendRow,d[0])).join('')}<td><button type="button" class="weekly-del-btn" onclick="deleteWeeklyRow(${sendRow.id})">✕</button></td></tr>`;
+      }
+      const tableHtml = bodyHtml
+        ? `<div class="card weekly-card"><table class="weekly-grid"><colgroup><col class="weekly-name-col"><col><col><col><col><col><col class="weekly-del-col"></colgroup><thead><tr><th>담당자</th>${dayHeads}<th>삭제</th></tr></thead><tbody>${bodyHtml}</tbody></table></div>`
+        : `<div class="card"><div class="weekly-empty">이 주차에 등록된 인원이 없습니다.<br>아래 버튼으로 <b>지난주 명단을 복사</b>하거나 <b>+ 인원 추가</b>로 시작하세요.</div></div>`;
+      const actionsHtml = `<div class="weekly-actions">
+          <button type="button" class="btn secondary" onclick="copyWeeklyPrevWeek()">📋 지난주 명단 복사</button>
+          ${sendRow?'':'<button type="button" class="btn secondary" onclick="addWeeklySendRow()">+ 발송 행</button>'}
+        </div>`;
+      const memoHtml = `<div class="card weekly-memo-card"><h3>📌 추가 일정 업데이트</h3><textarea placeholder="주간 공지·추가 일정을 기록하세요" onblur="saveWeeklyMemo(this.value)">${escapeHTML(memoRow?.note||'')}</textarea></div>`;
+      container.innerHTML = tableHtml + actionsHtml + memoHtml;
+    }
+    async function insertWeeklyRows(records, successMessage){
+      try{
+        await ensureSupabaseClient();
+        const { error } = await sb.from('weekly_team_schedule').insert(records);
+        if(error) throw error;
+        await refreshWeeklyAndRender();
+        if(successMessage) showToast(successMessage, 'success');
+      }catch(err){
+        console.error('weekly insert 오류:', err);
+        if(String(err?.message||'').includes('weekly_team_schedule')) showToast('Supabase에 weekly_team_schedule 테이블을 먼저 만들어주세요. (설정 SQL 실행 필요)', 'error');
+        else showToast('저장 오류: '+(err.message||err), 'error');
+      }
+    }
+    window.addWeeklyMemberRow = async function(){
+      const members=getWeeklyRowsFor(weeklyTeam, weeklyWeekStart).filter(r=>(r.row_type||'member')==='member');
+      await insertWeeklyRows([{ team:weeklyTeam, week_start:weeklyWeekStart, row_type:'member', member:'', sort_order:members.length }], '인원을 추가했습니다.');
+    };
+    window.addWeeklySendRow = async function(){
+      await insertWeeklyRows([{ team:weeklyTeam, week_start:weeklyWeekStart, row_type:'send', member:'발송', sort_order:99 }], '발송 행을 추가했습니다.');
+    };
+    window.copyWeeklyPrevWeek = async function(){
+      const all=(cache.weeklyRows||[]).filter(r=>String(r.team||'')===weeklyTeam && normalizeWeekStart(r.week_start) < weeklyWeekStart);
+      if(!all.length) return showToast('복사할 이전 주차 데이터가 없습니다.', 'error');
+      const prevWeek=all.map(r=>normalizeWeekStart(r.week_start)).sort().pop();
+      const prevRows=all.filter(r=>normalizeWeekStart(r.week_start)===prevWeek && r.row_type!=='memo');
+      const existing=getWeeklyRowsFor(weeklyTeam, weeklyWeekStart);
+      const records=prevRows
+        .filter(p=>!existing.some(e=>e.row_type===p.row_type && String(e.member||'')===String(p.member||'')))
+        .map(p=>({ team:weeklyTeam, week_start:weeklyWeekStart, row_type:p.row_type||'member', member:p.member||'', sort_order:p.sort_order||0 }));
+      if(!records.length) return showToast('이미 지난주 명단이 모두 있습니다.', 'info');
+      await insertWeeklyRows(records, `지난주(${prevWeek}) 명단 ${records.length}명(행)을 복사했습니다.`);
+    };
+    window.deleteWeeklyRow = async function(id){
+      if(!confirm('이 행을 삭제하시겠습니까?')) return;
+      try{
+        await ensureSupabaseClient();
+        const { error } = await sb.from('weekly_team_schedule').delete().eq('id', id);
+        if(error) throw error;
+        await refreshWeeklyAndRender();
+        showToast('삭제했습니다.', 'success');
+      }catch(err){ showToast('삭제 오류: '+(err.message||err), 'error'); }
+    };
+    window.saveWeeklyMemo = async function(value){
+      try{
+        await ensureSupabaseClient();
+        const memoRow=getWeeklyRowsFor(weeklyTeam, weeklyWeekStart).find(r=>r.row_type==='memo');
+        if(memoRow){
+          const { error } = await sb.from('weekly_team_schedule').update({ note:value }).eq('id', memoRow.id);
+          if(error) throw error;
+          memoRow.note=value; // 캐시만 갱신 (포커스 유지)
+        } else if(String(value||'').trim()){
+          const { error } = await sb.from('weekly_team_schedule').insert([{ team:weeklyTeam, week_start:weeklyWeekStart, row_type:'memo', member:'메모', note:value }]);
+          if(error) throw error;
+          cache.weeklyRows = await safeSelectOptional('weekly_team_schedule','id',true);
+        }
+      }catch(err){
+        console.error('weekly memo 오류:', err);
+        if(String(err?.message||'').includes('weekly_team_schedule')) showToast('Supabase에 weekly_team_schedule 테이블을 먼저 만들어주세요. (설정 SQL 실행 필요)', 'error');
+        else showToast('메모 저장 오류: '+(err.message||err), 'error');
+      }
+    };
+    /* ----- A4 인쇄 ----- */
+    function buildWeeklyPrintHTML(){
+      const rows=getWeeklyRowsFor(weeklyTeam, weeklyWeekStart);
+      const members=rows.filter(r=>(r.row_type||'member')==='member').sort((a,b)=>(a.sort_order||0)-(b.sort_order||0) || a.id-b.id);
+      const sendRow=rows.find(r=>r.row_type==='send');
+      const memoRow=rows.find(r=>r.row_type==='memo');
+      const dayHeads=WEEKLY_DAYS.map((d,i)=>`<th>${d[1]}<small>(${weeklyDayDate(i)})</small></th>`).join('');
+      const cellHtml=(r,key)=>{
+        const l1=escapeHTML(r[key+'1']||''), l2=escapeHTML(r[key+'2']||'');
+        return `<td><div class="wp-line">${l1||'&nbsp;'}</div>${l2?`<div class="wp-line">${l2}</div>`:''}</td>`;
+      };
+      let bodyHtml='';
+      members.forEach(r=>{ bodyHtml += `<tr><td class="wp-name">${escapeHTML(r.member||'')}</td>${WEEKLY_DAYS.map(d=>cellHtml(r,d[0])).join('')}</tr>`; });
+      if(sendRow) bodyHtml += `<tr class="wp-send"><td class="wp-name">발송</td>${WEEKLY_DAYS.map(d=>cellHtml(sendRow,d[0])).join('')}</tr>`;
+      const memoHtml = (memoRow && String(memoRow.note||'').trim())
+        ? `<div class="wp-memo"><div class="wp-memo-title">📌 추가 일정 업데이트</div><div class="wp-memo-body">${escapeHTML(memoRow.note)}</div></div>` : '';
+      const printedAt = new Date();
+      const printedLabel = `${printedAt.getFullYear()}.${String(printedAt.getMonth()+1).padStart(2,'0')}.${String(printedAt.getDate()).padStart(2,'0')}`;
+      return `<div class="wp-title">디자인${escapeHTML(weeklyTeam)} 주간업무일정표</div>
+        <div class="wp-sub"><span>${formatWeekLabel(weeklyWeekStart)} (월~금)</span><span>출력일: ${printedLabel} · EXHEOH DESIGN TEAM</span></div>
+        <table><colgroup><col style="width:11%"><col><col><col><col><col></colgroup>
+          <thead><tr><th>담당자</th>${dayHeads}</tr></thead><tbody>${bodyHtml||'<tr><td class="wp-name">-</td><td colspan="5">등록된 일정이 없습니다.</td></tr>'}</tbody></table>${memoHtml}`;
+    }
+    window.printWeeklySchedule = function(){
+      const sheet=document.getElementById('weeklyPrintSheet'); if(!sheet) return;
+      sheet.innerHTML = buildWeeklyPrintHTML();
+      document.body.classList.add('print-weekly');
+      const cleanup=()=>{ document.body.classList.remove('print-weekly'); window.removeEventListener('afterprint', cleanup); };
+      window.addEventListener('afterprint', cleanup);
+      setTimeout(()=>{ window.print(); setTimeout(cleanup, 500); }, 50);
+    };
+
     window.addTodo = async function(){ await runAction(async()=>{ const { error } = await sb.from('todo_items').insert([{ group_tag:'GROUP 1', project:'', priority:'medium', task_name:'새 작업', assignee:'', status:'todo', due_date:null, category:'' }]); if(error) throw error; await fetchAllData(); renderTodo(); renderDashboard(); }, 'TO DO를 추가했습니다.'); };
     window.addMeeting = async function(){ await runAction(async()=>{ const { error } = await sb.from('meeting_notes').insert([{ meeting_date:new Date().toISOString().split('T')[0], title:'새 회의', project:'', attendees:'', agenda:'', notes:'', actions:'', next_meeting_date:null }]); if(error) throw error; await fetchAllData(); renderMeetings(); renderDashboard(); }, '회의록을 추가했습니다.'); };
     window.addSetting = async function(type){ if(currentProfile.role!=='admin') return showToast('관리자만 가능합니다.', 'error'); await runAction(async()=>{ const { error } = await sb.from('settings_'+type).insert([{ name:'새 항목' }]); if(error) throw error; await fetchAllData(); renderSettings(type); renderSchedules(); }, '설정을 추가했습니다.'); };
@@ -3260,7 +3476,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
       }, '이전 주차 기록을 삭제했습니다.');
     };
 
-    function renderAll(){ syncEffectiveRole(); renderProjects(); renderLogs(); renderSchedules(); renderDesignTeamSchedules(); renderTodo(); renderMeetings(); if(currentProfile.role==='admin'){ renderSettings('upper'); renderSettings('lower'); renderAdmin(); } renderDashboard(); }
+    function renderAll(){ syncEffectiveRole(); renderProjects(); renderLogs(); renderSchedules(); renderWeeklyWork(); renderDesignTeamSchedules(); renderTodo(); renderMeetings(); if(currentProfile.role==='admin'){ renderSettings('upper'); renderSettings('lower'); renderAdmin(); } renderDashboard(); }
 
     async function refreshManpowerAndRender(){
       try{
