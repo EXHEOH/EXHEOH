@@ -139,7 +139,10 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .empty-box{padding:18px;color:var(--muted);font-weight:900}.admin-only{display:none}
 /* 기성 관리 스타일 */
 .project-card table{table-layout:fixed;min-width:1300px}
+.project-card .col-no{width:38px;padding:6px 2px;text-align:center;color:var(--muted);font-weight:900;font-size:12px}
+.project-card td.col-no{color:rgba(255,255,255,.55)}
 .project-card .col-delete{width:32px;padding:6px 2px;text-align:center}
+.pm-no{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:26px;padding:0 7px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:rgba(255,255,255,.65);font-weight:900;font-size:12px;flex:none}
 .project-card .col-code{width:78px;padding:6px 4px}
 .project-card .col-name{width:190px}
 .project-card .col-history{width:110px}
@@ -154,20 +157,20 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .project-card td select.compact-select{width:calc(100% - 2px);box-sizing:border-box}
 /* 계약 컬럼: 미계약/계약 드롭다운만 */
 .project-card .col-contract select.compact-select{width:100%}
-.milestone-cell{padding:4px 2px !important;vertical-align:middle !important}
-.milestone-wrap{display:flex;flex-direction:column;gap:2px}
-.milestone-bar-wrap{display:flex;align-items:center;gap:1px;flex-wrap:nowrap}
-.milestone-bar{height:17px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#fff;cursor:pointer;transition:all .15s ease;flex-shrink:0}
-.milestone-bar:hover{transform:scaleY(1.2);box-shadow:0 2px 8px rgba(0,0,0,.3)}
-.milestone-bar.status-0{background:#555;color:rgba(255,255,255,.6)}
+.milestone-cell{padding:5px 6px !important;vertical-align:middle !important}
+.milestone-wrap{display:flex;align-items:stretch;gap:6px;width:100%}
+.milestone-cols{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0}
+.milestone-bars,.milestone-checkrow{display:grid;gap:2px;width:100%}
+.milestone-bar{height:22px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;cursor:pointer;transition:all .15s ease;min-width:0}
+.milestone-bar:hover{transform:scaleY(1.12);box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.milestone-bar.status-0{background:#4a4a4d;color:rgba(255,255,255,.65)}
 .milestone-bar.status-1{background:#378ADD}
 .milestone-bar.status-2{background:#1D9E75}
-.milestone-progress{font-size:9px;font-weight:900;min-width:24px;text-align:right;padding-left:2px;flex-shrink:0}
+.milestone-progress{font-size:12px;font-weight:900;text-align:center;flex-shrink:0;color:#fff}
 .milestone-progress.complete{color:#1D9E75}
-.milestone-bottom{display:flex;align-items:center;gap:1px}
-.milestone-checks{display:flex;gap:1px;flex-wrap:nowrap}
-.milestone-check-group{display:flex;flex-direction:column;gap:1px;align-items:center}
-.milestone-check{height:14px;border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;cursor:pointer;border:1px solid rgba(255,255,255,.2);transition:all .12s ease;flex-shrink:0}
+.milestone-side{display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:3px;flex-shrink:0;min-width:40px}
+.milestone-check-group{display:flex;gap:2px;min-width:0}
+.milestone-check{flex:1;height:16px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;cursor:pointer;border:1px solid rgba(255,255,255,.2);transition:all .12s ease;min-width:0}
 .milestone-check:hover{transform:scale(1.05)}
 .milestone-check.design{background:transparent;color:rgba(255,255,255,.3)}
 .milestone-check.design.checked{background:#00D4AA;border-color:#00D4AA;color:#0E0E0E}
@@ -1167,7 +1170,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
         <div class="card" style="padding:16px;"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;"><h3 style="margin:0;">📋 최근 맨파워 기록</h3><span class="muted">최근 8건</span></div><table style="margin-top:12px;"><thead><tr><th>이름</th><th>프로젝트</th><th>업무내용</th><th>소요시간(h)</th><th>날짜</th></tr></thead><tbody id="dashboard-manpower-body"></tbody></table></div>
       </div>
 
-      <div id="page-project" class="page-section"><div class="header"><h1>프로젝트 현황판</h1><div class="page-actions"><button class="btn secondary admin-only" onclick="document.getElementById('csvInput').click()">📂 CSV 업로드</button><button class="btn" onclick="addNewProject()">+ 추가</button><input type="file" id="csvInput" accept=".csv,text/csv" onchange="handleFileUpload(this,'project')" style="display:none"></div></div><div class="project-search-bar" style="margin:-6px 0 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;"><input type="text" id="projectSearchInput" placeholder="🔍 코드·프로젝트명·발주처·담당자·소속팀 검색" style="max-width:420px;" oninput="filterProjects(this.value)"><span class="muted" id="projectSearchCount"></span></div><div class="card project-card table-compact"><table><thead><tr><th class="col-delete">삭제</th><th class="col-code">코드</th><th class="col-name">프로젝트명</th><th class="col-history">이력코드</th><th class="col-client">발주처</th><th class="col-constructor">건설사</th><th class="col-team">소속팀</th><th class="col-manager">담당자</th><th class="col-type">단계</th><th class="col-contract">계약</th><th class="col-milestone">기성현황</th></tr></thead><tbody id="tableBody"></tbody></table></div><div id="projectMobileList" class="project-mobile-list"></div><div class="table-hint project-table-hint">모바일에서는 표를 좌우로 밀어 더 많은 칼럼을 확인할 수 있습니다.</div><div class="muted">※ 기성현황: 막대 클릭→상태변경 / D(디자인)·M(경영지원) 클릭→크로스체크 / 설정→단계 수정</div></div>
+      <div id="page-project" class="page-section"><div class="header"><h1>프로젝트 현황판</h1><div class="page-actions"><button class="btn secondary admin-only" onclick="document.getElementById('csvInput').click()">📂 CSV 업로드</button><button class="btn" onclick="addNewProject()">+ 추가</button><input type="file" id="csvInput" accept=".csv,text/csv" onchange="handleFileUpload(this,'project')" style="display:none"></div></div><div class="project-search-bar" style="margin:-6px 0 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;"><input type="text" id="projectSearchInput" placeholder="🔍 코드·프로젝트명·발주처·담당자·소속팀 검색" style="max-width:420px;" oninput="filterProjects(this.value)"><span class="muted" id="projectSearchCount"></span></div><div class="card project-card table-compact"><table><thead><tr><th class="col-no">순번</th><th class="col-delete">삭제</th><th class="col-code">코드</th><th class="col-name">프로젝트명</th><th class="col-history">이력코드</th><th class="col-client">발주처</th><th class="col-constructor">건설사</th><th class="col-team">소속팀</th><th class="col-manager">담당자</th><th class="col-type">단계</th><th class="col-contract">계약</th><th class="col-milestone">기성현황</th></tr></thead><tbody id="tableBody"></tbody></table></div><div id="projectMobileList" class="project-mobile-list"></div><div class="table-hint project-table-hint">모바일에서는 표를 좌우로 밀어 더 많은 칼럼을 확인할 수 있습니다.</div><div class="muted">※ 기성현황: 막대 클릭→상태변경 / D(디자인)·M(경영지원) 클릭→크로스체크 / 설정→단계 수정</div></div>
       <div class="milestone-dialog" id="milestoneDialog" onclick="if(event.target===this) closeMilestoneDialog()"><div class="milestone-dialog-card"><div class="milestone-dialog-header"><div class="milestone-dialog-title" id="milestoneDialogTitle">기성 상태 입력</div><button class="milestone-dialog-close" onclick="closeMilestoneDialog()">×</button></div><div class="milestone-dialog-body" id="milestoneDialogBody"></div></div></div>
 
       <div id="page-manpower" class="page-section"><div class="header"><h1>일일 업무 기록</h1><div class="page-actions page-actions-single"><button class="btn" onclick="addDailyLog()">+ 기록 추가</button></div></div><div class="muted" style="margin:-8px 0 14px;">소요시간은 <b>시간 단위</b>로 입력하세요. 예) 1.5 = 1시간30분 / 0.25 = 15분</div><div id="dailyLogContainer"></div></div>
@@ -3657,25 +3660,26 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
     function renderMilestoneInner(projectId) {
       const data = getMilestoneData(projectId);
       const progress = calcMilestoneProgress(data);
-      const totalBarWidth = 110;
-      const barWidths = data.milestones.map(m => Math.max(Math.floor((m.weight / 100) * totalBarWidth), 10));
+      // 가중치 비율대로 셀 전체 폭을 꽉 채우는 그리드 (막대·체크가 같은 열을 공유해 정렬됨)
+      const gridCols = data.milestones.map(m => `minmax(26px,${Math.max(m.weight,1)}fr)`).join(' ');
       let barsHtml = data.milestones.map((m, i) => {
         const s = data.status[i] || 0;
-        const w = barWidths[i];
-        return `<div class="milestone-bar status-${s}" style="width:${w}px" onclick="cycleMilestoneStatus(${projectId},${i})" title="${escapeHTML(m.name)} (${m.weight}%)">${m.weight}</div>`;
+        return `<div class="milestone-bar status-${s}" onclick="cycleMilestoneStatus(${projectId},${i})" title="${escapeHTML(m.name)} (${m.weight}%)">${m.weight}</div>`;
       }).join('');
       let checksHtml = data.milestones.map((m, i) => {
         const dc = data.designCheck[i] ? 'checked' : '';
         const mc = data.mgmtCheck[i] ? 'checked' : '';
-        const w = barWidths[i];
-        return `<div class="milestone-check-group" style="width:${w}px">
-          <div class="milestone-check design ${dc}" style="width:100%" onclick="toggleMilestoneCheck(${projectId},${i},'design')" title="${escapeHTML(m.name)} - 디자인팀">${dc ? 'D' : ''}</div>
-          <div class="milestone-check mgmt ${mc}" style="width:100%" onclick="toggleMilestoneCheck(${projectId},${i},'mgmt')" title="${escapeHTML(m.name)} - 경영지원팀">${mc ? 'M' : ''}</div>
+        return `<div class="milestone-check-group">
+          <div class="milestone-check design ${dc}" onclick="toggleMilestoneCheck(${projectId},${i},'design')" title="${escapeHTML(m.name)} - 디자인팀">${dc ? 'D' : ''}</div>
+          <div class="milestone-check mgmt ${mc}" onclick="toggleMilestoneCheck(${projectId},${i},'mgmt')" title="${escapeHTML(m.name)} - 경영지원팀">${mc ? 'M' : ''}</div>
         </div>`;
       }).join('');
       return `<div class="milestone-wrap">
-          <div class="milestone-bar-wrap">${barsHtml}<span class="milestone-progress ${progress===100?'complete':''}">${progress}%</span></div>
-          <div class="milestone-bottom"><div class="milestone-checks">${checksHtml}</div><button class="milestone-btn" onclick="openMilestoneDialog(${projectId})">설정</button></div>
+          <div class="milestone-cols">
+            <div class="milestone-bars" style="grid-template-columns:${gridCols}">${barsHtml}</div>
+            <div class="milestone-checkrow" style="grid-template-columns:${gridCols}">${checksHtml}</div>
+          </div>
+          <div class="milestone-side"><span class="milestone-progress ${progress===100?'complete':''}">${progress}%</span><button class="milestone-btn" onclick="openMilestoneDialog(${projectId})">설정</button></div>
         </div>`;
     }
     function renderMilestoneCell(projectId) {
@@ -3852,13 +3856,14 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
       renderProjects();
     };
     
-    function projectMobileCard(p){
+    function projectMobileCard(p, idx){
       const typeLabel = {default:'선택',plan:'기획',basic:'기본',exec:'실시',site:'현장'};
       const typeSel = `<select class="compact-select" onchange="updateCell('projects',${p.id},'type',this.value)">`+
         ['default','plan','basic','exec','site'].map(t=>`<option value="${t}" ${p.type===t?'selected':''}>${typeLabel[t]}</option>`).join('')+`</select>`;
       const contractSel = `<select class="compact-select" onchange="updateContractStatus(${p.id},this.value)"><option value="none" ${p.contract_status==='signed'?'':'selected'}>미계약</option><option value="signed" ${p.contract_status==='signed'?'selected':''}>계약</option></select>`;
       return `<div class="pm-card">
         <div class="pm-top">
+          <span class="pm-no">${(typeof idx==='number'?idx:0)+1}</span>
           <input class="pm-code cell-input" type="text" value="${escapeHTML(p.code||'')}" placeholder="코드" onblur="updateCell('projects',${p.id},'code',this.value)">
           <button class="delete-btn" onclick="deleteItem('projects',${p.id})">×</button>
         </div>
@@ -3875,7 +3880,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
         <div class="pm-milestone"><div class="pm-label">기성현황</div>${renderMilestoneInner(p.id)}</div>
       </div>`;
     }
-    function renderProjects(){ const t=document.getElementById('tableBody'); t.innerHTML=''; const q=String(projectSearchQuery||'').trim().toLowerCase(); let list=[...cache.projects].sort((a,b)=>{ const ac=(a.code||'').toUpperCase(); const bc=(b.code||'').toUpperCase(); return ac.localeCompare(bc, 'ko', {numeric:true}); }); if(q){ list=list.filter(p=>[p.code,p.name,p.history,p.client,p.constructor,p.team,p.manager].some(v=>String(v||'').toLowerCase().includes(q))); } const _cEl=document.getElementById('projectSearchCount'); if(_cEl) _cEl.innerText = q ? `${list.length}건 / 전체 ${cache.projects.length}건` : `전체 ${cache.projects.length}건`; const _ml=document.getElementById('projectMobileList'); if(window.innerWidth<=768){ if(t) t.innerHTML=''; if(_ml){ _ml.innerHTML = list.length ? list.map(projectMobileCard).join('') : `<div class="card"><div class="empty-box">${q?'검색 결과가 없습니다.':'프로젝트가 없습니다.'}</div></div>`; } return; } if(_ml) _ml.innerHTML=''; if(!list.length){ t.innerHTML=`<tr><td colspan="11" class="muted" style="padding:16px;">${q?'검색 결과가 없습니다.':'프로젝트가 없습니다. 추가 버튼으로 등록하세요.'}</td></tr>`; return; } list.forEach(p=>{ t.insertAdjacentHTML('beforeend', `<tr><td class="col-delete"><button class="delete-btn" onclick="deleteItem('projects',${p.id})">×</button></td><td class="col-code"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.code||'')}" placeholder="-" onblur="updateCell('projects',${p.id},'code',this.value)"></td><td class="col-name">${makeEditPreview({table:'projects', id:p.id, field:'name', title:'프로젝트명', value:p.name||'', limit:18, empty:'프로젝트명'})}</td><td class="col-history">${makeEditPreview({table:'projects', id:p.id, field:'history', title:'이력코드', value:p.history||'', limit:10, empty:'-'})}</td><td class="col-client"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.client||'')}" placeholder="-" onblur="updateCell('projects',${p.id},'client',this.value)"></td><td class="col-constructor"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.constructor||'')}" placeholder="-" onblur="updateCell('projects',${p.id},'constructor',this.value)"></td><td class="col-team"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.team||'')}" placeholder="-" onblur="updateCell('projects',${p.id},'team',this.value)"></td><td class="col-manager"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.manager||'')}" placeholder="-" onblur="updateCell('projects',${p.id},'manager',this.value)"></td><td class="col-type"><select class="compact-select" onchange="updateCell('projects',${p.id},'type',this.value).catch(()=>{})"><option value="default" ${p.type==='default'?'selected':''}>선택</option><option value="plan" ${p.type==='plan'?'selected':''}>기획</option><option value="basic" ${p.type==='basic'?'selected':''}>기본</option><option value="exec" ${p.type==='exec'?'selected':''}>실시</option><option value="site" ${p.type==='site'?'selected':''}>현장</option></select></td><td class="col-contract"><select class="compact-select" onchange="updateContractStatus(${p.id},this.value)"><option value="none" ${p.contract_status==='signed'?'':'selected'}>미계약</option><option value="signed" ${p.contract_status==='signed'?'selected':''}>계약</option></select></td>${renderMilestoneCell(p.id)}</tr>`); }); }
+    function renderProjects(){ const t=document.getElementById('tableBody'); t.innerHTML=''; const q=String(projectSearchQuery||'').trim().toLowerCase(); let list=[...cache.projects].sort((a,b)=>{ const ac=(a.code||'').toUpperCase(); const bc=(b.code||'').toUpperCase(); return ac.localeCompare(bc, 'ko', {numeric:true}); }); if(q){ list=list.filter(p=>[p.code,p.name,p.history,p.client,p.constructor,p.team,p.manager].some(v=>String(v||'').toLowerCase().includes(q))); } const _cEl=document.getElementById('projectSearchCount'); if(_cEl) _cEl.innerText = q ? `${list.length}건 / 전체 ${cache.projects.length}건` : `전체 ${cache.projects.length}건`; const _ml=document.getElementById('projectMobileList'); if(window.innerWidth<=768){ if(t) t.innerHTML=''; if(_ml){ _ml.innerHTML = list.length ? list.map((p,i)=>projectMobileCard(p,i)).join('') : `<div class="card"><div class="empty-box">${q?'검색 결과가 없습니다.':'프로젝트가 없습니다.'}</div></div>`; } return; } if(_ml) _ml.innerHTML=''; if(!list.length){ t.innerHTML=`<tr><td colspan="12" class="muted" style="padding:16px;">${q?'검색 결과가 없습니다.':'프로젝트가 없습니다. 추가 버튼으로 등록하세요.'}</td></tr>`; return; } list.forEach((p,idx)=>{ t.insertAdjacentHTML('beforeend', `<tr><td class="col-no">${idx+1}</td><td class="col-delete"><button class="delete-btn" onclick="deleteItem('projects',${p.id})">×</button></td><td class="col-code"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.code||'')}" placeholder="-" onblur="updateCell('projects',${p.id},'code',this.value)"></td><td class="col-name">${makeEditPreview({table:'projects', id:p.id, field:'name', title:'프로젝트명', value:p.name||'', limit:18, empty:'프로젝트명'})}</td><td class="col-history">${makeEditPreview({table:'projects', id:p.id, field:'history', title:'이력코드', value:p.history||'', limit:10, empty:'-'})}</td><td class="col-client"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.client||'')}" placeholder="-" onblur="updateCell('projects',${p.id},'client',this.value)"></td><td class="col-constructor"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.constructor||'')}" placeholder="-" onblur="updateCell('projects',${p.id},'constructor',this.value)"></td><td class="col-team"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.team||'')}" placeholder="-" onblur="updateCell('projects',${p.id},'team',this.value)"></td><td class="col-manager"><input class="cell-input compact-input" type="text" value="${escapeHTML(p.manager||'')}" placeholder="-" onblur="updateCell('projects',${p.id},'manager',this.value)"></td><td class="col-type"><select class="compact-select" onchange="updateCell('projects',${p.id},'type',this.value).catch(()=>{})"><option value="default" ${p.type==='default'?'selected':''}>선택</option><option value="plan" ${p.type==='plan'?'selected':''}>기획</option><option value="basic" ${p.type==='basic'?'selected':''}>기본</option><option value="exec" ${p.type==='exec'?'selected':''}>실시</option><option value="site" ${p.type==='site'?'selected':''}>현장</option></select></td><td class="col-contract"><select class="compact-select" onchange="updateContractStatus(${p.id},this.value)"><option value="none" ${p.contract_status==='signed'?'':'selected'}>미계약</option><option value="signed" ${p.contract_status==='signed'?'selected':''}>계약</option></select></td>${renderMilestoneCell(p.id)}</tr>`); }); }
     function renderLogs(){
       const c=document.getElementById('dailyLogContainer');
       if(!cache.logs.length){ c.innerHTML='<div class="card"><div class="empty-box">기록 없음. 상단 "+ 기록 추가"를 눌러 첫 기록을 만들 수 있습니다.</div></div>'; return; }
