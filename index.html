@@ -7,6 +7,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#070707" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
   <title>EXHEOH SYSTEM V38 (Enhanced)</title>
   <script>
     window.__supabaseReadyPromise = new Promise((resolve, reject) => {
@@ -4469,6 +4472,25 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
         item.addEventListener('click', () => { if(window.innerWidth <= 1024) closeSidebar(); });
       });
     });
+  </script>
+  <script>
+    // PWA 서비스워커 등록 (https 또는 localhost에서만 동작; file:// 미리보기에선 자동 무시)
+    if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+      window.addEventListener('load', function(){
+        navigator.serviceWorker.register('./sw.js').then(function(reg){
+          // 새 버전 배포 감지 → 안내 토스트 (다음 새로고침 때 적용됨)
+          reg.addEventListener('updatefound', function(){
+            var nw = reg.installing;
+            if(!nw) return;
+            nw.addEventListener('statechange', function(){
+              if(nw.state === 'installed' && navigator.serviceWorker.controller && typeof showToast === 'function'){
+                showToast('새 버전이 준비되었습니다. 새로고침하면 적용됩니다.', 'success');
+              }
+            });
+          });
+        }).catch(function(){});
+      });
+    }
   </script>
 </body>
 </html>
