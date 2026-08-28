@@ -994,6 +994,17 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
 .weekly-memo-card h3{margin:0 0 10px;color:#fff;font-size:15px}
 .weekly-memo-card textarea{min-height:110px;line-height:1.7}
 .weekly-empty{padding:34px 20px;text-align:center;color:var(--muted);font-weight:800}
+/* 셀 글자색 강조 */
+input.wline.wcol-red{color:#FF6B6B !important;font-weight:800}
+input.wline.wcol-orange{color:#FFA94D !important;font-weight:800}
+input.wline.wcol-yellow{color:#FFD166 !important;font-weight:800}
+input.wline.wcol-mint{color:#00FFC3 !important;font-weight:800}
+input.wline.wcol-blue{color:#5AA9FF !important;font-weight:800}
+.weekly-palette{position:fixed;z-index:5000;display:flex;gap:4px;padding:6px 8px;border-radius:999px;background:#1d1d20;border:1px solid rgba(255,255,255,.22);box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.weekly-palette button{background:none;border:none;padding:2px;cursor:pointer;line-height:0}
+.weekly-palette .wp-dot{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;border:2px solid rgba(255,255,255,.25);transition:.12s ease}
+.weekly-palette button:hover .wp-dot{transform:scale(1.18);border-color:#fff}
+.weekly-palette .wp-dot-none{background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);font-size:11px;font-weight:900;line-height:1}
 @media (max-width:640px){.weekly-toolbar{flex-direction:column;align-items:stretch}.weekly-week-nav{justify-content:space-between}}
 
 /* ===== A4 인쇄 (주간업무일정표) ===== */
@@ -1011,6 +1022,11 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
   #weeklyPrintSheet td{border:0.4mm solid #333;padding:1.4mm 1.6mm;font-size:9pt;font-weight:600;vertical-align:top;word-break:break-all;line-height:1.45;color:#111}
   #weeklyPrintSheet td.wp-name{font-weight:900;text-align:center;vertical-align:middle;font-size:10pt;background:#f6f6f6 !important}
   #weeklyPrintSheet .wp-line{min-height:4.6mm}
+  #weeklyPrintSheet .wp-line.wpc-red{color:#C0392B !important;font-weight:900}
+  #weeklyPrintSheet .wp-line.wpc-orange{color:#D35400 !important;font-weight:900}
+  #weeklyPrintSheet .wp-line.wpc-yellow{color:#B7791F !important;font-weight:900}
+  #weeklyPrintSheet .wp-line.wpc-mint{color:#1D9E75 !important;font-weight:900}
+  #weeklyPrintSheet .wp-line.wpc-blue{color:#2E6DB4 !important;font-weight:900}
   #weeklyPrintSheet .wp-line+.wp-line{margin-top:0.8mm;padding-top:0.8mm;border-top:0.2mm dashed #bbb}
   #weeklyPrintSheet tr.wp-send td{background:#f2f9f6 !important}
   #weeklyPrintSheet tr.wp-send td.wp-name{background:#e2f2ec !important}
@@ -1195,8 +1211,16 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
             <span class="weekly-week-label" id="weeklyWeekLabel"></span>
           </div>
         </div>
-        <div class="muted" style="margin:-6px 0 14px;">팀 탭에서 <b>디자인1팀/2팀</b>을 선택하고 주차를 이동하세요. 셀은 하루 <b>2줄</b>까지 입력, 입력 후 포커스가 빠지면 자동 저장됩니다.</div>
+        <div class="muted" style="margin:-6px 0 14px;">팀 탭에서 <b>디자인1팀/2팀</b>을 선택하고 주차를 이동하세요. 셀은 하루 <b>2줄</b>까지 입력, 입력 후 포커스가 빠지면 자동 저장됩니다. 입력칸을 클릭하면 <b>색상 팔레트</b>가 떠서 외근·주요일정을 색으로 강조할 수 있습니다.</div>
         <div id="weeklyContainer"></div>
+        <div id="weeklyPalette" class="weekly-palette" style="display:none">
+          <button type="button" title="기본색" onmousedown="event.preventDefault();applyWeeklyColor('')"><span class="wp-dot wp-dot-none">✕</span></button>
+          <button type="button" title="빨강 (주요일정)" onmousedown="event.preventDefault();applyWeeklyColor('red')"><span class="wp-dot" style="background:#FF6B6B"></span></button>
+          <button type="button" title="주황 (외근)" onmousedown="event.preventDefault();applyWeeklyColor('orange')"><span class="wp-dot" style="background:#FFA94D"></span></button>
+          <button type="button" title="노랑 (주의)" onmousedown="event.preventDefault();applyWeeklyColor('yellow')"><span class="wp-dot" style="background:#FFD166"></span></button>
+          <button type="button" title="민트 (완료·강조)" onmousedown="event.preventDefault();applyWeeklyColor('mint')"><span class="wp-dot" style="background:#00FFC3"></span></button>
+          <button type="button" title="파랑 (협의·회의)" onmousedown="event.preventDefault();applyWeeklyColor('blue')"><span class="wp-dot" style="background:#5AA9FF"></span></button>
+        </div>
       </div>
 
       <div id="page-design-team-schedule" class="page-section"><div class="header"><h1>설계팀일정</h1><div class="page-actions page-actions-single"><button class="btn" onclick="addDesignTeamSchedule()">+ 항목 추가</button></div></div><div class="design-team-help">프로젝트 현황판의 백데이터를 선택해 <b>프로젝트 · 담당자 · 현재까지 진행사항 · 예상설계일정 · 비고</b>를 한 화면에서 관리합니다.</div><div class="design-team-subhelp">프로젝트를 선택하면 담당자는 현황판 담당자 기준으로 먼저 채워지며, 필요하면 수정할 수 있습니다.</div><div id="designTeamScheduleContainer" class="design-team-list"></div></div>
@@ -3143,6 +3167,57 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
     function getWeeklyRowsFor(team, weekStart){
       return (cache.weeklyRows||[]).filter(r=>String(r.team||'')===team && normalizeWeekStart(r.week_start)===weekStart);
     }
+    /* --- 셀 글자색 강조 (외근·주요일정 등) --- */
+    const WEEKLY_COLOR_KEYS = ['red','orange','yellow','mint','blue'];
+    function getWeeklyColorMap(r){ try{ const o=JSON.parse(r.colors||'{}'); return (o&&typeof o==='object')?o:{}; }catch(e){ return {}; } }
+    let _weeklyPaletteTarget = null;
+    let _weeklyPaletteHideTimer = null;
+    function showWeeklyPalette(input){
+      const pal=document.getElementById('weeklyPalette'); if(!pal) return;
+      _weeklyPaletteTarget = input;
+      clearTimeout(_weeklyPaletteHideTimer);
+      const rect=input.getBoundingClientRect();
+      pal.style.display='flex';
+      const palW = 190;
+      let left = rect.left;
+      if(left + palW > window.innerWidth - 8) left = window.innerWidth - palW - 8;
+      pal.style.left = left + 'px';
+      pal.style.top = Math.max(4, rect.top - 40) + 'px';
+    }
+    function hideWeeklyPalette(){
+      _weeklyPaletteHideTimer = setTimeout(()=>{
+        const pal=document.getElementById('weeklyPalette');
+        if(pal) pal.style.display='none';
+        _weeklyPaletteTarget=null;
+      }, 180);
+    }
+    window.applyWeeklyColor = async function(color){
+      const input=_weeklyPaletteTarget; if(!input) return;
+      const id=input.getAttribute('data-wid'), field=input.getAttribute('data-wfield');
+      const row=(cache.weeklyRows||[]).find(r=>String(r.id)===String(id)); if(!row) return;
+      const cmap=getWeeklyColorMap(row);
+      if(color) cmap[field]=color; else delete cmap[field];
+      // 입력칸 스타일 즉시 반영 (리렌더 없이 → 포커스 유지)
+      WEEKLY_COLOR_KEYS.forEach(k=>input.classList.remove('wcol-'+k));
+      if(color) input.classList.add('wcol-'+color);
+      input.focus();
+      try{
+        await ensureSupabaseClient();
+        const payload={ colors: JSON.stringify(cmap) };
+        const { error } = await sb.from('weekly_team_schedule').update(payload).eq('id', id);
+        if(error) throw error;
+        row.colors = payload.colors;
+      }catch(err){
+        console.error('색상 저장 오류:', err);
+        showToast('색상 저장 실패: '+(err.message||err), 'error');
+      }
+    };
+    document.addEventListener('focusin', function(e){
+      if(e.target && e.target.matches && e.target.matches('#weeklyContainer input.wline')) showWeeklyPalette(e.target);
+    });
+    document.addEventListener('focusout', function(e){
+      if(e.target && e.target.matches && e.target.matches('#weeklyContainer input.wline')) hideWeeklyPalette();
+    });
     async function refreshWeeklyAndRender(){
       cache.weeklyRows = await safeSelectOptional('weekly_team_schedule','id',true);
       renderWeeklyWork();
@@ -3163,7 +3238,12 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
       const memoRow=rows.find(r=>r.row_type==='memo');
       const todayIdx = (weeklyWeekStart===getCurrentWeekStart()) ? (new Date().getDay()+6)%7 : -1; // 0=월 ... 4=금 (주말이면 5,6 → 하이라이트 없음)
       const dayHeads=WEEKLY_DAYS.map((d,i)=>`<th class="weekly-day-th${i===todayIdx?' is-today':''}">${d[1]}<small>${weeklyDayDate(i)}</small></th>`).join('');
-      const cellHtml=(r,key,i)=>`<td${i===todayIdx?' class="is-today"':''}><div class="weekly-cell-lines"><input type="text" value="${escapeHTML(r[key+'1']||'')}" placeholder="" onblur="updateCell('weekly_team_schedule',${r.id},'${key}1',this.value)"><input type="text" class="line2" value="${escapeHTML(r[key+'2']||'')}" placeholder="" onblur="updateCell('weekly_team_schedule',${r.id},'${key}2',this.value)"></div></td>`;
+      const cellHtml=(r,key,i)=>{
+        const cmap=getWeeklyColorMap(r);
+        const cls1=cmap[key+'1']?` wcol-${cmap[key+'1']}`:'';
+        const cls2=cmap[key+'2']?` wcol-${cmap[key+'2']}`:'';
+        return `<td${i===todayIdx?' class="is-today"':''}><div class="weekly-cell-lines"><input type="text" class="wline${cls1}" data-wid="${r.id}" data-wfield="${key}1" value="${escapeHTML(r[key+'1']||'')}" placeholder="" onblur="updateCell('weekly_team_schedule',${r.id},'${key}1',this.value)"><input type="text" class="wline line2${cls2}" data-wid="${r.id}" data-wfield="${key}2" value="${escapeHTML(r[key+'2']||'')}" placeholder="" onblur="updateCell('weekly_team_schedule',${r.id},'${key}2',this.value)"></div></td>`;
+      };
       let bodyHtml='';
       members.forEach(r=>{
         bodyHtml += `<tr><td class="weekly-name-td"><div class="weekly-name-cell"><input type="text" value="${escapeHTML(r.member||'')}" placeholder="이름" onblur="updateCell('weekly_team_schedule',${r.id},'member',this.value)"></div></td>${WEEKLY_DAYS.map((d,i)=>cellHtml(r,d[0],i)).join('')}<td><button type="button" class="weekly-del-btn" onclick="deleteWeeklyRow(${r.id})">✕</button></td></tr>`;
@@ -3251,7 +3331,10 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
       const dayHeads=WEEKLY_DAYS.map((d,i)=>`<th>${d[1]}<small>(${weeklyDayDate(i)})</small></th>`).join('');
       const cellHtml=(r,key)=>{
         const l1=escapeHTML(r[key+'1']||''), l2=escapeHTML(r[key+'2']||'');
-        return `<td><div class="wp-line">${l1||'&nbsp;'}</div>${l2?`<div class="wp-line">${l2}</div>`:''}</td>`;
+        const cmap=getWeeklyColorMap(r);
+        const c1=cmap[key+'1']?` wpc-${cmap[key+'1']}`:'';
+        const c2=cmap[key+'2']?` wpc-${cmap[key+'2']}`:'';
+        return `<td><div class="wp-line${c1}">${l1||'&nbsp;'}</div>${l2?`<div class="wp-line${c2}">${l2}</div>`:''}</td>`;
       };
       let bodyHtml='';
       members.forEach(r=>{ bodyHtml += `<tr><td class="wp-name">${escapeHTML(r.member||'')}</td>${WEEKLY_DAYS.map(d=>cellHtml(r,d[0])).join('')}</tr>`; });
