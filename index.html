@@ -959,7 +959,12 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
 
 /* ===== 주간업무일정표 ===== */
 .weekly-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 16px}
-.weekly-team-tabs{display:flex;gap:6px}
+.weekly-team-tabs{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.weekly-tab-sep{width:1px;height:22px;background:rgba(255,255,255,.18);margin:0 4px}
+.weekly-tab.weekly-tab-archive{padding:8px 14px;font-size:11px;border-style:dashed;color:rgba(255,255,255,.5)}
+.weekly-tab.weekly-tab-archive.active{background:rgba(255,193,7,.10);border-color:rgba(255,193,7,.45);color:#FFC107;box-shadow:none}
+.weekly-archive-note{margin:0 0 12px;padding:12px 16px;border-radius:14px;background:rgba(255,193,7,.07);border:1px solid rgba(255,193,7,.3);color:#FFC107;font-weight:800;font-size:12px}
+.weekly-grid input[readonly],.weekly-memo-card textarea[readonly]{opacity:.75;cursor:default}
 .weekly-tab{padding:10px 20px;border-radius:999px;border:1px solid var(--border-strong);background:rgba(255,255,255,.05);color:rgba(255,255,255,.65);font-weight:800;font-size:12px;cursor:pointer;transition:.16s ease;letter-spacing:-0.02em}
 .weekly-tab:hover{background:rgba(255,255,255,.10)}
 .weekly-tab.active{background:rgba(0,255,195,.12);border-color:rgba(0,255,195,.35);color:#00FFC3;box-shadow:0 0 14px rgba(0,255,195,.15)}
@@ -1197,11 +1202,15 @@ input.wline.wcol-blue{color:#5AA9FF !important;font-weight:800}
 
       <div id="page-schedule" class="page-section"><div class="header"><h1>프로젝트 일정표</h1><div class="page-actions"><button class="btn secondary" onclick="document.getElementById('xlsxInputSchedule').click()">📂 위클리브리핑 업로드</button><button class="btn" onclick="openAddScheduleModal()">+ 일정 추가</button><input type="file" id="xlsxInputSchedule" accept=".xlsx,.xls" onchange="handleWeeklyBriefingUpload(this)" style="display:none"></div></div><div class="muted" style="margin:-8px 0 14px;"><b>위클리브리핑 엑셀(.xlsx)</b>을 업로드하면 금주 일정이 자동 반영됩니다. 개별 추가/수정도 가능합니다.</div><div id="scheduleContainer"></div></div>
 
-      <div id="page-weekly-team" class="page-section"><div class="header"><h1>🗓️ 주간업무일정표</h1><div class="page-actions"><button class="btn secondary" onclick="printWeeklySchedule()">🖨️ A4 인쇄</button><button class="btn" onclick="addWeeklyMemberRow()">+ 인원 추가</button></div></div>
+      <div id="page-weekly-team" class="page-section"><div class="header"><h1>🗓️ 주간업무일정표</h1><div class="page-actions"><button class="btn secondary" onclick="downloadWeeklyBackupCSV()" title="주간업무일정표 전체 기록(모든 팀·파트·주차)을 CSV로 저장">💾 전체 백업(CSV)</button><button class="btn secondary" onclick="printWeeklySchedule()">🖨️ A4 인쇄</button><button class="btn" id="weeklyAddMemberBtn" onclick="addWeeklyMemberRow()">+ 인원 추가</button></div></div>
         <div class="weekly-toolbar">
           <div class="weekly-team-tabs">
-            <button type="button" class="weekly-tab" id="weeklyTab1" onclick="setWeeklyTeam('1팀')">디자인1팀</button>
-            <button type="button" class="weekly-tab" id="weeklyTab2" onclick="setWeeklyTeam('2팀')">디자인2팀</button>
+            <button type="button" class="weekly-tab" data-team="1파트" onclick="setWeeklyTeam('1파트')">1파트</button>
+            <button type="button" class="weekly-tab" data-team="2파트" onclick="setWeeklyTeam('2파트')">2파트</button>
+            <button type="button" class="weekly-tab" data-team="3파트" onclick="setWeeklyTeam('3파트')">3파트</button>
+            <span class="weekly-tab-sep"></span>
+            <button type="button" class="weekly-tab weekly-tab-archive" data-team="1팀" onclick="setWeeklyTeam('1팀')" title="파트 개편 이전 기록 (읽기 전용)">📁 1팀 백업</button>
+            <button type="button" class="weekly-tab weekly-tab-archive" data-team="2팀" onclick="setWeeklyTeam('2팀')" title="파트 개편 이전 기록 (읽기 전용)">📁 2팀 백업</button>
           </div>
           <div class="weekly-week-nav">
             <button type="button" class="btn secondary" onclick="shiftWeeklyWeek(-1)">◀ 이전주</button>
@@ -1211,7 +1220,7 @@ input.wline.wcol-blue{color:#5AA9FF !important;font-weight:800}
             <span class="weekly-week-label" id="weeklyWeekLabel"></span>
           </div>
         </div>
-        <div class="muted" style="margin:-6px 0 14px;">팀 탭에서 <b>디자인1팀/2팀</b>을 선택하고 주차를 이동하세요. 셀은 하루 <b>2줄</b>까지 입력, 입력 후 포커스가 빠지면 자동 저장됩니다. 입력칸을 클릭하면 <b>색상 팔레트</b>가 떠서 외근·주요일정을 색으로 강조할 수 있습니다.</div>
+        <div class="muted" style="margin:-6px 0 14px;">파트 탭에서 <b>1파트/2파트/3파트</b>를 선택하고 주차를 이동하세요. (개편 이전 1팀·2팀 기록은 <b>📁 백업</b> 탭에서 읽기 전용으로 볼 수 있습니다.) 셀은 하루 <b>2줄</b>까지 입력, 입력 후 포커스가 빠지면 자동 저장됩니다. 입력칸을 클릭하면 <b>색상 팔레트</b>가 떠서 외근·주요일정을 색으로 강조할 수 있습니다.</div>
         <div id="weeklyContainer"></div>
         <div id="weeklyPalette" class="weekly-palette" style="display:none">
           <button type="button" title="기본색" onmousedown="event.preventDefault();applyWeeklyColor('')"><span class="wp-dot wp-dot-none">✕</span></button>
@@ -2891,6 +2900,7 @@ input.wline.wcol-blue{color:#5AA9FF !important;font-weight:800}
       cache.schedules = await safeSelect('schedules','id',true);
       cache.designTeamSchedules = await safeSelectOptional('design_team_schedule','id',true);
       cache.weeklyRows = await safeSelectOptional('weekly_team_schedule','id',true);
+      if(await migrateWeeklyToParts(cache.weeklyRows)) cache.weeklyRows = await safeSelectOptional('weekly_team_schedule','id',true);
       cache.upper = await safeSelect('settings_upper','id',true);
       cache.lower = await safeSelect('settings_lower','id',true);
       cache.todo = await safeSelect('todo_items','id',true);
@@ -3161,7 +3171,54 @@ input.wline.wcol-blue{color:#5AA9FF !important;font-weight:800}
     };
     /* ===== 주간업무일정표 ===== */
     const WEEKLY_DAYS = [ ['mon','월'], ['tue','화'], ['wed','수'], ['thu','목'], ['fri','금'] ];
-    let weeklyTeam = localStorage.getItem('exheoh_weekly_team') || '2팀';
+    // 2026-10-26 개편: 디자인1팀/2팀 → 1파트/2파트/3파트. 기존 '1팀'·'2팀' 기록은 DB에 그대로 두고 읽기 전용 백업으로 열람.
+    const WEEKLY_PARTS = ['1파트','2파트','3파트'];
+    const WEEKLY_ARCHIVE_TEAMS = ['1팀','2팀'];
+    function isWeeklyArchive(team){ return WEEKLY_ARCHIVE_TEAMS.includes(team); }
+    function weeklyTeamLabel(team){ return isWeeklyArchive(team) ? `디자인${team}` : team; }
+    /* --- 파트 개편 매핑 (2026-10-26 주차부터 적용) ---
+     * 디자인1팀 전원 → 1파트
+     * 디자인2팀: 최은진·신수연·정승원 → 2파트 / 김주경·김미교 → 3파트 (목록에 없는 2팀 인원은 2파트)
+     * 2팀의 발송 행·메모는 2파트로 옮기고 3파트에도 같은 내용으로 복사 */
+    const WEEKLY_PART_CUTOFF = '2026-10-26';
+    const WEEKLY_PART3_MEMBERS = ['김주경','김미교'];
+    const WEEKLY_PART2_MEMBERS = ['최은진','신수연','정승원'];
+    const normName = s => String(s||'').replace(/\s+/g,'');
+    function weeklyPartFor(team, member){
+      if(team==='1팀') return '1파트';
+      if(team==='2팀') return WEEKLY_PART3_MEMBERS.includes(normName(member)) ? '3파트' : '2파트';
+      return null;
+    }
+    // 개편 기준 주차 이후에 1팀·2팀으로 입력된 행을 파트로 이동 (이전 주차 기록은 손대지 않음). 변경이 있었으면 true.
+    async function migrateWeeklyToParts(rows){
+      const targets=(rows||[]).filter(r=>isWeeklyArchive(String(r.team||'')) && String(normalizeWeekStart(r.week_start)||'') >= WEEKLY_PART_CUTOFF);
+      if(!targets.length) return false;
+      let changed=false;
+      try{
+        await ensureSupabaseClient();
+        for(const r of targets){
+          const team=String(r.team);
+          const type=r.row_type||'member';
+          const dest = type==='member' ? weeklyPartFor(team, r.member) : (team==='1팀' ? '1파트' : '2파트');
+          const { error } = await sb.from('weekly_team_schedule').update({ team:dest }).eq('id', r.id);
+          if(error){ console.warn('파트 이동 실패', r.id, error.message); continue; }
+          changed=true;
+          // 2팀 발송·메모는 3파트에도 복사 (3파트에 같은 종류 행이 이미 있으면 생략)
+          if(team==='2팀' && type!=='member'){
+            const wk=normalizeWeekStart(r.week_start);
+            const exists=(rows||[]).some(x=>x.team==='3파트' && normalizeWeekStart(x.week_start)===wk && x.row_type===type);
+            if(!exists){
+              const copy={...r}; delete copy.id; delete copy.created_at; delete copy.updated_at; copy.team='3파트';
+              const { error:e2 } = await sb.from('weekly_team_schedule').insert([copy]);
+              if(e2) console.warn('3파트 복사 실패', e2.message);
+            }
+          }
+        }
+        if(changed) console.info(`주간업무일정표: ${targets.length}개 행을 파트 구조로 이동했습니다.`);
+      }catch(err){ console.warn('파트 이동 예외:', err?.message||err); }
+      return changed;
+    }
+    let weeklyTeam = (function(){ let saved=null; try{ saved=localStorage.getItem('exheoh_weekly_team'); }catch(e){} return WEEKLY_PARTS.includes(saved) ? saved : WEEKLY_PARTS[0]; })();
     let weeklyWeekStart = getCurrentWeekStart();
     function weeklyDayDate(idx){ const d=new Date(weeklyWeekStart+'T00:00:00'); d.setDate(d.getDate()+idx); return `${d.getMonth()+1}/${d.getDate()}`; }
     function getWeeklyRowsFor(team, weekStart){
@@ -3213,7 +3270,7 @@ input.wline.wcol-blue{color:#5AA9FF !important;font-weight:800}
       }
     };
     document.addEventListener('focusin', function(e){
-      if(e.target && e.target.matches && e.target.matches('#weeklyContainer input.wline')) showWeeklyPalette(e.target);
+      if(e.target && e.target.matches && e.target.matches('#weeklyContainer input.wline:not([readonly])')) showWeeklyPalette(e.target);
     });
     document.addEventListener('focusout', function(e){
       if(e.target && e.target.matches && e.target.matches('#weeklyContainer input.wline')) hideWeeklyPalette();
@@ -3222,14 +3279,15 @@ input.wline.wcol-blue{color:#5AA9FF !important;font-weight:800}
       cache.weeklyRows = await safeSelectOptional('weekly_team_schedule','id',true);
       renderWeeklyWork();
     }
-    window.setWeeklyTeam = function(team){ weeklyTeam=team; localStorage.setItem('exheoh_weekly_team', team); renderWeeklyWork(); };
+    window.setWeeklyTeam = function(team){ weeklyTeam=team; if(WEEKLY_PARTS.includes(team)){ try{ localStorage.setItem('exheoh_weekly_team', team); }catch(e){} } renderWeeklyWork(); };
+    function weeklyArchiveBlocked(){ if(isWeeklyArchive(weeklyTeam)){ showToast('백업(이전 팀) 기록은 읽기 전용입니다. 1~3파트 탭에서 작업하세요.', 'info'); return true; } return false; }
     window.setWeeklyWeek = function(value){ weeklyWeekStart = value ? (normalizeWeekStart(value)||getCurrentWeekStart()) : getCurrentWeekStart(); renderWeeklyWork(); };
     window.shiftWeeklyWeek = function(delta){ const d=new Date(weeklyWeekStart+'T00:00:00'); d.setDate(d.getDate()+delta*7); weeklyWeekStart=isoDate(d); renderWeeklyWork(); };
     function renderWeeklyWork(){
       const container=document.getElementById('weeklyContainer'); if(!container) return;
-      const t1=document.getElementById('weeklyTab1'), t2=document.getElementById('weeklyTab2');
-      if(t1) t1.classList.toggle('active', weeklyTeam==='1팀');
-      if(t2) t2.classList.toggle('active', weeklyTeam==='2팀');
+      document.querySelectorAll('.weekly-team-tabs .weekly-tab').forEach(b=>b.classList.toggle('active', b.getAttribute('data-team')===weeklyTeam));
+      const ro = isWeeklyArchive(weeklyTeam);
+      const addBtn=document.getElementById('weeklyAddMemberBtn'); if(addBtn) addBtn.style.display = ro ? 'none' : '';
       const picker=document.getElementById('weeklyWeekPicker'); if(picker) picker.value=weeklyWeekStart;
       const labelEl=document.getElementById('weeklyWeekLabel'); if(labelEl) labelEl.textContent=formatWeekLabel(weeklyWeekStart);
       const rows=getWeeklyRowsFor(weeklyTeam, weeklyWeekStart);
@@ -3242,24 +3300,31 @@ input.wline.wcol-blue{color:#5AA9FF !important;font-weight:800}
         const cmap=getWeeklyColorMap(r);
         const cls1=cmap[key+'1']?` wcol-${cmap[key+'1']}`:'';
         const cls2=cmap[key+'2']?` wcol-${cmap[key+'2']}`:'';
-        return `<td${i===todayIdx?' class="is-today"':''}><div class="weekly-cell-lines"><input type="text" class="wline${cls1}" data-wid="${r.id}" data-wfield="${key}1" value="${escapeHTML(r[key+'1']||'')}" placeholder="" onblur="updateCell('weekly_team_schedule',${r.id},'${key}1',this.value)"><input type="text" class="wline line2${cls2}" data-wid="${r.id}" data-wfield="${key}2" value="${escapeHTML(r[key+'2']||'')}" placeholder="" onblur="updateCell('weekly_team_schedule',${r.id},'${key}2',this.value)"></div></td>`;
+        const edit=(f)=> ro ? 'readonly' : `onblur="updateCell('weekly_team_schedule',${r.id},'${f}',this.value)"`;
+        return `<td${i===todayIdx?' class="is-today"':''}><div class="weekly-cell-lines"><input type="text" class="wline${cls1}" data-wid="${r.id}" data-wfield="${key}1" value="${escapeHTML(r[key+'1']||'')}" placeholder="" ${edit(key+'1')}><input type="text" class="wline line2${cls2}" data-wid="${r.id}" data-wfield="${key}2" value="${escapeHTML(r[key+'2']||'')}" placeholder="" ${edit(key+'2')}></div></td>`;
       };
+      const delCell=(id)=> ro ? '<td></td>' : `<td><button type="button" class="weekly-del-btn" onclick="deleteWeeklyRow(${id})">✕</button></td>`;
       let bodyHtml='';
       members.forEach(r=>{
-        bodyHtml += `<tr><td class="weekly-name-td"><div class="weekly-name-cell"><input type="text" value="${escapeHTML(r.member||'')}" placeholder="이름" onblur="updateCell('weekly_team_schedule',${r.id},'member',this.value)"></div></td>${WEEKLY_DAYS.map((d,i)=>cellHtml(r,d[0],i)).join('')}<td><button type="button" class="weekly-del-btn" onclick="deleteWeeklyRow(${r.id})">✕</button></td></tr>`;
+        const nameAttr = ro ? 'readonly' : `onblur="updateCell('weekly_team_schedule',${r.id},'member',this.value)"`;
+        bodyHtml += `<tr><td class="weekly-name-td"><div class="weekly-name-cell"><input type="text" value="${escapeHTML(r.member||'')}" placeholder="이름" ${nameAttr}></div></td>${WEEKLY_DAYS.map((d,i)=>cellHtml(r,d[0],i)).join('')}${delCell(r.id)}</tr>`;
       });
       if(sendRow){
-        bodyHtml += `<tr class="weekly-send-row"><td class="weekly-name-td"><div class="weekly-send-label">📦 발송</div></td>${WEEKLY_DAYS.map((d,i)=>cellHtml(sendRow,d[0],i)).join('')}<td><button type="button" class="weekly-del-btn" onclick="deleteWeeklyRow(${sendRow.id})">✕</button></td></tr>`;
+        bodyHtml += `<tr class="weekly-send-row"><td class="weekly-name-td"><div class="weekly-send-label">📦 발송</div></td>${WEEKLY_DAYS.map((d,i)=>cellHtml(sendRow,d[0],i)).join('')}${delCell(sendRow.id)}</tr>`;
       }
+      const archiveNote = ro ? `<div class="weekly-archive-note">📁 ${weeklyTeamLabel(weeklyTeam)} 백업 기록 — 파트 개편(2026.10.26) 이전 데이터입니다. 읽기 전용이며 수정·삭제되지 않습니다.</div>` : '';
+      const emptyMsg = ro
+        ? '이 주차에는 백업된 기록이 없습니다.<br>주차를 이동해 이전 기록을 확인하세요.'
+        : '이 주차에 등록된 인원이 없습니다.<br>아래 버튼으로 <b>지난주 명단을 복사</b>하거나 <b>+ 인원 추가</b>로 시작하세요.';
       const tableHtml = bodyHtml
-        ? `<div class="card weekly-card"><table class="weekly-grid"><colgroup><col class="weekly-name-col"><col><col><col><col><col><col class="weekly-del-col"></colgroup><thead><tr><th>담당자</th>${dayHeads}<th>삭제</th></tr></thead><tbody>${bodyHtml}</tbody></table></div>`
-        : `<div class="card"><div class="weekly-empty">이 주차에 등록된 인원이 없습니다.<br>아래 버튼으로 <b>지난주 명단을 복사</b>하거나 <b>+ 인원 추가</b>로 시작하세요.</div></div>`;
-      const actionsHtml = `<div class="weekly-actions">
+        ? `<div class="card weekly-card"><table class="weekly-grid"><colgroup><col class="weekly-name-col"><col><col><col><col><col><col class="weekly-del-col"></colgroup><thead><tr><th>담당자</th>${dayHeads}<th>${ro?'':'삭제'}</th></tr></thead><tbody>${bodyHtml}</tbody></table></div>`
+        : `<div class="card"><div class="weekly-empty">${emptyMsg}</div></div>`;
+      const actionsHtml = ro ? '<div class="weekly-actions"></div>' : `<div class="weekly-actions">
           <button type="button" class="btn secondary" onclick="copyWeeklyPrevWeek()">📋 지난주 명단 복사</button>
           ${sendRow?'':'<button type="button" class="btn secondary" onclick="addWeeklySendRow()">+ 발송 행</button>'}
         </div>`;
-      const memoHtml = `<div class="card weekly-memo-card"><h3>📌 추가 일정 업데이트</h3><textarea placeholder="주간 공지·추가 일정을 기록하세요" onblur="saveWeeklyMemo(this.value)">${escapeHTML(memoRow?.note||'')}</textarea></div>`;
-      container.innerHTML = tableHtml + actionsHtml + memoHtml;
+      const memoHtml = (ro && !String(memoRow?.note||'').trim()) ? '' : `<div class="card weekly-memo-card"><h3>📌 추가 일정 업데이트</h3><textarea placeholder="주간 공지·추가 일정을 기록하세요" ${ro?'readonly':'onblur="saveWeeklyMemo(this.value)"'}>${escapeHTML(memoRow?.note||'')}</textarea></div>`;
+      container.innerHTML = archiveNote + tableHtml + actionsHtml + memoHtml;
     }
     async function insertWeeklyRows(records, successMessage){
       try{
@@ -3275,14 +3340,22 @@ input.wline.wcol-blue{color:#5AA9FF !important;font-weight:800}
       }
     }
     window.addWeeklyMemberRow = async function(){
+      if(weeklyArchiveBlocked()) return;
       const members=getWeeklyRowsFor(weeklyTeam, weeklyWeekStart).filter(r=>(r.row_type||'member')==='member');
       await insertWeeklyRows([{ team:weeklyTeam, week_start:weeklyWeekStart, row_type:'member', member:'', sort_order:members.length }], '인원을 추가했습니다.');
     };
     window.addWeeklySendRow = async function(){
+      if(weeklyArchiveBlocked()) return;
       await insertWeeklyRows([{ team:weeklyTeam, week_start:weeklyWeekStart, row_type:'send', member:'발송', sort_order:99 }], '발송 행을 추가했습니다.');
     };
     window.copyWeeklyPrevWeek = async function(){
-      const all=(cache.weeklyRows||[]).filter(r=>String(r.team||'')===weeklyTeam && normalizeWeekStart(r.week_start) < weeklyWeekStart);
+      if(weeklyArchiveBlocked()) return;
+      let all=(cache.weeklyRows||[]).filter(r=>String(r.team||'')===weeklyTeam && normalizeWeekStart(r.week_start) < weeklyWeekStart);
+      if(!all.length){
+        // 파트 기록이 아직 없으면 개편 이전 팀 기록에서 이 파트 인원만 가져옴
+        all=(cache.weeklyRows||[]).filter(r=>isWeeklyArchive(String(r.team||'')) && normalizeWeekStart(r.week_start) < weeklyWeekStart
+          && (r.row_type==='member' || !r.row_type ? weeklyPartFor(String(r.team), r.member)===weeklyTeam : (String(r.team)==='1팀' ? weeklyTeam==='1파트' : weeklyTeam!=='1파트')));
+      }
       if(!all.length) return showToast('복사할 이전 주차 데이터가 없습니다.', 'error');
       const prevWeek=all.map(r=>normalizeWeekStart(r.week_start)).sort().pop();
       const prevRows=all.filter(r=>normalizeWeekStart(r.week_start)===prevWeek && r.row_type!=='memo');
@@ -3294,6 +3367,7 @@ input.wline.wcol-blue{color:#5AA9FF !important;font-weight:800}
       await insertWeeklyRows(records, `지난주(${prevWeek}) 명단 ${records.length}명(행)을 복사했습니다.`);
     };
     window.deleteWeeklyRow = async function(id){
+      if(weeklyArchiveBlocked()) return;
       if(!confirm('이 행을 삭제하시겠습니까?')) return;
       try{
         await ensureSupabaseClient();
@@ -3304,6 +3378,7 @@ input.wline.wcol-blue{color:#5AA9FF !important;font-weight:800}
       }catch(err){ showToast('삭제 오류: '+(err.message||err), 'error'); }
     };
     window.saveWeeklyMemo = async function(value){
+      if(isWeeklyArchive(weeklyTeam)) return;
       try{
         await ensureSupabaseClient();
         const memoRow=getWeeklyRowsFor(weeklyTeam, weeklyWeekStart).find(r=>r.row_type==='memo');
@@ -3343,7 +3418,7 @@ input.wline.wcol-blue{color:#5AA9FF !important;font-weight:800}
         ? `<div class="wp-memo"><div class="wp-memo-title">📌 추가 일정 업데이트</div><div class="wp-memo-body">${escapeHTML(memoRow.note)}</div></div>` : '';
       const printedAt = new Date();
       const printedLabel = `${printedAt.getFullYear()}.${String(printedAt.getMonth()+1).padStart(2,'0')}.${String(printedAt.getDate()).padStart(2,'0')}`;
-      return `<div class="wp-title">디자인${escapeHTML(weeklyTeam)} 주간업무일정표</div>
+      return `<div class="wp-title">${escapeHTML(weeklyTeamLabel(weeklyTeam))} 주간업무일정표${isWeeklyArchive(weeklyTeam)?' (백업)':''}</div>
         <div class="wp-sub"><span>${formatWeekLabel(weeklyWeekStart)} (월~금)</span><span>출력일: ${printedLabel} · EXHEOH DESIGN TEAM</span></div>
         <table><colgroup><col style="width:11%"><col><col><col><col><col></colgroup>
           <thead><tr><th>담당자</th>${dayHeads}</tr></thead><tbody>${bodyHtml||'<tr><td class="wp-name">-</td><td colspan="5">등록된 일정이 없습니다.</td></tr>'}</tbody></table>${memoHtml}`;
@@ -3355,6 +3430,32 @@ input.wline.wcol-blue{color:#5AA9FF !important;font-weight:800}
       const cleanup=()=>{ document.body.classList.remove('print-weekly'); window.removeEventListener('afterprint', cleanup); };
       window.addEventListener('afterprint', cleanup);
       setTimeout(()=>{ window.print(); setTimeout(cleanup, 500); }, 50);
+    };
+    /* ----- 전체 백업 (CSV 다운로드) ----- */
+    window.downloadWeeklyBackupCSV = async function(){
+      try{
+        await ensureSupabaseClient();
+        const rows = await safeSelectOptional('weekly_team_schedule','id',true) || [];
+        if(!rows.length) return showToast('백업할 주간업무일정표 데이터가 없습니다.', 'info');
+        const base=['id','team','week_start','row_type','member','sort_order'];
+        WEEKLY_DAYS.forEach(d=>{ base.push(d[0]+'1', d[0]+'2'); });
+        base.push('note','colors');
+        const extra=[...new Set(rows.flatMap(r=>Object.keys(r)))].filter(k=>!base.includes(k));
+        const cols=[...base, ...extra];
+        const esc=v=>{ if(v===null||v===undefined) return ''; const s=typeof v==='object'?JSON.stringify(v):String(v); return /[",\n\r]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s; };
+        const sorted=[...rows].sort((a,b)=>String(a.team||'').localeCompare(String(b.team||'')) || String(normalizeWeekStart(a.week_start)).localeCompare(String(normalizeWeekStart(b.week_start))) || (a.sort_order||0)-(b.sort_order||0) || a.id-b.id);
+        const csv='﻿'+[cols.join(','), ...sorted.map(r=>cols.map(c=>esc(r[c])).join(','))].join('\r\n');
+        const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+        const a=document.createElement('a');
+        a.href=URL.createObjectURL(blob);
+        a.download=`주간업무일정표_전체백업_${isoDate(new Date())}.csv`;
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+        showToast(`주간업무일정표 ${rows.length}건을 백업 파일로 저장했습니다.`, 'success');
+      }catch(err){
+        console.error('weekly backup 오류:', err);
+        showToast('백업 오류: '+(err.message||err), 'error');
+      }
     };
 
     window.addTodo = async function(){ await runAction(async()=>{ const { error } = await sb.from('todo_items').insert([{ group_tag:'GROUP 1', project:'', priority:'medium', task_name:'새 작업', assignee:'', status:'todo', due_date:null, category:'' }]); if(error) throw error; await fetchAllData(); renderTodo(); renderDashboard(); }, 'TO DO를 추가했습니다.'); };
