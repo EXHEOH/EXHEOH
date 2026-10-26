@@ -5,7 +5,7 @@
  *  - Supabase API 호출은 가로채지 않음 (실시간 데이터)
  * 배포 시 새 버전을 강제 반영하려면 아래 CACHE_VERSION 숫자만 올리면 됩니다.
  */
-const CACHE_VERSION = 2;
+const CACHE_VERSION = 3;
 const CACHE_NAME = 'exheoh-shell-v' + CACHE_VERSION;
 
 const SHELL_ASSETS = [

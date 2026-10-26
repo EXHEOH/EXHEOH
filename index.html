@@ -960,6 +960,26 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightnes
 /* ===== 주간업무일정표 ===== */
 .weekly-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 16px}
 .weekly-team-tabs{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+/* ===== 프로젝트 엑셀 동기화 미리보기 ===== */
+.psync-overlay{position:fixed;inset:0;z-index:6000;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;padding:16px}
+.psync-box{background:#141416;border:1px solid rgba(255,255,255,.16);border-radius:20px;width:min(1100px,100%);max-height:90vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.psync-head{padding:18px 22px;border-bottom:1px solid rgba(255,255,255,.1);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.psync-head h2{margin:0;font-size:17px;color:#fff}
+.psync-stats{display:flex;gap:8px;flex-wrap:wrap}
+.psync-stat{padding:6px 12px;border-radius:999px;font-size:12px;font-weight:900;border:1px solid rgba(255,255,255,.18);color:#ddd}
+.psync-stat.new{color:#00FFC3;border-color:rgba(0,255,195,.4);background:rgba(0,255,195,.08)}
+.psync-stat.upd{color:#FFC107;border-color:rgba(255,193,7,.4);background:rgba(255,193,7,.08)}
+.psync-stat.warn{color:#FF6B6B;border-color:rgba(255,107,107,.4);background:rgba(255,107,107,.08)}
+.psync-body{overflow:auto;padding:14px 22px}
+.psync-body h3{font-size:13px;margin:14px 0 8px;color:#fff}
+.psync-body table{width:100%;border-collapse:collapse;font-size:12px}
+.psync-body th,.psync-body td{border:1px solid rgba(255,255,255,.1);padding:6px 8px;text-align:left;vertical-align:top}
+.psync-body th{background:#202023;color:#fff;font-weight:900;position:sticky;top:0}
+.psync-old{color:rgba(255,255,255,.45);text-decoration:line-through}
+.psync-new{color:#FFC107;font-weight:800}
+.psync-warn-list{margin:0;padding-left:18px;color:#FF9B9B;font-size:12px;line-height:1.7}
+.psync-foot{padding:14px 22px;border-top:1px solid rgba(255,255,255,.1);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.psync-foot .muted{font-size:12px}
 .weekly-tab-sep{width:1px;height:22px;background:rgba(255,255,255,.18);margin:0 4px}
 .weekly-tab.weekly-tab-archive{padding:8px 14px;font-size:11px;border-style:dashed;color:rgba(255,255,255,.5)}
 .weekly-tab.weekly-tab-archive.active{background:rgba(255,193,7,.10);border-color:rgba(255,193,7,.45);color:#FFC107;box-shadow:none}
@@ -1195,7 +1215,7 @@ input.wline.wcol-blue{color:#5AA9FF !important;font-weight:800}
         <div class="card" style="padding:16px;"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;"><h3 style="margin:0;">📋 최근 맨파워 기록</h3><span class="muted">최근 8건</span></div><table style="margin-top:12px;"><thead><tr><th>이름</th><th>프로젝트</th><th>업무내용</th><th>소요시간(h)</th><th>날짜</th></tr></thead><tbody id="dashboard-manpower-body"></tbody></table></div>
       </div>
 
-      <div id="page-project" class="page-section"><div class="header"><h1>프로젝트 현황판</h1><div class="page-actions"><button class="btn secondary admin-only" onclick="document.getElementById('csvInput').click()">📂 CSV 업로드</button><button class="btn" onclick="addNewProject()">+ 추가</button><input type="file" id="csvInput" accept=".csv,text/csv" onchange="handleFileUpload(this,'project')" style="display:none"></div></div><div class="project-search-bar" style="margin:-6px 0 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;"><input type="text" id="projectSearchInput" placeholder="🔍 코드·프로젝트명·발주처·담당자·소속팀 검색" style="max-width:420px;" oninput="filterProjects(this.value)"><span class="muted" id="projectSearchCount"></span></div><div class="card project-card table-compact"><table><thead><tr><th class="col-no">순번</th><th class="col-delete">삭제</th><th class="col-code">코드</th><th class="col-name">프로젝트명</th><th class="col-history">이력코드</th><th class="col-client">발주처</th><th class="col-constructor">건설사</th><th class="col-team">소속팀</th><th class="col-manager">담당자</th><th class="col-type">단계</th><th class="col-contract">계약</th><th class="col-milestone">기성현황</th></tr></thead><tbody id="tableBody"></tbody></table></div><div id="projectMobileList" class="project-mobile-list"></div><div class="table-hint project-table-hint">모바일에서는 표를 좌우로 밀어 더 많은 칼럼을 확인할 수 있습니다.</div><div class="muted">※ 기성현황: 막대 클릭→상태변경 / D(디자인)·M(경영지원) 클릭→크로스체크 / 설정→단계 수정</div></div>
+      <div id="page-project" class="page-section"><div class="header"><h1>프로젝트 현황판</h1><div class="page-actions"><button class="btn secondary admin-only" onclick="document.getElementById('projectSyncInput').click()" title="프로젝트 엑셀(Design_PROJECT)을 올리면 코드 기준으로 신규 추가 + 담당자·소속팀·이력코드 갱신">📊 엑셀로 업데이트</button><input type="file" id="projectSyncInput" accept=".xlsx,.xls,.csv" onchange="handleProjectSyncUpload(this)" style="display:none"><button class="btn secondary admin-only" onclick="document.getElementById('csvInput').click()">📂 CSV 업로드</button><button class="btn" onclick="addNewProject()">+ 추가</button><input type="file" id="csvInput" accept=".csv,text/csv" onchange="handleFileUpload(this,'project')" style="display:none"></div></div><div class="project-search-bar" style="margin:-6px 0 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;"><input type="text" id="projectSearchInput" placeholder="🔍 코드·프로젝트명·발주처·담당자·소속팀 검색" style="max-width:420px;" oninput="filterProjects(this.value)"><span class="muted" id="projectSearchCount"></span></div><div class="card project-card table-compact"><table><thead><tr><th class="col-no">순번</th><th class="col-delete">삭제</th><th class="col-code">코드</th><th class="col-name">프로젝트명</th><th class="col-history">이력코드</th><th class="col-client">발주처</th><th class="col-constructor">건설사</th><th class="col-team">소속팀</th><th class="col-manager">담당자</th><th class="col-type">단계</th><th class="col-contract">계약</th><th class="col-milestone">기성현황</th></tr></thead><tbody id="tableBody"></tbody></table></div><div id="projectMobileList" class="project-mobile-list"></div><div class="table-hint project-table-hint">모바일에서는 표를 좌우로 밀어 더 많은 칼럼을 확인할 수 있습니다.</div><div class="muted">※ 기성현황: 막대 클릭→상태변경 / D(디자인)·M(경영지원) 클릭→크로스체크 / 설정→단계 수정</div></div>
       <div class="milestone-dialog" id="milestoneDialog" onclick="if(event.target===this) closeMilestoneDialog()"><div class="milestone-dialog-card"><div class="milestone-dialog-header"><div class="milestone-dialog-title" id="milestoneDialogTitle">기성 상태 입력</div><button class="milestone-dialog-close" onclick="closeMilestoneDialog()">×</button></div><div class="milestone-dialog-body" id="milestoneDialogBody"></div></div></div>
 
       <div id="page-manpower" class="page-section"><div class="header"><h1>일일 업무 기록</h1><div class="page-actions page-actions-single"><button class="btn" onclick="addDailyLog()">+ 기록 추가</button></div></div><div class="muted" style="margin:-8px 0 14px;">소요시간은 <b>시간 단위</b>로 입력하세요. 예) 1.5 = 1시간30분 / 0.25 = 15분</div><div id="dailyLogContainer"></div></div>
@@ -3558,6 +3578,148 @@ input.wline.wcol-blue{color:#5AA9FF !important;font-weight:800}
     window.setUserRole = async function(userId, newRole){ if(currentProfile.role!=='admin') return showToast('관리자만 가능합니다.', 'error'); await runAction(async()=>{ const { error } = await sb.from('profiles').update({ role:newRole }).eq('id', userId); if(error) throw error; await fetchProfilesAdmin(); renderAdmin(); }, '권한을 변경했습니다.'); };
     window.setStatsPreset = async function(preset){ const now=new Date(); let start; if(preset==='week') start=startOfWeekMonday(now); else if(preset==='month') start=startOfMonth(now); else if(preset==='quarter') start=startOfQuarter(now); else start=startOfYear(now); statsState.start=isoDate(start); statsState.end=isoDate(now); document.getElementById('statsStart').value=statsState.start; document.getElementById('statsEnd').value=statsState.end; await refreshStatsAndRender(); };
     window.applyStatsRange = async function(){ statsState.start=document.getElementById('statsStart').value||null; statsState.end=document.getElementById('statsEnd').value||null; await refreshStatsAndRender(); };
+
+    /* ===== 프로젝트 엑셀 동기화 (코드 기준: 신규 추가 + 담당자·소속팀·이력코드 갱신) ===== */
+    async function ensureXLSX(){
+      if(window.XLSX) return;
+      await new Promise((resolve, reject)=>{
+        const s=document.createElement('script');
+        s.src='https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+        s.onload=resolve; s.onerror=()=>reject(new Error('SheetJS 로드 실패'));
+        document.head.appendChild(s);
+      });
+    }
+    // 'D2613', 'd 2613', 2613 → 'D2613'
+    function normalizeProjectCode(v){
+      let s=String(v??'').replace(/\s+/g,'').toUpperCase();
+      if(/^\d/.test(s)) s='D'+s;
+      return s;
+    }
+    const PSYNC_UPDATE_FIELDS=[['history','이력코드'],['team','소속팀'],['manager','담당자']];
+    function psyncPhase(v){ v=String(v||''); if(v.includes('기획')) return 'plan'; if(v.includes('기본')) return 'basic'; if(v.includes('실시')) return 'exec'; if(v.includes('현장')) return 'site'; return 'default'; }
+    function psyncFindCol(headers, names){
+      const h=headers.map(x=>String(x||'').replace(/\s+/g,'').toUpperCase());
+      for(const n of names){ const i=h.indexOf(n.toUpperCase()); if(i!==-1) return i; }
+      return -1;
+    }
+    function parseProjectSheet(rows){
+      let hr=-1;
+      for(let i=0;i<Math.min(rows.length,10);i++){ if(psyncFindCol(rows[i]||[],['프로젝트코드','코드','CODE'])!==-1){ hr=i; break; } }
+      if(hr===-1) throw new Error('엑셀에서 "프로젝트코드" 열을 찾지 못했습니다.');
+      const H=rows[hr];
+      const idx={ code:psyncFindCol(H,['프로젝트코드','코드','CODE']), name:psyncFindCol(H,['프로젝트명','프로젝트','NAME']), history:psyncFindCol(H,['이력코드','이력','HISTORY']), client:psyncFindCol(H,['발주처','CLIENT']), constructor:psyncFindCol(H,['건설사','시공사','CONSTRUCTOR']), team:psyncFindCol(H,['소속팀','소속','TEAM']), manager:psyncFindCol(H,['담당자','담당','MANAGER']), phase:psyncFindCol(H,['현재단계','단계','PHASE']) };
+      const cell=(r,i)=> i===-1 ? '' : String(r[i]??'').trim();
+      const out=[];
+      for(let i=hr+1;i<rows.length;i++){
+        const r=rows[i]||[]; const raw=cell(r,idx.code); if(!raw) continue;
+        out.push({ excelRow:i+1, rawCode:raw, code:normalizeProjectCode(raw), name:cell(r,idx.name), history:cell(r,idx.history), client:cell(r,idx.client), constructor:cell(r,idx.constructor), team:cell(r,idx.team), manager:cell(r,idx.manager), phase:cell(r,idx.phase) });
+      }
+      return out;
+    }
+    let _psync=null;
+    function buildProjectSyncPlan(items){
+      const db=cache.projects||[];
+      const byCode={};
+      db.forEach(p=>{ const k=normalizeProjectCode(p.code); if(!k) return; (byCode[k]=byCode[k]||[]).push(p); });
+      const counts={}; items.forEach(it=>{ counts[it.code]=(counts[it.code]||0)+1; });
+      const plan={ inserts:[], updates:[], same:0, dupInFile:[], warnings:[] };
+      items.forEach(it=>{
+        if(counts[it.code]>1){ plan.dupInFile.push(it); return; }
+        if(it.rawCode.replace(/\s+/g,'').toUpperCase()!==it.code) plan.warnings.push(`${it.excelRow}행 코드 "${it.rawCode}" → "${it.code}"로 맞춤`);
+        const matches=byCode[it.code]||[];
+        if(!matches.length){ plan.inserts.push(it); return; }
+        if(matches.length>1) plan.warnings.push(`${it.code}: 현황판에 같은 코드가 ${matches.length}건 있어 모두 갱신합니다.`);
+        matches.forEach(p=>{
+          const changes=PSYNC_UPDATE_FIELDS.filter(([f])=>String(p[f]??'').trim()!==it[f]).map(([f,label])=>({ field:f, label, from:String(p[f]??''), to:it[f] }));
+          if(changes.length) plan.updates.push({ item:it, project:p, changes }); else plan.same++;
+        });
+      });
+      const fileCodes=new Set(items.map(it=>it.code));
+      plan.notInFile=db.filter(p=>p.code && !fileCodes.has(normalizeProjectCode(p.code))).length;
+      return plan;
+    }
+    function renderProjectSyncModal(){
+      const { items, fileName }=_psync; const plan=buildProjectSyncPlan(items); _psync.plan=plan;
+      let el=document.getElementById('psyncOverlay');
+      if(!el){ el=document.createElement('div'); el.id='psyncOverlay'; el.className='psync-overlay'; document.body.appendChild(el); }
+      const e=escapeHTML;
+      const dupHtml = plan.dupInFile.length ? `<h3>⚠️ 엑셀 안에서 코드가 겹치는 행 (${plan.dupInFile.length}건) — 코드를 고치거나 비워서 제외하세요</h3>
+        <table><thead><tr><th>엑셀 행</th><th>원래 코드</th><th>프로젝트명</th><th>담당자</th><th style="width:150px">사용할 코드</th></tr></thead><tbody>
+        ${plan.dupInFile.map(it=>`<tr><td>${it.excelRow}</td><td>${e(it.rawCode)}</td><td>${e(it.name)}</td><td>${e(it.manager)}</td><td><input type="text" value="${e(it.code)}" data-psync-row="${it.excelRow}" placeholder="비우면 제외" style="padding:6px 8px;font-size:12px"></td></tr>`).join('')}
+        </tbody></table><div style="margin-top:8px"><button type="button" class="btn secondary" onclick="psyncApplyCodeFix()">코드 수정 반영</button></div>` : '';
+      const insHtml = plan.inserts.length ? `<h3>🆕 신규 추가 (${plan.inserts.length}건)</h3><table><thead><tr><th>코드</th><th>프로젝트명</th><th>이력코드</th><th>발주처</th><th>건설사</th><th>소속팀</th><th>담당자</th><th>단계</th></tr></thead><tbody>
+        ${plan.inserts.map(it=>`<tr><td>${e(it.code)}</td><td>${e(it.name)}</td><td>${e(it.history)}</td><td>${e(it.client)}</td><td>${e(it.constructor)}</td><td>${e(it.team)}</td><td>${e(it.manager)}</td><td>${e(it.phase)}</td></tr>`).join('')}</tbody></table>` : '';
+      const updHtml = plan.updates.length ? `<h3>✏️ 담당자·소속팀·이력코드 변경 (${plan.updates.length}건)</h3><table><thead><tr><th>코드</th><th>프로젝트명</th><th>변경 내용</th></tr></thead><tbody>
+        ${plan.updates.map(u=>`<tr><td>${e(u.item.code)}</td><td>${e(u.project.name||u.item.name)}</td><td>${u.changes.map(c=>`<div><b>${c.label}</b>: <span class="psync-old">${e(c.from)||'(빈칸)'}</span> → <span class="psync-new">${e(c.to)||'(빈칸)'}</span></div>`).join('')}</td></tr>`).join('')}</tbody></table>` : '';
+      const warnHtml = plan.warnings.length ? `<h3>참고</h3><ul class="psync-warn-list">${plan.warnings.map(w=>`<li>${e(w)}</li>`).join('')}</ul>` : '';
+      const blocked=plan.dupInFile.length>0, nothing=!plan.inserts.length && !plan.updates.length;
+      el.innerHTML=`<div class="psync-box"><div class="psync-head"><h2>📊 프로젝트 엑셀 업데이트 미리보기 <span class="muted" style="font-size:12px">${e(fileName)}</span></h2>
+        <div class="psync-stats"><span class="psync-stat new">신규 ${plan.inserts.length}</span><span class="psync-stat upd">변경 ${plan.updates.length}</span><span class="psync-stat">변경없음 ${plan.same}</span>${plan.dupInFile.length?`<span class="psync-stat warn">코드중복 ${plan.dupInFile.length}</span>`:''}</div></div>
+        <div class="psync-body">${dupHtml}${insHtml}${updHtml}${warnHtml}${nothing&&!blocked?'<div class="weekly-empty">반영할 변경 사항이 없습니다.</div>':''}
+        <div class="muted" style="margin-top:12px;font-size:12px">· 기존 프로젝트는 <b>담당자·소속팀·이력코드</b>만 엑셀 값으로 바꿉니다 (엑셀이 빈칸이면 빈칸으로). 단계·계약·기성 등 나머지는 그대로 둡니다.<br>· 엑셀에 없는 기존 프로젝트 ${plan.notInFile}건은 건드리지 않습니다.</div></div>
+        <div class="psync-foot"><span class="muted">반영 전에 현재 프로젝트 목록이 CSV로 자동 백업(다운로드)됩니다.</span><div style="display:flex;gap:8px"><button type="button" class="btn secondary" onclick="closeProjectSync()">취소</button><button type="button" class="btn" ${blocked||nothing?'disabled style="opacity:.4;cursor:not-allowed"':''} onclick="applyProjectSync()">반영하기</button></div></div></div>`;
+    }
+    window.psyncApplyCodeFix=function(){
+      const inputs=[...document.querySelectorAll('#psyncOverlay input[data-psync-row]')];
+      const map={}; inputs.forEach(i=>{ map[i.getAttribute('data-psync-row')]=i.value; });
+      _psync.items=_psync.items.map(it=>{ if(!(String(it.excelRow) in map)) return it; const v=String(map[it.excelRow]).trim(); return v ? { ...it, rawCode:v, code:normalizeProjectCode(v) } : null; }).filter(Boolean);
+      renderProjectSyncModal();
+    };
+    window.closeProjectSync=function(){ const el=document.getElementById('psyncOverlay'); if(el) el.remove(); _psync=null; };
+    function downloadProjectsBackupCSV(){
+      const rows=cache.projects||[]; if(!rows.length) return;
+      const cols=[...new Set(rows.flatMap(r=>Object.keys(r)))];
+      const esc=v=>{ if(v===null||v===undefined) return ''; const s=typeof v==='object'?JSON.stringify(v):String(v); return /[",\n\r]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s; };
+      const csv='﻿'+[cols.join(','), ...rows.map(r=>cols.map(c=>esc(r[c])).join(','))].join('\r\n');
+      const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+      const d=new Date(); a.download=`프로젝트현황판_백업_${isoDate(d)}_${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}.csv`;
+      document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+    }
+    window.applyProjectSync=async function(){
+      if(!_psync?.plan) return; const plan=_psync.plan;
+      if(plan.dupInFile.length) return showToast('엑셀 안의 중복 코드를 먼저 정리해주세요.', 'error');
+      if(!confirm(`신규 ${plan.inserts.length}건 추가, ${plan.updates.length}건 변경을 반영할까요?\n(현재 목록은 CSV로 먼저 백업됩니다)`)) return;
+      const btns=document.querySelectorAll('#psyncOverlay button'); btns.forEach(b=>b.disabled=true);
+      try{
+        await ensureSupabaseClient();
+        downloadProjectsBackupCSV();
+        let ok=0, fail=[];
+        if(plan.inserts.length){
+          const recs=plan.inserts.map(it=>({ code:it.code, name:it.name, history:it.history, client:it.client, constructor:it.constructor, team:it.team, manager:it.manager, note:'', type:psyncPhase(it.phase) }));
+          const { error } = await sb.from('projects').insert(recs);
+          if(error) fail.push('신규 추가: '+error.message); else ok+=recs.length;
+        }
+        for(const u of plan.updates){
+          const payload={}; u.changes.forEach(c=>{ payload[c.field]=c.to; });
+          const { error } = await sb.from('projects').update(payload).eq('id', u.project.id);
+          if(error) fail.push(`${u.item.code}: ${error.message}`); else ok++;
+        }
+        closeProjectSync();
+        await fetchAllData(); renderAll();
+        if(fail.length){ console.error('프로젝트 동기화 일부 실패', fail); showToast(`${ok}건 반영, ${fail.length}건 실패 (콘솔 확인): ${fail[0]}`, 'error'); }
+        else showToast(`프로젝트 ${ok}건 반영 완료 (신규 ${plan.inserts.length} · 변경 ${plan.updates.length})`, 'success');
+      }catch(err){ console.error(err); showToast('반영 오류: '+(err.message||err), 'error'); btns.forEach(b=>b.disabled=false); }
+    };
+    window.handleProjectSyncUpload=async function(input){
+      const file=input.files?.[0]; if(!file) return;
+      try{
+        await ensureSupabaseClient();
+        let rows;
+        if(/\.csv$/i.test(file.name)){ const text=await readCsvText(file); rows=parseRobustCSV(text, detectDelimiter(text)); }
+        else{
+          await ensureXLSX();
+          const wb=XLSX.read(await file.arrayBuffer(), {type:'array'});
+          const name=wb.SheetNames.find(n=>{ const r=XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,defval:''}).slice(0,10); return r.some(x=>psyncFindCol(x,['프로젝트코드'])!==-1); }) || wb.SheetNames[0];
+          rows=XLSX.utils.sheet_to_json(wb.Sheets[name], {header:1, defval:'', raw:false});
+        }
+        const items=parseProjectSheet(rows);
+        if(!items.length) throw new Error('엑셀에 프로젝트 행이 없습니다.');
+        cache.projects=await safeSelect('projects','id',true); // 최신 목록 기준으로 비교
+        _psync={ items, fileName:file.name };
+        renderProjectSyncModal();
+      }catch(err){ console.error(err); showToast('엑셀 분석 오류: '+(err.message||err), 'error'); }
+      finally{ input.value=''; }
+    };
 
     /* ===== 위클리브리핑 XLSX 업로드 파싱 ===== */
     window.handleWeeklyBriefingUpload = async function(input){
